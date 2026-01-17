@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { JOB_TYPES, EMPLOYMENT_TYPES } from "../constants.js"; 
+import { JOB_TYPES, EMPLOYMENT_TYPES } from "../constants/jobEnums" 
 
 const jobSchema = new mongoose.Schema(
   {
