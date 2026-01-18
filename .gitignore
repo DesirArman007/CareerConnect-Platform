@@ -23,6 +23,7 @@ env/
 .env.development.local
 .env.test.local
 .env.production.local
+.env.*
 
 # --- OS & IDE Files ---
 .DS_Store
@@ -32,3 +33,7 @@ Thumbs.db
 node_modules/
 .env
 .DS_Store
+
+# All Logs
+*.log
+logs/

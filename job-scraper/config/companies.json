@@ -1,0 +1,801 @@
+{
+  "filter_country": "India",
+  "companies": [
+    {
+      "name": "Google",
+      "scraper": "GoogleScraper",
+      "url": "https://www.google.com/about/careers/applications/jobs/results/?location=India",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Microsoft",
+      "scraper": "MicrosoftScraper",
+      "url": "https://jobs.careers.microsoft.com/global/en/search?lc=India",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Amazon",
+      "scraper": "AmazonScraper",
+      "url": "https://www.amazon.jobs/en/search.json",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Uber",
+      "scraper": "UberScraper",
+      "url": "https://www.uber.com/in/en/careers/list/?location=India",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Infosys",
+      "scraper": "InfosysScraper",
+      "url": "https://infosys.wd1.myworkdayjobs.com/wday/cxs/infosys/Infosys/jobs",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "NVIDIA",
+      "scraper": "WorkdayScraper",
+      "url": "https://nvidia.wd5.myworkdayjobs.com/wday/cxs/nvidia/NVIDIAExternalCareerSite/jobs",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Salesforce",
+      "scraper": "WorkdayScraper",
+      "url": "https://salesforce.wd1.myworkdayjobs.com/wday/cxs/salesforce/External_Career_Site/jobs",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Citi",
+      "scraper": "WorkdayScraper",
+      "url": "https://citi.wd5.myworkdayjobs.com/wday/cxs/citi/Citi_External/jobs",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Morgan Stanley",
+      "scraper": "WorkdayScraper",
+      "url": "https://ms.wd1.myworkdayjobs.com/wday/cxs/ms/External/jobs",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Wells Fargo",
+      "scraper": "WorkdayScraper",
+      "url": "https://wellsfargo.wd5.myworkdayjobs.com/wday/cxs/wellsfargo/Wells_Fargo_Jobs/jobs",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Walmart",
+      "scraper": "WorkdayScraper",
+      "url": "https://walmart.wd5.myworkdayjobs.com/wday/cxs/walmart/WalmartExternal/jobs",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Pfizer",
+      "scraper": "WorkdayScraper",
+      "url": "https://pfizer.wd1.myworkdayjobs.com/wday/cxs/pfizer/Pfizer_Careers/jobs",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "eBay",
+      "scraper": "WorkdayScraper",
+      "url": "https://ebay.wd5.myworkdayjobs.com/wday/cxs/ebay/ebay_careers/jobs",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "FedEx",
+      "scraper": "WorkdayScraper",
+      "url": "https://fedex.wd1.myworkdayjobs.com/wday/cxs/fedex/External/jobs",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Boeing",
+      "scraper": "WorkdayScraper",
+      "url": "https://boeing.wd1.myworkdayjobs.com/wday/cxs/boeing/EXTERNAL_CAREERS/jobs",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Caterpillar",
+      "scraper": "WorkdayScraper",
+      "url": "https://caterpillar.wd5.myworkdayjobs.com/wday/cxs/caterpillar/CaterpillarCareers/jobs",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "3M",
+      "scraper": "WorkdayScraper",
+      "url": "https://3m.wd1.myworkdayjobs.com/wday/cxs/mmm/External/jobs",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Visa",
+      "scraper": "WorkdayScraper",
+      "url": "https://visa.wd1.myworkdayjobs.com/wday/cxs/visa/Visa_Inc_External_Career_Site/jobs",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Mastercard",
+      "scraper": "WorkdayScraper",
+      "url": "https://mastercard.wd1.myworkdayjobs.com/wday/cxs/mastercard/Mastercard_External/jobs",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Adobe",
+      "scraper": "WorkdayScraper",
+      "url": "https://adobe.wd5.myworkdayjobs.com/wday/cxs/adobe/external_experienced/jobs",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Intel",
+      "scraper": "WorkdayScraper",
+      "url": "https://intel.wd1.myworkdayjobs.com/wday/cxs/intel/External/jobs",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Dell",
+      "scraper": "WorkdayScraper",
+      "url": "https://dell.wd1.myworkdayjobs.com/wday/cxs/dell/External/jobs",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "HP",
+      "scraper": "WorkdayScraper",
+      "url": "https://hp.wd5.myworkdayjobs.com/wday/cxs/hp/ExternalCareerSite/jobs",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Autodesk",
+      "scraper": "WorkdayScraper",
+      "url": "https://autodesk.wd1.myworkdayjobs.com/wday/cxs/autodesk/Ext/jobs",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Intuit",
+      "scraper": "WorkdayScraper",
+      "url": "https://intuit.wd1.myworkdayjobs.com/wday/cxs/intuit/Ijobs/jobs",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Target",
+      "scraper": "WorkdayScraper",
+      "url": "https://target.wd5.myworkdayjobs.com/wday/cxs/target/target_careers/jobs",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Razorpay",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/razorpay",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Cred",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/cred",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "PhonePe",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/phonepe",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Meesho",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/meesho",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Zepto",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/zepto",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Groww",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/groww",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Postman",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/postman",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "BrowserStack",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/browserstack",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Apple",
+      "scraper": "AppleScraper",
+      "url": "https://jobs.apple.com/en-in/search?location=India-IN",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Airbnb",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/airbnb",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Stripe",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/stripe",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Spotify",
+      "scraper": "SpotifyScraper",
+      "url": "https://www.lifeatspotify.com/jobs",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Rubrik",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/rubrik",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Nutanix",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/nutanix",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Tekion",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/tekion",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Coinbase",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/coinbase",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "DoorDash",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/doordash",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Twitch",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/twitch",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Pinterest",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/pinterest",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Dropbox",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/dropbox",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Grammarly",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/grammarly",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "HashiCorp",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/hashicorp",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Lenskart",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/lenskart",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Chargebee",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/chargebee",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Slice",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/slice",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Acko",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/acko",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "ShareChat",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/sharechat",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Twilio",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/twilio",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Reddit",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/reddit",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Okta",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/okta",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Notion",
+      "scraper": "AshbyScraper",
+      "url": "https://jobs.ashbyhq.com/notion",
+      "enabled": true,
+      "priority": 3
+    },
+    {
+      "name": "Figma",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/figma",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Atlassian",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/atlassian",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Swiggy",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/swiggy",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Oracle",
+      "scraper": "CustomScraper",
+      "url": "https://careers.oracle.com/en/sites/jobsearch/jobs?location=India",
+      "enabled": false,
+      "priority": 1,
+      "note": "Uses Oracle Cloud ATS"
+    },
+    {
+      "name": "Netflix",
+      "scraper": "CustomScraper",
+      "url": "https://jobs.netflix.com/api/search",
+      "enabled": false,
+      "priority": 2,
+      "note": "Requires custom Netflix API scraper"
+    },
+    {
+      "name": "Shopify",
+      "scraper": "CustomScraper",
+      "url": "https://jobs.smartrecruiters.com/Shopify",
+      "enabled": false,
+      "priority": 2,
+      "note": "Uses SmartRecruiters"
+    },
+    {
+      "name": "Tata Consultancy Services",
+      "scraper": "CustomScraper",
+      "url": "https://ibegin.tcs.com/iBegin/jobs/search",
+      "enabled": false,
+      "priority": 1,
+      "note": "Uses custom iBegin portal"
+    },
+    {
+      "name": "Flipkart",
+      "scraper": "CustomScraper",
+      "url": "https://www.flipkartcareers.com/",
+      "enabled": false,
+      "priority": 1,
+      "note": "Uses custom portal"
+    },
+    {
+      "name": "NoBroker",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/nobroker",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Khatabook",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/khatabook",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "InVideo",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/invideo",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Cars24",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/cars24",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Palantir",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/palantir",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Rippling",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/rippling",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Udemy",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/udemy",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Urban Company",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/urbancompany",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "HackerRank",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/hackerrank",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Smallcase",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/smallcase",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Quizizz",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/quizizz",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Simpl",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/getsimpl",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Darwinbox",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/darwinbox",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Headout",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/headout",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Porter",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/porter",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "LeadSquared",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/leadsquared",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Open Money",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/open",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Paytm",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/paytm",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Mindtickle",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/mindtickle",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "MoEngage",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/moengage",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Hasura",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/hasura",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Turing",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/turing",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Zoox",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/zoox",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Udacity",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/udacity",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Skillshare",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/skillshare",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Change.org",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/change.org",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Nium",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/nium",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Jupiter",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/jupiter",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Fi Money",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/epifi",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Uni Cards",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/uni",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "FamPay",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/fampay",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Rupeek",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/rupeek",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Plum",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/plumhq",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Springworks",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/springworks",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Hiver",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/hiver",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Wingify",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/wingify",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Kuku FM",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/kukufm",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Unacademy",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/unacademy",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Upstox",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/upstox",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Licious",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/licious",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Navi",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/navi",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Cashfree Payments",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/cashfree",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Games24x7",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/games24x7",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Bizongo",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/bizongo",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Ixigo",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/ixigo",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Yubi",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/yubi",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "HomeLane",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/homelane",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "LinkedIn Search",
+      "scraper": "LinkedInScraper",
+      "url": "https://www.linkedin.com",
+      "enabled": true,
+      "priority": 1
+    }
+  ]
+}
