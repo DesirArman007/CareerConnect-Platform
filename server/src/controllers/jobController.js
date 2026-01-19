@@ -51,7 +51,6 @@ const getAllJobs = asyncHandler(async( req,res) => {
     const skip = (page -1)*limit;
 
     // filter object
-
     const filter ={};
 
     if(job_type){
@@ -274,9 +273,6 @@ const getSimilarJobs = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Job not found");
   }
 
-  // --------------------------------------------
-  // STEP 1: Extract meaningful keywords from title
-  // --------------------------------------------
   const commonWords = [
     "the", "a", "an", "and", "or", "but", "in", "on", "at", "to",
     "for", "of", "with", "by", "as", "senior", "junior"
@@ -291,9 +287,6 @@ const getSimilarJobs = asyncHandler(async (req, res) => {
   // Limit keywords to avoid heavy regex computation
   keywords = keywords.slice(0, 5);
 
-  // --------------------------------------------
-  // STEP 2: Early filtering (PERFORMANCE CRITICAL)
-  // --------------------------------------------
   const initialMatchStage = {
     $match: {
       _id: { $ne: originalJob._id },
@@ -307,9 +300,7 @@ const getSimilarJobs = asyncHandler(async (req, res) => {
     }
   };
 
-  // --------------------------------------------
-  // STEP 3: Similarity scoring
-  // --------------------------------------------
+ 
   const similarJobs = await Job.aggregate([
     initialMatchStage,
 
@@ -400,9 +391,7 @@ const getSimilarJobs = asyncHandler(async (req, res) => {
     }
   ]);
 
-  // --------------------------------------------
-  // STEP 4: Response
-  // --------------------------------------------
+  
   res.status(200).json(
     new ApiResponse(200, {
       similarJobs,

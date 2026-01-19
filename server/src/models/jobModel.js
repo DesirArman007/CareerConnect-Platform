@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
-import { JOB_TYPES, EMPLOYMENT_TYPES } from "../constants/jobEnums" 
+import { JOB_TYPES, EMPLOYMENT_TYPES } from "../constants/jobEnums.js"
+import { jobConnection } from "../config/jobConnection.js";
 
 const jobSchema = new mongoose.Schema(
   {
@@ -69,26 +70,29 @@ const jobSchema = new mongoose.Schema(
   },
   { 
     timestamps: true, 
-    versionKey: false 
+    versionKey: false,
+    collection: 'jobs'
   }
 );
 
 // INDEXES (Performance & Safety)
 
-// 1. The "Safety Lock" (From your old schema)
+// The "Safety Lock"
 // Prevents the same job ID from the same company being saved twice.
 jobSchema.index({ company: 1, job_id: 1 }, { unique: true });
 
-// 2. The "Feeds" Index
+//  The "Feeds" Index
 // Makes "New Jobs" and "Latest" queries instant.
 jobSchema.index({ createdAt: -1 });
 
-// 3. The "Search" Index
+// The "Search" Index
 // Optimizes filtering by company + location (very common user behavior).
 jobSchema.index({ company: 1, location: 1 });
 
-// 4. The "Keyword" Index (Keep text search available for future use)
+// The "Keyword" Index (Keep text search available for future use)
 jobSchema.index({ title: "text", description: "text" });
 
 
-export default mongoose.model("Job", jobSchema);
+const Job = jobConnection.model("Job", jobSchema);
+
+export default Job;

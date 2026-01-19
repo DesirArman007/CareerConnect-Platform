@@ -33,6 +33,7 @@ Thumbs.db
 node_modules/
 .env
 .DS_Store
+venv/
 
 # All Logs
 *.log

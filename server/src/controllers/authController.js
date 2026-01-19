@@ -120,10 +120,20 @@ const refreshTokenHandler = asyncHandler(async (req, res) => {
 
     const newAccessToken = user.generateAccessToken();
 
+     const options = {
+        httpOnly: true,
+        secure: true
+    }
 
-
-res.json({ accessToken: newAccessToken });
-
+return res
+    .cookie("accessToken", newAccessToken, options)
+    .cookie("refreshToken", newRefreshToken, options)
+    .json(
+        new ApiResponse(200, "Tokens refreshed successfully", {
+            accessToken: newAccessToken,
+            refreshToken: newRefreshToken
+        })
+    );
 
 })
 
@@ -140,13 +150,47 @@ const logoutUser = asyncHandler(async (req, res) => {
         httpOnly: true,
         secure: true
     }
+
     res.clearCookie("accessToken", options);
     res.clearCookie("refreshToken", options);
+
     return res
         .status(200)
         .json( new ApiResponse(200, "User logged out successfully"))
 });
 
+const changePassword = asyncHandler(async(req,res) =>{
+
+
+    console.log("1. ROUTE HIT: changePassword function started.");
+    console.log("2. REQ.USER:", req.user);
+    console.log("3. USER ID TRYING TO SEARCH:", req.user?._id);
+    console.log("4. ID TYPE:", typeof req.user?._id);
+    const userId = req.user?._id;
+    
+    const {oldPassword, newPassword} = req.body;
+
+    if(!oldPassword || !newPassword){
+        throw new ApiError (400,"Old password and new password are required")
+    }
+
+    const user = await User.findOne({_id: userId}).select("+password");
+    if (!user) {
+    throw new ApiError(404, "User not found");
+}
+    const isMatch = await user.isPasswordCorrect(oldPassword);
+    if(!isMatch){
+        throw new ApiError(400,"Current password is incorrect")
+    }
+
+    user.password = newPassword;
+    user.refreshToken = null;
+    await user.save();
+
+    return res.status(200).json(
+    new ApiResponse(200, "Password changed successfully. Please login again")
+    );
+})
 
 const forgotPassword = asyncHandler(async(req,res) =>{
 
@@ -162,6 +206,12 @@ const forgotPassword = asyncHandler(async(req,res) =>{
 
     const hashedToken = crypto.createHash("sha256").update(resetToken).digest("hex");
 
+    if (!user) {
+    // Send success response anyway to prevent email enumeration
+    return res.status(200).json(
+        new ApiResponse(200, "If an account exists, a password reset link has been sent")
+    );
+}
     user.resetPasswordToken = hashedToken;
     user.resetPasswordExpiry = Date.now() + 10 *60 *60*1000;
     await user.save({validateBeforeSave:false});
@@ -192,8 +242,12 @@ const resetPassword = asyncHandler(async(req, res) =>{
     const {token, id} = req.query;
     const {newPassword} = req.body;
 
+    if (user._id.toString() !== id) {
+    throw new ApiError(400, "Invalid reset request");
+    }
+
     if(!newPassword){
-        throw new ApiError(400,"New passwords in required");
+        throw new ApiError(400,"New passwords is required");
     }
 
     const hashedToken = crypto.createHash('sha256').update(token).digest("hex");

@@ -4,7 +4,7 @@ const TokenBucket = require("../utils/TokenBucket")
 
 const rateLimiter = asyncHandler( async(req, res, next) => {
 
-    // using IP Address or user ID as the hey
+    // using IP Address or user ID 
     const clientId = req.ip || req.user?.id || "anonymous";
 
     const allowed = await TokenBucket.isAllowed(clientId);
