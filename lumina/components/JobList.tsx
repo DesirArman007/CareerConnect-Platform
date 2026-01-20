@@ -69,7 +69,14 @@ export const JobList: React.FC<JobListProps> = ({
               <Card
                 key={job._id || job.id}
                 className="p-6 group flex flex-col h-full bg-surface/50 hover:bg-surface transition-colors cursor-pointer"
-                onClick={() => navigate(`/jobs/${job._id || job.id}`)}
+                onClick={(e) => {
+                  const jobUrl = `/jobs/${job._id || job.id}`;
+                  if (e.ctrlKey || e.metaKey) {
+                    window.open(jobUrl, '_blank');
+                  } else {
+                    navigate(jobUrl);
+                  }
+                }}
               >
                 <div className="flex items-start justify-between mb-6">
                   <div className="flex items-center gap-4">
