@@ -25,6 +25,13 @@ env/
 .env.production.local
 .env.*
 
+node_modules
+dist
+build
+.env
+.env.local
+
+
 # --- OS & IDE Files ---
 .DS_Store
 Thumbs.db
