@@ -120,13 +120,13 @@ export const JobsPage: React.FC = () => {
                             placeholder="Search by job title, company, or keywords..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="flex-1 px-4 py-3 bg-black/40 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-white/20 transition-colors"
+                            className="flex-1 px-4 py-3 bg-black/40 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-white/20 transition-colors text-base"
                         />
-                        <div className="flex gap-4">
+                        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
                             <select
                                 value={selectedDepartment}
                                 onChange={(e) => setSelectedDepartment(e.target.value)}
-                                className="px-4 py-3 bg-black/40 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/20 transition-colors appearance-none min-w-[200px]"
+                                className="flex-1 md:flex-none px-4 py-3 bg-black/40 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/20 transition-colors appearance-none md:min-w-[180px] text-base"
                             >
                                 <option value="">All Departments</option>
                                 {allDepartments.map(dept => (
@@ -136,7 +136,7 @@ export const JobsPage: React.FC = () => {
                             <select
                                 value={selectedLocation}
                                 onChange={(e) => setSelectedLocation(e.target.value)}
-                                className="px-4 py-3 bg-black/40 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/20 transition-colors appearance-none min-w-[200px]"
+                                className="flex-1 md:flex-none px-4 py-3 bg-black/40 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/20 transition-colors appearance-none md:min-w-[180px] text-base"
                             >
                                 <option value="">All Locations</option>
                                 {allLocations.map(loc => (

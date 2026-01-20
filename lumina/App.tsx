@@ -18,7 +18,7 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <div className="min-h-screen bg-background text-foreground selection:bg-accent selection:text-white">
+        <div className="min-h-screen bg-background text-foreground selection:bg-accent selection:text-white overflow-x-hidden">
           {/* Global subtle grid background */}
           <div className="fixed inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none z-50 mix-blend-overlay"></div>
 

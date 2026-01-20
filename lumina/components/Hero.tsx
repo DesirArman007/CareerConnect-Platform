@@ -67,12 +67,12 @@ export const Hero: React.FC = () => {
   };
 
   return (
-    <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
-      {/* Background Ambience */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-accent/20 blur-[120px] rounded-full opacity-20 pointer-events-none" />
-      <div className="absolute top-1/2 right-0 w-[800px] h-[600px] bg-blue-500/10 blur-[100px] rounded-full opacity-20 pointer-events-none" />
+    <section className="relative pt-24 pb-16 md:pt-48 md:pb-32 overflow-hidden">
+      {/* Background Ambience - constrained to prevent overflow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[1000px] h-[300px] md:h-[500px] bg-accent/20 blur-[120px] rounded-full opacity-20 pointer-events-none" />
+      <div className="absolute top-1/2 right-0 w-[50vw] max-w-[800px] h-[400px] md:h-[600px] bg-blue-500/10 blur-[100px] rounded-full opacity-20 pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-6 relative z-10 grid lg:grid-cols-2 gap-16 items-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
         {/* Left: Hook & Value Prop */}
         <div className="flex flex-col items-start text-left">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm text-xs font-medium text-gray-300 mb-8 animate-fade-in-up">
@@ -80,12 +80,12 @@ export const Hero: React.FC = () => {
             {getNewJobsText()}
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-[1.1] mb-6">
-            Find and apply to <br />
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight leading-[1.15] mb-4 md:mb-6">
+            Find and apply to{' '}
             <span className="text-gradient-accent">all relevant jobs</span> in one place.
           </h1>
 
-          <p className="text-lg md:text-xl text-gray-400 mb-8 max-w-lg leading-relaxed">
+          <p className="text-base sm:text-lg md:text-xl text-gray-400 mb-6 md:mb-8 max-w-lg leading-relaxed">
             Stop visiting fifty different career pages. Access direct company listings, use one-click applications, and see fresh opportunities dropped daily.
           </p>
 
