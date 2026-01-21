@@ -172,9 +172,28 @@ const extractJobsWithPagination = (response: any): JobsResponse => {
 
 export const jobs = {
     // Get jobs with server-side pagination
-    getAll: async (page: number = 1, limit: number = 15): Promise<JobsResponse> => {
-        const res = await api.get(`/job?page=${page}&limit=${limit}`);
-        return extractJobsWithPagination(res.data);
+    getAll: async (
+        page: number,
+        limit: number,
+        department?: string,
+        location?: string,
+        signal?: AbortSignal
+    ) => {
+        const params = new URLSearchParams({
+            page: page.toString(),
+            limit: limit.toString(),
+            ...(department && { department }),
+            ...(location && { location })
+        });
+        const response = await fetch(`/api/jobs?${params}`, { signal });
+        if (!response.ok) throw new Error('Failed to fetch jobs');
+        return response.json();
+    },
+
+    getFilterOptions: async (signal?: AbortSignal) => {
+        const response = await fetch('/api/jobs/filter-options', { signal });
+        if (!response.ok) throw new Error('Failed to fetch filter options');
+        return response.json();
     },
 
     // Get all jobs (for filters - larger limit)
@@ -199,23 +218,24 @@ export const jobs = {
         return jobs;
     },
 
-    search: async (query: string, page: number = 1, limit: number = 15): Promise<JobsResponse> => {
-        // Validate query before making request
-        const trimmedQuery = query?.trim();
-        if (!trimmedQuery || trimmedQuery.length === 0) {
-            // Return empty result instead of making invalid request
-            return {
-                jobs: [],
-                pagination: { currentPage: 1, totalPages: 0, totalJobs: 0, limit }
-            };
-        }
-
-        // URL encode the query properly
-        const encodedQuery = encodeURIComponent(trimmedQuery);
-
-        // Backend expects 'keyword' parameter, not 'q'
-        const res = await api.get(`/job/search/query?keyword=${encodedQuery}&page=${page}&limit=${limit}`);
-        return extractJobsWithPagination(res.data);
+    search: async (
+        keyword: string,
+        page: number,
+        limit: number,
+        department?: string,
+        location?: string,
+        signal?: AbortSignal
+    ) => {
+        const params = new URLSearchParams({
+            keyword,
+            page: page.toString(),
+            limit: limit.toString(),
+            ...(department && { department }),
+            ...(location && { location })
+        });
+        const response = await fetch(`/api/jobs/search?${params}`, { signal });
+        if (!response.ok) throw new Error('Failed to search jobs');
+        return response.json();
     },
 
     getOne: async (id: string): Promise<Job> => {
@@ -227,6 +247,12 @@ export const jobs = {
         const res = await api.get(`/job/${id}/similar`);
         const { jobs } = extractJobsWithPagination(res.data);
         return jobs;
+    },
+
+    getStats: async (signal?: AbortSignal) => {
+        const response = await api.get('/job/stats', { signal });
+        if (!response.data) throw new Error('Failed to fetch job stats');
+        return response.data;
     },
 };
 
