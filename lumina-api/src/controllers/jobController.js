@@ -9,6 +9,7 @@ import { response } from "express";
 
 // Fetch a single job posting by ID
 const getJobById = asyncHandler(async(req, res) => {
+    const {jobId} = req.params;
 
     const cacheKey = `job_detail:${jobId}`;
     try {
@@ -18,7 +19,6 @@ const getJobById = asyncHandler(async(req, res) => {
       console.error("Cache retrieval failed, fetching from DB:", err);
     }
     
-    const {jobId} = req.params;
 
     const job = await Job.findById(jobId);
 
@@ -249,6 +249,11 @@ const getJobsByCompany = asyncHandler(async(req, res) =>{
 // Recently added 
 const getNewJobs = asyncHandler(async(req, res) => {
 
+  const {
+        page=1,
+        limit=10,
+        days=7
+    } = req.query;
 
   const cacheKey = `new_jobs:${page}:${limit}:${days}`;
 
@@ -259,12 +264,7 @@ const getNewJobs = asyncHandler(async(req, res) => {
     console.error("Cache retrieval failed, fetching from DB:", err);
   }
 
-    const {
-        page=1,
-        limit=10,
-        days=7
-    } = req.query;
-
+   
     const skip = (page-1) * limit;
 
     // --------------------------------------------
