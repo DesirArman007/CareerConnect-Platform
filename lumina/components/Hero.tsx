@@ -61,13 +61,13 @@ export const Hero = () => {
             {getNewJobsText()}
           </div>
 
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight leading-[1.15] mb-4 md:mb-6">
+          <h1 className="text-5xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05] mb-6 md:mb-6">
             Find and apply to{" "}
             <span className="text-gradient-accent">all relevant jobs</span> in one
             place.
           </h1>
 
-          <p className="text-base sm:text-lg md:text-xl text-gray-400 mb-6 md:mb-8 max-w-lg leading-relaxed">
+          <p className="text-xs sm:text-sm md:text-base text-gray-400 mb-8 md:mb-8 max-w-lg leading-relaxed">
             Stop visiting fifty different career pages. Access direct company
             listings, use one-click applications, and see fresh opportunities
             dropped daily.
@@ -98,10 +98,10 @@ export const Hero = () => {
               <CheckCircle2 className="w-5 h-5 text-gray-500 mt-0.5" />
               <div>
                 <h3 className="font-semibold text-white mb-1">
-                  One-Click Apply
+                  Fresh Listings Daily
                 </h3>
                 <p className="text-sm text-gray-500">
-                  Fill your profile once. Apply everywhere instantly.
+                  New opportunities added every day from top companies worldwide.
                 </p>
               </div>
             </div>

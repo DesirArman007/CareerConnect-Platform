@@ -48,38 +48,25 @@ export const CompaniesPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const fetchAndAggregate = async () => {
+        const fetchCompanies = async () => {
             setIsLoading(true);
             try {
-                // Use getAllForCompanies to fetch ALL jobs (up to 5000) for accurate company counts
-                const jobs = await jobApi.getAllForCompanies();
+                // Use the new dedicated companies endpoint
+                const response = await jobApi.getCompanies();
 
-                // Aggregate job data to get unique companies with actual job counts
-                const companyMap = new Map<string, CompanyData>();
+                // Response: { data: { companies: [{ name, jobs }] } }
+                const companiesData = response?.data?.companies || response?.companies || [];
 
-                jobs.forEach(job => {
-                    if (job.company) {
-                        if (!companyMap.has(job.company)) {
-                            companyMap.set(job.company, {
-                                name: job.company,
-                                logo: job.logo,
-                                location: job.location || 'Remote',
-                                jobCount: 1
-                            });
-                        } else {
-                            const current = companyMap.get(job.company)!;
-                            companyMap.set(job.company, {
-                                ...current,
-                                jobCount: current.jobCount + 1
-                            });
-                        }
-                    }
-                });
-
-                // Convert to array and filter out companies with 0 jobs (already done by aggregation)
-                const companiesArray = Array.from(companyMap.values())
-                    .filter(company => company.jobCount > 0)
-                    .sort((a, b) => b.jobCount - a.jobCount); // Sort by job count descending
+                // Map to our CompanyData format
+                const companiesArray: CompanyData[] = companiesData
+                    .filter((c: { name: string; jobs: number }) => c.name && c.jobs > 0)
+                    .map((c: { name: string; jobs: number }) => ({
+                        name: c.name,
+                        logo: undefined, // API doesn't return logos
+                        location: 'Multiple Locations', // API doesn't return location
+                        jobCount: c.jobs
+                    }))
+                    .sort((a: CompanyData, b: CompanyData) => b.jobCount - a.jobCount);
 
                 setCompanies(companiesArray);
             } catch (error) {
@@ -90,7 +77,7 @@ export const CompaniesPage: React.FC = () => {
             }
         };
 
-        fetchAndAggregate();
+        fetchCompanies();
     }, []);
 
     // Pagination calculations
@@ -212,27 +199,28 @@ export const CompaniesPage: React.FC = () => {
 
                         {/* Pagination */}
                         {totalPages > 1 && (
-                            <div className="mt-12 flex items-center justify-center gap-2">
+                            <div className="mt-12 flex items-center justify-center gap-2 sm:gap-4">
                                 <Button
                                     variant="outline"
                                     onClick={() => handlePageChange(currentPage - 1)}
                                     disabled={currentPage === 1}
-                                    className="flex items-center gap-2"
+                                    className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4"
                                 >
-                                    <ChevronLeft className="w-4 h-4" /> Previous
+                                    <ChevronLeft className="w-4 h-4" />
+                                    <span className="hidden sm:inline">Previous</span>
                                 </Button>
 
                                 <div className="flex items-center gap-1">
                                     {getPaginationButtons().map((page, idx) => (
                                         page === '...' ? (
-                                            <span key={`ellipsis-${idx}`} className="w-10 h-10 flex items-center justify-center text-gray-500">
+                                            <span key={`ellipsis-${idx}`} className="w-8 sm:w-10 h-8 sm:h-10 flex items-center justify-center text-gray-500 text-sm">
                                                 ...
                                             </span>
                                         ) : (
                                             <button
                                                 key={page}
                                                 onClick={() => handlePageChange(page as number)}
-                                                className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${currentPage === page
+                                                className={`w-8 sm:w-10 h-8 sm:h-10 rounded-lg flex items-center justify-center transition-colors text-sm sm:text-base ${currentPage === page
                                                     ? 'bg-accent text-white font-bold'
                                                     : 'bg-surface hover:bg-surface/80 text-gray-400 hover:text-white'
                                                     }`}
@@ -247,9 +235,10 @@ export const CompaniesPage: React.FC = () => {
                                     variant="outline"
                                     onClick={() => handlePageChange(currentPage + 1)}
                                     disabled={currentPage === totalPages}
-                                    className="flex items-center gap-2"
+                                    className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4"
                                 >
-                                    Next <ChevronRight className="w-4 h-4" />
+                                    <span className="hidden sm:inline">Next</span>
+                                    <ChevronRight className="w-4 h-4" />
                                 </Button>
                             </div>
                         )}

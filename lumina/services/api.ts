@@ -263,6 +263,14 @@ export const jobs = {
         if (!response.data) throw new Error('Failed to fetch job stats');
         return response.data;
     },
+
+    // Get companies with job counts from dedicated endpoint
+    getCompanies: async (signal?: AbortSignal) => {
+        const response = await api.get('/job/companies', { signal });
+        if (!response.data) throw new Error('Failed to fetch companies');
+        // Response: { statusCode: 200, data: { companies: [{ name, jobs }] } }
+        return response.data;
+    },
 };
 
 export default api;

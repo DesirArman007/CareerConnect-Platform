@@ -151,25 +151,25 @@ export const SignupPage: React.FC = () => {
     };
 
     return (
-        <main className="min-h-screen flex items-center justify-center px-4 relative">
-            {/* Back Button */}
+        <main className="min-h-screen py-20 sm:py-0 sm:flex sm:items-center sm:justify-center px-4 relative overflow-y-auto">
+            {/* Back Button - hidden on mobile */}
             <button
                 onClick={() => navigate('/')}
-                className="absolute top-24 left-6 md:left-12 flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+                className="hidden sm:flex absolute top-24 left-6 md:left-12 items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm"
             >
                 <ArrowLeft className="w-4 h-4" />
                 <span>Back to Home</span>
             </button>
 
-            <Card className="max-w-md w-full p-8 bg-surface/80 border-white/10 backdrop-blur-sm">
-                <div className="text-center mb-8">
-                    <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-br from-white to-white/60 mb-2">Create an Account</h1>
-                    <p className="text-gray-400 text-sm">Join the future of job hunting</p>
+            <Card className="max-w-md w-full p-4 sm:p-8 mx-auto my-4 sm:my-0 bg-surface/80 border-white/10 backdrop-blur-sm">
+                <div className="text-center mb-4 sm:mb-8">
+                    <h1 className="text-xl sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-br from-white to-white/60 mb-1 sm:mb-2">Create an Account</h1>
+                    <p className="text-gray-400 text-xs sm:text-sm">Join the future of job hunting</p>
                 </div>
 
-                <div className="space-y-4">
-                    <Button variant="outline" className="w-full flex justify-center items-center gap-3 h-12">
-                        <svg className="w-5 h-5" viewBox="0 0 24 24">
+                <div className="space-y-3 sm:space-y-4">
+                    <Button variant="outline" className="w-full flex justify-center items-center gap-2 sm:gap-3 h-10 sm:h-12 text-xs sm:text-sm">
+                        <svg className="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24">
                             <path
                                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                                 fill="#4285F4"
@@ -187,10 +187,11 @@ export const SignupPage: React.FC = () => {
                                 fill="#EA4335"
                             />
                         </svg>
-                        Continue with Google
+                        <span className="hidden sm:inline">Continue with Google</span>
+                        <span className="sm:hidden">Google</span>
                     </Button>
 
-                    <div className="relative my-6">
+                    <div className="relative my-4 sm:my-6">
                         <div className="absolute inset-0 flex items-center">
                             <div className="w-full border-t border-white/10"></div>
                         </div>
@@ -199,7 +200,7 @@ export const SignupPage: React.FC = () => {
                         </div>
                     </div>
 
-                    <form className="space-y-4" onSubmit={handleSubmit}>
+                    <form className="space-y-3 sm:space-y-4" onSubmit={handleSubmit}>
                         {error && (
                             <div className="p-3 rounded bg-red-500/10 border border-red-500/20 text-red-500 text-sm">
                                 {error}
@@ -211,7 +212,7 @@ export const SignupPage: React.FC = () => {
                             </div>
                         )}
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                             <div>
                                 <Input
                                     placeholder="First Name *"
@@ -266,7 +267,7 @@ export const SignupPage: React.FC = () => {
                         </Button>
                     </form>
 
-                    <div className="mt-6 text-center text-sm text-gray-400">
+                    <div className="mt-4 sm:mt-6 text-center text-xs sm:text-sm text-gray-400">
                         Already have an account?{' '}
                         <Link to="/login" className="text-white hover:underline">
                             Log in
