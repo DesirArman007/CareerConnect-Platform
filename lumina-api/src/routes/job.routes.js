@@ -8,7 +8,8 @@ import {
   getSimilarJobs,
   getSmartSeachSuggestions,
   getFilterOptions,
-  getJobStats
+  getJobStats,
+  getCompanies
 } from "../controllers/jobController.js";
 
 const router = Router();
@@ -20,6 +21,7 @@ router.get("/new/recent", getNewJobs);
 router.get("/search/query", searchJobs);       
 router.get("/search/suggestions", getSmartSeachSuggestions); 
 router.get("/filter-options",getFilterOptions);
+router.get("/companies", getCompanies);
 
 // Dynamic Routes with specific prefixes SECOND
 router.get("/company/:company", getJobsByCompany);

@@ -646,6 +646,35 @@ const getJobStats = asyncHandler(async(req,res) =>{
 
 });
 
+const getCompanies = asyncHandler(async (req, res) => {
+  const cacheKey = "companies:list";
+
+  const cached = await getFromCache(cacheKey);
+  if (cached) return res.status(200).json(cached);
+
+  const companies = await Job.aggregate([
+    { $match: { company: { $exists: true, $ne: "" } } },
+    {
+      $group: {
+        _id: "$company",
+        jobCount: { $sum: 1 }
+      }
+    },
+    { $sort: { jobCount: -1 } }
+  ]);
+
+  const response = new ApiResponse(200, {
+    companies: companies.map(c => ({
+      name: c._id,
+      jobs: c.jobCount
+    }))
+  });
+
+  await setInCache(cacheKey, response, 600); // 10 min
+  res.status(200).json(response);
+});
+
+
 export {
     getJobById,
     getAllJobs,
@@ -655,5 +684,6 @@ export {
     getSimilarJobs,
     getSmartSeachSuggestions,
     getFilterOptions,
-    getJobStats
+    getJobStats,
+    getCompanies
 }
