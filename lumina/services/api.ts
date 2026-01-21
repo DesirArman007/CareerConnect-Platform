@@ -233,7 +233,7 @@ export const jobs = {
         location?: string,
         signal?: AbortSignal
     ) => {
-        const res = await api.get('/job/search', {
+        const res = await api.get('/job/search/query', {
             params: {
                 keyword,
                 page,

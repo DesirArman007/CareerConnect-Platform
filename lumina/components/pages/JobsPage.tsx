@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { JobList } from '../JobList';
 import { Job } from '../../types';
 import { jobs as jobApi, PaginationInfo } from '../../services/api';
 
 const ITEMS_PER_PAGE = 15;
 const DEBOUNCE_DELAY = 300
+
+
 
 export const JobsPage: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -90,18 +92,32 @@ export const JobsPage: React.FC = () => {
 
     // Fetching with debounce and abot
 
+    const prevFiltersRef = useRef({
+        searchQuery: "",
+        department: "",
+        location: ""
+    });
+
     useEffect(() => {
         const abortController = new AbortController();
 
-        const shouldResetPage = currentPage !== 1 && (
-            searchQuery !== '' ||
-            selectedDepartment !== '' ||
-            selectedLocation !== ''
-        );
+        const filtersChanged =
+            prevFiltersRef.current.searchQuery !== searchQuery ||
+            prevFiltersRef.current.department !== selectedDepartment ||
+            prevFiltersRef.current.location !== selectedLocation;
 
-        if (shouldResetPage) {
-            setCurrentPage(1);
-            return;
+        // ✅ Reset page ONLY when filters/search change
+        if (filtersChanged) {
+            prevFiltersRef.current = {
+                searchQuery,
+                department: selectedDepartment,
+                location: selectedLocation
+            };
+
+            if (currentPage !== 1) {
+                setCurrentPage(1);
+                return;
+            }
         }
 
         const debounceTimer = setTimeout(() => {
@@ -119,6 +135,9 @@ export const JobsPage: React.FC = () => {
             abortController.abort();
         };
     }, [searchQuery, currentPage, selectedDepartment, selectedLocation, fetchJobs]);
+
+
+
 
 
     const handlePageChanges = useCallback((page: number) => {

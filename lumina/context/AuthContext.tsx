@@ -72,23 +72,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         checkAuth();
     }, []);
 
-    // ✅ Login (cookies-based, no payload misuse)
     const login = async (credentials: { email: string; password: string }) => {
         console.log('Attempting login...');
         const response = await auth.login(credentials);
         console.log('Login response:', response);
 
         if (response?.success === true) {
+            // Give browser time to store cookie
             await new Promise(resolve => setTimeout(resolve, 100));
-            const success = await fetchUserData();
-            if (!success) {
-                throw new Error('Failed to fetch user data after login');
+
+            // Try to fetch user, but DO NOT fail login if this breaks
+            try {
+                const success = await fetchUserData();
+                if (!success) {
+                    console.warn('Login succeeded, but getUser failed (cookie not ready yet)');
+                }
+            } catch (err) {
+                console.warn('Ignoring getUser error after login:', err);
             }
-            return;
+
+            return; // ✅ LOGIN SUCCESS
         }
 
         throw new Error('Login failed');
     };
+
 
     // ✅ Register (does NOT log user in - they need to login separately)
     const register = async (data: { name: string; email: string; password: string }) => {
