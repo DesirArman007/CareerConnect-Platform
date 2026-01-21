@@ -1,5 +1,4 @@
 import {Redis} from "ioredis";
-const createClient = new Redis();
 
 const client = new Redis({
     username: process.env.REDIS_USERNAME,
