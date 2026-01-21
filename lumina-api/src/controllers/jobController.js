@@ -52,6 +52,21 @@ const getAllJobs = asyncHandler(async( req,res) => {
         department
     } = req.query;
 
+    const cacheKey = `jobs:
+    page=${page}:
+    limit=${limit}:
+    job_type=${job_type || "any"}:
+    location=${location || "any"}:
+    company=${company || "any"}:
+    employment_type=${employment_type || "any"}:
+    department=${department || "any"}`.replace(/\s+/g, "");
+
+    const cached = await getFromCache(cacheKey);
+    if (cached) {
+      return res.status(200).json(cached);
+    }
+
+
 
     //  How many records to ignore before returning the reults
     /*   page = 1, limit = 10
@@ -96,19 +111,22 @@ const getAllJobs = asyncHandler(async( req,res) => {
     
     const totalJobs = await Job.countDocuments(filter);
 
-    res.status(200).json(
-        new ApiResponse(200,{
-            jobs,
-            pagination: {
-                success: true,
-                currentPage: Number(page),
-                totalPages: Math.ceil(totalJobs/Number(limit)),
-                totalJobs: totalJobs,
-                limit: Number(limit),
-            },
-        })
-    );
+    const response = new ApiResponse(200, {
+      jobs,
+      pagination: {
+        success: true,
+        currentPage: Number(page),
+        totalPages: Math.ceil(totalJobs / Number(limit)),
+        totalJobs,
+        limit: Number(limit)
+      }
+    });
+
+    await setInCache(cacheKey, response, 300); 
+
+    res.status(200).json(response);
 });
+
 
 // Search Jobs by keyword, Title, Companies, Skills
 const searchJobs = asyncHandler(async(req,res) =>{
