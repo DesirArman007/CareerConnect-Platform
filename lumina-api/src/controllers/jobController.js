@@ -2,12 +2,22 @@ import Job from "../models/jobModel.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-
+import { getFromCache, setInCache, deleteFromCache } from "../cache/cacheHelper.js";
+import { response } from "express";
 
 
 
 // Fetch a single job posting by ID
 const getJobById = asyncHandler(async(req, res) => {
+
+    const cacheKey = `job_detail:${jobId}`;
+    try {
+      const cached = await getFromCache(cacheKey);
+      if (cached) return res.status(200).json(cached);
+    } catch (err) {
+      console.error("Cache retrieval failed, fetching from DB:", err);
+    }
+    
     const {jobId} = req.params;
 
     const job = await Job.findById(jobId);
@@ -17,14 +27,16 @@ const getJobById = asyncHandler(async(req, res) => {
     throw new ApiError(404, "Job not found");
   }
 
-  res.status(200).json(
-    new ApiResponse(200,
+  const response =  new ApiResponse(200,
         {
             success: true,
             jobData:job,
         }
-    )
-  );
+    );
+
+  await setInCache(cacheKey,response, 1000);
+
+  res.status(200).json(response);
 })
 
 // Fetch All Jobs (Paginated)
@@ -111,6 +123,17 @@ const searchJobs = asyncHandler(async(req,res) =>{
         location
     } = req.query;
 
+
+
+  const cacheKey = `job_search:${keyword}:${page}:${limit}:${job_type}:${employment_type}:${department}:${location}`;
+
+  try {
+    const cached = await getFromCache(cacheKey);
+    if (cached) return res.status(200).json(cached);
+  } catch (err) {
+    console.error("Cache retrieval failed, fetching from DB:", err);
+  }
+
     if(!keyword?.trim()){
         throw new ApiError(400, "Search term/keyword is required");
     }
@@ -150,9 +173,7 @@ const searchJobs = asyncHandler(async(req,res) =>{
     .select('-__v');
 
     const totalJobs = await Job.countDocuments(searchFilter);
-
-    res.status(200).json(
-        new ApiResponse(200,
+    const response = new ApiResponse(200,
 
             {jobs,
                 pagination:{
@@ -163,8 +184,12 @@ const searchJobs = asyncHandler(async(req,res) =>{
                     limit : Number(limit),
                 },
                 searchQuery: keyword
-            })
-    );
+            });
+    
+    await setInCache(cacheKey,response,300)   
+            
+    res.status(200).json(response);
+        
 
 });
 
@@ -173,13 +198,22 @@ const searchJobs = asyncHandler(async(req,res) =>{
 // All jobs from a specific company
 const getJobsByCompany = asyncHandler(async(req, res) =>{
 
-    const {company} = req.params;
+  const {company} = req.params;
     
-    const { page=1, limit=10} = req.query;
+  const { page=1, limit=10} = req.query;
 
-    const skip = (page-1)*limit;
+  const cacheKey = `jobs_company:${company}:${page}:${limit}`;
 
-    const jobs = await Job.find({
+  try {
+    const cached = await getFromCache(cacheKey);
+    if (cached) return res.status(200).json(cached);
+  } catch (err) {
+    console.error("Cache retrieval failed, fetching from DB:", err);
+  }
+
+  const skip = (page-1)*limit;
+
+  const jobs = await Job.find({
         company: {$regex: company, $options:'i'}
     })
     .sort({createdAt: -1})
@@ -188,12 +222,12 @@ const getJobsByCompany = asyncHandler(async(req, res) =>{
     .select('-__v');
 
 
-    const totalJobs = await Job.countDocuments({
+  const totalJobs = await Job.countDocuments({
         company: {$regex: company, $options:'i'}
     });
 
-    res.status(200).json(
-        new ApiResponse(200,{
+  
+  const response = new ApiResponse(200,{
             success: true,
             jobs,
             pagination:{
@@ -203,7 +237,10 @@ const getJobsByCompany = asyncHandler(async(req, res) =>{
                 limit: Number(limit)
             }
         })
-    );
+
+    await setInCache(cacheKey,response, 600);
+
+    res.status(200).json(response);
 
 });
 
@@ -211,6 +248,16 @@ const getJobsByCompany = asyncHandler(async(req, res) =>{
 // Fetch New Jobs
 // Recently added 
 const getNewJobs = asyncHandler(async(req, res) => {
+
+
+  const cacheKey = `new_jobs:${page}:${limit}:${days}`;
+
+  try {
+    const cached = await getFromCache(cacheKey);
+    if (cached) return res.status(200).json(cached);
+  } catch (err) {
+    console.error("Cache retrieval failed, fetching from DB:", err);
+  }
 
     const {
         page=1,
@@ -260,9 +307,7 @@ const getNewJobs = asyncHandler(async(req, res) => {
         createdAt: { $gte: dateThreshold}
     });
 
-    res.status(200).json(
-        {
-            jobs,
+    const response = new ApiResponse(200, { jobs,
             pagination:{
                 success: true,
                 currentPage: Number(page),
@@ -270,9 +315,12 @@ const getNewJobs = asyncHandler(async(req, res) => {
                 totalJobs:totalJobs,
                 limit: Number(limit)
             },
-            message: `Jobs added in the last ${days}`
-        },
+            message: `Jobs added in the last ${days}`}
     );
+
+    await setInCache(cacheKey,response, process.env.REDIS_TTL)
+
+    res.status(200).json(response);
 })
 
 
@@ -499,6 +547,14 @@ const getFilterOptions = asyncHandler(async( req, res) =>{
 
 const getJobStats = asyncHandler(async(req,res) =>{
 
+  const cacheKey = 'job_stats';
+  try {
+    const cached = await getFromCache(cacheKey);
+    if (cached) return res.status(200).json(cached);
+  } catch (err) {
+    console.error("Cache retrieval failed, fetching from DB:", err);
+  }
+
   const[
     totalJobs,
     newJobsCount,
@@ -507,7 +563,7 @@ const getJobStats = asyncHandler(async(req,res) =>{
     recentJobs
   ] = await Promise.all([
     Job.countDocuments(),
-
+    
 
     // Finds the job that are added in last 7 days
     Job.countDocuments({
@@ -554,8 +610,8 @@ const getJobStats = asyncHandler(async(req,res) =>{
     count: loc.count
   }));
 
-   res.status(200).json(
-        new ApiResponse(200, {
+
+  const response = new ApiResponse(200, {
             totalJobs,
             newJobsThisWeek: newJobsCount,
             jobTypes: {
@@ -564,8 +620,11 @@ const getJobStats = asyncHandler(async(req,res) =>{
             },
             topLocations,
             recentJobs
-        })
-    );
+        });
+  
+  await setInCache(cacheKey, response, process.env.REDIS_TTL);      
+  
+  res.status(200).json(response);
 
 });
 

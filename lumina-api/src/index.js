@@ -1,7 +1,7 @@
 import dotenv from "dotenv"
 import connectDB from "./config/db.js"
 import {app} from "./app.js"
-
+import client from "./cache/client.js"
 
 dotenv.config()
 
