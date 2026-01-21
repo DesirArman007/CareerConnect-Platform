@@ -6,23 +6,28 @@ import {
   getJobsByCompany,
   getNewJobs,
   getSimilarJobs,
-  getSmartSeachSuggestions
+  getSmartSeachSuggestions,
+  getFilterOptions,
+  getJobStats
 } from "../controllers/jobController.js";
 
 const router = Router();
 
 
 // Static/Specific Routes 
-router.get("/", getAllJobs);
+router.get("/stats", getJobStats);
 router.get("/new/recent", getNewJobs);          
 router.get("/search/query", searchJobs);       
 router.get("/search/suggestions", getSmartSeachSuggestions); 
+router.get("/filter-options",getFilterOptions);
 
 // Dynamic Routes with specific prefixes SECOND
 router.get("/company/:company", getJobsByCompany);
 router.get("/:jobId/similar", getSimilarJobs);    
 
-// The "Catch-All" Dynamic Route LAST
+//  Dynamic Route 
 router.get("/:jobId", getJobById);
+
+router.get("/", getAllJobs);
 
 export default router;

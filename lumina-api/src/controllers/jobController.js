@@ -36,7 +36,8 @@ const getAllJobs = asyncHandler(async( req,res) => {
         job_type,
         location,
         company,
-        employment_type
+        employment_type,
+        department
     } = req.query;
 
 
@@ -70,6 +71,10 @@ const getAllJobs = asyncHandler(async( req,res) => {
         filter.employment_type = employment_type
     }
 
+    if(department){
+      filter.department = { $regex: department, $options:'i'};
+    }
+
     // Fetch jobs
     const jobs = await Job.find(filter)
         .sort({createdAt: -1}) // newest job post first
@@ -101,7 +106,9 @@ const searchJobs = asyncHandler(async(req,res) =>{
         page=1,
         limit=10,
         job_type,
-        employment_type
+        employment_type,
+        department,
+        location
     } = req.query;
 
     if(!keyword?.trim()){
@@ -128,6 +135,13 @@ const searchJobs = asyncHandler(async(req,res) =>{
         searchFilter.employment_type = employment_type;
     }
 
+    if(department?.trim()){
+        searchFilter.department = { $regex: department, $options: 'i'};
+    }
+
+    if(location?.trim()){
+        searchFilter.location = { $regex: location, $options: 'i'};
+    }
 
     const jobs = await Job.find(searchFilter)
     .sort({createdAt: -1})
@@ -465,9 +479,95 @@ const getSmartSeachSuggestions = asyncHandler(async(req,res) => {
         })
     );
 
-})
+});
+
+const getFilterOptions = asyncHandler(async( req, res) =>{
+
+  const [departements, locations] = await Promise.all([
+    Job.distinct('departement'),
+    Job.distinct('location')
+  ]);
+
+  res.status(200).json(
+    new ApiResponse(200,{
+      departements: departements.filter(Boolean),
+      locations: locations.filter(Boolean)
+      
+    })
+  );
+});
+
+const getJobStats = asyncHandler(async(req,res) =>{
+
+  const[
+    totalJobs,
+    newJobsCount,
+    jobsByType,
+    jobsByLocation,
+    recentJobs
+  ] = await Promise.all([
+    Job.countDocuments(),
 
 
+    // Finds the job that are added in last 7 days
+    Job.countDocuments({
+      createdAt: {
+        $gte: new Date(Date.now() - 7 * 24 * 60 * 60 *1000)
+      }
+    }),
+
+
+    Job.aggregate([
+            {
+                $group: {
+                    _id: '$job_type',
+                    count: { $sum: 1 }
+                }
+            }
+        ]),
+
+    // Finds the  top 5 locations with most jobs
+    Job.aggregate([
+      {
+        $group: {
+          _id: '$location',
+          count: { $sum: 1}
+        }
+      },
+      { $sort: {count: -1}},
+      { $limit: 5}
+    ]),
+
+
+    // Gets the 5 monst recent jobs
+    Job.find().sort({createdAt: -1}).limit(5).select('title company location job_type createdAt')
+
+  ]);
+
+  const jobTypeStats = jobsByType.reduce( (acc, item) => {
+    acc[item._id || 'other'] = item.count;
+    return acc;
+  }, {});
+
+  const topLocations = jobsByLocation.map( loc => ({
+    location: loc._id,
+    count: loc.count
+  }));
+
+   res.status(200).json(
+        new ApiResponse(200, {
+            totalJobs,
+            newJobsThisWeek: newJobsCount,
+            jobTypes: {
+                jobs: jobTypeStats.job || 0,
+                internships: jobTypeStats.internship || 0
+            },
+            topLocations,
+            recentJobs
+        })
+    );
+
+});
 
 export {
     getJobById,
@@ -476,5 +576,7 @@ export {
     getJobsByCompany,
     getNewJobs,
     getSimilarJobs,
-    getSmartSeachSuggestions
+    getSmartSeachSuggestions,
+    getFilterOptions,
+    getJobStats
 }
