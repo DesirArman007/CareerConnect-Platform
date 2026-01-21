@@ -18,7 +18,7 @@ export const Hero = () => {
     const fetchStats = async () => {
       try {
         const response = await jobApi.getStats();
-        const statsData = response?.data?.data;
+        const statsData = response?.data;
 
         if (!statsData || typeof statsData.newJobsThisWeek !== "number") {
           console.error("Invalid stats response", response);

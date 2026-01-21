@@ -179,22 +179,29 @@ export const jobs = {
         location?: string,
         signal?: AbortSignal
     ) => {
-        const params = new URLSearchParams({
-            page: page.toString(),
-            limit: limit.toString(),
-            ...(department && { department }),
-            ...(location && { location })
+        const res = await api.get('/job', {
+            params: {
+                page,
+                limit,
+                ...(department && { department }),
+                ...(location && { location }),
+            },
+            signal,
         });
-        const response = await fetch(`/api/jobs?${params}`, { signal });
-        if (!response.ok) throw new Error('Failed to fetch jobs');
-        return response.json();
+
+        return extractJobsWithPagination(res.data);
     },
 
+
     getFilterOptions: async (signal?: AbortSignal) => {
-        const response = await fetch('/api/jobs/filter-options', { signal });
-        if (!response.ok) throw new Error('Failed to fetch filter options');
-        return response.json();
+        const res = await api.get('/job/filter-options', { signal });
+
+        if (!res.data) {
+            throw new Error('Failed to fetch filter options');
+        }
+        return res.data;
     },
+
 
     // Get all jobs (for filters - larger limit)
     getAllForFilters: async (): Promise<Job[]> => {
@@ -226,16 +233,18 @@ export const jobs = {
         location?: string,
         signal?: AbortSignal
     ) => {
-        const params = new URLSearchParams({
-            keyword,
-            page: page.toString(),
-            limit: limit.toString(),
-            ...(department && { department }),
-            ...(location && { location })
+        const res = await api.get('/job/search', {
+            params: {
+                keyword,
+                page,
+                limit,
+                ...(department && { department }),
+                ...(location && { location }),
+            },
+            signal,
         });
-        const response = await fetch(`/api/jobs/search?${params}`, { signal });
-        if (!response.ok) throw new Error('Failed to search jobs');
-        return response.json();
+
+        return extractJobsWithPagination(res.data);
     },
 
     getOne: async (id: string): Promise<Job> => {

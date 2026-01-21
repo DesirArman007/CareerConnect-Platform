@@ -37,7 +37,11 @@ export const LandingPage: React.FC = () => {
         <main>
             <Hero />
             <Stats />
-            <JobList jobs={recentJobs} showViewAll={true} isLoading={isLoading} />
+            <JobList
+                jobs={recentJobs.slice(0, 9)}
+                showViewAll={true}
+                isLoading={isLoading}
+            />
             <Testimonials />
             <CTA />
             <Feedback />
