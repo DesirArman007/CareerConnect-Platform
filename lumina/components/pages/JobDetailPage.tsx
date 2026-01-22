@@ -236,7 +236,7 @@ export const JobDetailPage: React.FC = () => {
                 <p className="text-gray-400 mb-8">
                     {error || 'The job posting you are looking for does not exist or has been removed.'}
                 </p>
-                <Button onClick={() => navigate('/jobs')}>Back to Jobs</Button>
+                <Button onClick={() => navigate(-1)}>Back to Jobs</Button>
             </main>
         );
     }
@@ -256,7 +256,7 @@ export const JobDetailPage: React.FC = () => {
                 {/* Header Actions */}
                 <div className="flex items-center justify-between mb-8">
                     <button
-                        onClick={() => navigate('/jobs')}
+                        onClick={() => navigate(-1)}
                         className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors group"
                     >
                         <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
