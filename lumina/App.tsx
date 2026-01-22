@@ -1,5 +1,6 @@
 import React from 'react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
+import { Analytics } from '@vercel/analytics/react';
 import { Header } from './components/Header';
 import { AuthProvider } from './context/AuthContext';
 
@@ -49,9 +50,10 @@ function App() {
 
           {/* Floating AI Agent */}
           <AIChat />
-          
-          {/* Vercel Speed Insights */}
+
+          {/* Vercel Speed Insights & Analytics */}
           <SpeedInsights />
+          <Analytics />
         </div>
       </BrowserRouter>
     </AuthProvider>
