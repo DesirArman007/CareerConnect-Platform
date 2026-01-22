@@ -2,18 +2,20 @@
   "filter_country": "India",
   "companies": [
     {
-      "name": "Google",
-      "scraper": "GoogleScraper",
-      "url": "https://www.google.com/about/careers/applications/jobs/results/?location=India",
+      "name": "Wellfound Startups",
+      "scraper": "WellfoundScraper",
+      "url": "https://wellfound.com/role/l/software-engineer/india",
       "enabled": true,
-      "priority": 1
+      "priority": 1,
+      "note": "AngelList/Wellfound - Indian Startup Jobs"
     },
     {
-      "name": "Microsoft",
-      "scraper": "MicrosoftScraper",
-      "url": "https://jobs.careers.microsoft.com/global/en/search?lc=India",
+      "name": "Indian Startups Aggregator",
+      "scraper": "IndianStartupsScraper",
+      "url": "https://www.instahyre.com/jobs/",
       "enabled": true,
-      "priority": 1
+      "priority": 1,
+      "note": "Aggregates from Instahyre, Cutshort, YCombinator India"
     },
     {
       "name": "Amazon",
@@ -26,13 +28,6 @@
       "name": "Uber",
       "scraper": "UberScraper",
       "url": "https://www.uber.com/in/en/careers/list/?location=India",
-      "enabled": true,
-      "priority": 1
-    },
-    {
-      "name": "Infosys",
-      "scraper": "InfosysScraper",
-      "url": "https://infosys.wd1.myworkdayjobs.com/wday/cxs/infosys/Infosys/jobs",
       "enabled": true,
       "priority": 1
     },
@@ -401,67 +396,6 @@
       "priority": 3
     },
     {
-      "name": "Figma",
-      "scraper": "LeverScraper",
-      "url": "https://jobs.lever.co/figma",
-      "enabled": true,
-      "priority": 2
-    },
-    {
-      "name": "Atlassian",
-      "scraper": "LeverScraper",
-      "url": "https://jobs.lever.co/atlassian",
-      "enabled": true,
-      "priority": 2
-    },
-    {
-      "name": "Swiggy",
-      "scraper": "LeverScraper",
-      "url": "https://jobs.lever.co/swiggy",
-      "enabled": true,
-      "priority": 1
-    },
-    {
-      "name": "Oracle",
-      "scraper": "CustomScraper",
-      "url": "https://eeho.fa.us2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/jobsearch/jobs?location=India&locationId=300000000106947&locationLevel=country&mode=location",
-      "enabled": true,
-      "priority": 1,
-      "note": "Oracle Cloud HCM - URL updated to direct API endpoint"
-    },
-    {
-      "name": "Netflix",
-      "scraper": "CustomScraper",
-      "url": "https://explore.jobs.netflix.net/careers?location=india",
-      "enabled": true,
-      "priority": 2,
-      "note": "Netflix Vertex platform - URL updated to working careers portal"
-    },
-    {
-      "name": "Shopify",
-      "scraper": "CustomScraper",
-      "url": "https://www.shopify.com/careers",
-      "enabled": false,
-      "priority": 2,
-      "note": "Does NOT use SmartRecruiters - custom portal without public API, disabled until custom scraper implemented"
-    },
-    {
-      "name": "Tata Consultancy Services",
-      "scraper": "CustomScraper",
-      "url": "https://ibegin.tcsapps.com/",
-      "enabled": false,
-      "priority": 1,
-      "note": "Authentication-required portal - not publicly scrapable, disabled"
-    },
-    {
-      "name": "Flipkart",
-      "scraper": "CustomScraper",
-      "url": "https://www.flipkartcareers.com/",
-      "enabled": false,
-      "priority": 1,
-      "note": "Custom portal without structured API - disabled, recommend using third-party job aggregators"
-    },
-    {
       "name": "Accenture",
       "scraper": "WorkdayScraper",
       "url": "https://accenture.wd3.myworkdayjobs.com/wday/cxs/accenture/AccentureCareers/jobs",
@@ -558,6 +492,952 @@
       "url": "https://philips.wd3.myworkdayjobs.com/wday/cxs/philips/jobs-and-careers/jobs",
       "enabled": true,
       "priority": 2
+    },
+    {
+      "name": "Bosch",
+      "scraper": "SmartRecruitersScraper",
+      "url": "https://jobs.smartrecruiters.com/Bosch",
+      "enabled": true,
+      "priority": 1,
+      "note": "Bosch India - Major engineering employer"
+    },
+    {
+      "name": "Visa India",
+      "scraper": "SmartRecruitersScraper",
+      "url": "https://jobs.smartrecruiters.com/Visa",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "IKEA",
+      "scraper": "SmartRecruitersScraper",
+      "url": "https://jobs.smartrecruiters.com/IKEA",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Capgemini",
+      "scraper": "SmartRecruitersScraper",
+      "url": "https://jobs.smartrecruiters.com/Capgemini",
+      "enabled": true,
+      "priority": 1,
+      "note": "Major IT services company with large India presence"
+    },
+    {
+      "name": "Ericsson",
+      "scraper": "SmartRecruitersScraper",
+      "url": "https://jobs.smartrecruiters.com/Ericsson",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Cognizant",
+      "scraper": "SmartRecruitersScraper",
+      "url": "https://jobs.smartrecruiters.com/Cognizant",
+      "enabled": true,
+      "priority": 1,
+      "note": "Major Indian IT services company"
+    },
+    {
+      "name": "Publicis Sapient",
+      "scraper": "SmartRecruitersScraper",
+      "url": "https://jobs.smartrecruiters.com/PublicisSapient",
+      "enabled": true,
+      "priority": 1,
+      "note": "Digital transformation with major India centers"
+    },
+    {
+      "name": "Volvo",
+      "scraper": "SmartRecruitersScraper",
+      "url": "https://jobs.smartrecruiters.com/Volvo",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Deloitte",
+      "scraper": "SmartRecruitersScraper",
+      "url": "https://jobs.smartrecruiters.com/Deloitte",
+      "enabled": true,
+      "priority": 1,
+      "note": "Big 4 consulting - major India presence"
+    },
+    {
+      "name": "SAP",
+      "scraper": "SmartRecruitersScraper",
+      "url": "https://jobs.smartrecruiters.com/SAP",
+      "enabled": true,
+      "priority": 1,
+      "note": "SAP Labs India - major R&D center"
+    },
+    {
+      "name": "Schneider Electric",
+      "scraper": "SmartRecruitersScraper",
+      "url": "https://jobs.smartrecruiters.com/SchneiderElectric",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "KPMG",
+      "scraper": "SmartRecruitersScraper",
+      "url": "https://jobs.smartrecruiters.com/KPMG",
+      "enabled": true,
+      "priority": 1,
+      "note": "Big 4 consulting"
+    },
+    {
+      "name": "EY",
+      "scraper": "SmartRecruitersScraper",
+      "url": "https://jobs.smartrecruiters.com/EY",
+      "enabled": true,
+      "priority": 1,
+      "note": "Ernst & Young - Big 4"
+    },
+    {
+      "name": "PwC",
+      "scraper": "SmartRecruitersScraper",
+      "url": "https://jobs.smartrecruiters.com/PwC",
+      "enabled": true,
+      "priority": 1,
+      "note": "PricewaterhouseCoopers - Big 4"
+    },
+    {
+      "name": "Wipro",
+      "scraper": "iCIMSScraper",
+      "url": "https://careers.wipro.com/search",
+      "enabled": true,
+      "priority": 1,
+      "note": "Major Indian IT services company"
+    },
+    {
+      "name": "HCL Technologies",
+      "scraper": "iCIMSScraper",
+      "url": "https://hcltech.icims.com/jobs/search",
+      "enabled": true,
+      "priority": 1,
+      "note": "Major Indian IT company"
+    },
+    {
+      "name": "Tech Mahindra",
+      "scraper": "iCIMSScraper",
+      "url": "https://techmahindra.icims.com/jobs/search",
+      "enabled": true,
+      "priority": 1,
+      "note": "Major Indian IT company"
+    },
+    {
+      "name": "LTIMindtree",
+      "scraper": "iCIMSScraper",
+      "url": "https://ltimindtree.icims.com/jobs/search",
+      "enabled": true,
+      "priority": 1,
+      "note": "Major Indian IT services"
+    },
+    {
+      "name": "Mphasis",
+      "scraper": "iCIMSScraper",
+      "url": "https://mphasis.icims.com/jobs/search",
+      "enabled": true,
+      "priority": 1,
+      "note": "Indian IT services company"
+    },
+    {
+      "name": "L&T Infotech",
+      "scraper": "iCIMSScraper",
+      "url": "https://lti.icims.com/jobs/search",
+      "enabled": true,
+      "priority": 1,
+      "note": "Larsen & Toubro IT"
+    },
+    {
+      "name": "Persistent Systems",
+      "scraper": "iCIMSScraper",
+      "url": "https://persistent.icims.com/jobs/search",
+      "enabled": true,
+      "priority": 2,
+      "note": "Indian software company"
+    },
+    {
+      "name": "Hexaware",
+      "scraper": "iCIMSScraper",
+      "url": "https://hexaware.icims.com/jobs/search",
+      "enabled": true,
+      "priority": 2,
+      "note": "Indian IT services"
+    },
+    {
+      "name": "Mindtree",
+      "scraper": "iCIMSScraper",
+      "url": "https://mindtree.icims.com/jobs/search",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Cyient",
+      "scraper": "iCIMSScraper",
+      "url": "https://cyient.icims.com/jobs/search",
+      "enabled": true,
+      "priority": 2,
+      "note": "Indian engineering services"
+    },
+    {
+      "name": "NIIT Technologies",
+      "scraper": "iCIMSScraper",
+      "url": "https://niit.icims.com/jobs/search",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Birlasoft",
+      "scraper": "iCIMSScraper",
+      "url": "https://birlasoft.icims.com/jobs/search",
+      "enabled": true,
+      "priority": 2,
+      "note": "Indian IT company"
+    },
+    {
+      "name": "Ola",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/olacabs",
+      "enabled": true,
+      "priority": 1,
+      "note": "Indian ride-hailing unicorn"
+    },
+    {
+      "name": "Zomato",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/zomato",
+      "enabled": true,
+      "priority": 1,
+      "note": "Indian food delivery unicorn"
+    },
+    {
+      "name": "Upstox",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/upstox",
+      "enabled": true,
+      "priority": 1,
+      "note": "Indian fintech"
+    },
+    {
+      "name": "Delhivery",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/delhivery",
+      "enabled": true,
+      "priority": 1,
+      "note": "Indian logistics unicorn"
+    },
+    {
+      "name": "Dream11",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/dream11",
+      "enabled": true,
+      "priority": 1,
+      "note": "Indian gaming unicorn"
+    },
+    {
+      "name": "Cars24",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/cars24",
+      "enabled": true,
+      "priority": 1,
+      "note": "Indian used car unicorn"
+    },
+    {
+      "name": "Unacademy",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/unacademy",
+      "enabled": true,
+      "priority": 1,
+      "note": "Indian edtech unicorn"
+    },
+    {
+      "name": "Urban Company",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/urbancompany",
+      "enabled": true,
+      "priority": 1,
+      "note": "Indian home services unicorn"
+    },
+    {
+      "name": "Nykaa",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/nykaa",
+      "enabled": true,
+      "priority": 1,
+      "note": "Indian beauty e-commerce"
+    },
+    {
+      "name": "PolicyBazaar",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/policybazaar",
+      "enabled": true,
+      "priority": 1,
+      "note": "Indian insurtech unicorn"
+    },
+    {
+      "name": "Freshworks",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/freshworks",
+      "enabled": true,
+      "priority": 1,
+      "note": "Indian SaaS unicorn - Chennai based"
+    },
+    {
+      "name": "Cure.fit",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/curefit",
+      "enabled": true,
+      "priority": 1,
+      "note": "Indian health-tech"
+    },
+    {
+      "name": "Jupiter Money",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/jupiter",
+      "enabled": true,
+      "priority": 1,
+      "note": "Indian neobank"
+    },
+    {
+      "name": "CoinSwitch",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/coinswitch",
+      "enabled": true,
+      "priority": 1,
+      "note": "Indian crypto unicorn"
+    },
+    {
+      "name": "Whatfix",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/whatfix",
+      "enabled": true,
+      "priority": 2,
+      "note": "Indian SaaS company"
+    },
+    {
+      "name": "Druva",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/druva",
+      "enabled": true,
+      "priority": 2,
+      "note": "Indian cloud data protection"
+    },
+    {
+      "name": "CleverTap",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/clevertap",
+      "enabled": true,
+      "priority": 2,
+      "note": "Indian martech"
+    },
+    {
+      "name": "MoEngage",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/moengage",
+      "enabled": true,
+      "priority": 2,
+      "note": "Indian customer engagement platform"
+    },
+    {
+      "name": "Ramp",
+      "scraper": "AshbyScraper",
+      "url": "https://jobs.ashbyhq.com/ramp",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Linear",
+      "scraper": "AshbyScraper",
+      "url": "https://jobs.ashbyhq.com/linear",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "OpenAI",
+      "scraper": "AshbyScraper",
+      "url": "https://jobs.ashbyhq.com/openai",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Anthropic",
+      "scraper": "AshbyScraper",
+      "url": "https://jobs.ashbyhq.com/anthropic",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Vercel",
+      "scraper": "AshbyScraper",
+      "url": "https://jobs.ashbyhq.com/vercel",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Retool",
+      "scraper": "AshbyScraper",
+      "url": "https://jobs.ashbyhq.com/retool",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Mercury",
+      "scraper": "AshbyScraper",
+      "url": "https://jobs.ashbyhq.com/mercury",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Plaid",
+      "scraper": "AshbyScraper",
+      "url": "https://jobs.ashbyhq.com/plaid",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Anduril",
+      "scraper": "AshbyScraper",
+      "url": "https://jobs.ashbyhq.com/anduril",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Scale AI",
+      "scraper": "AshbyScraper",
+      "url": "https://jobs.ashbyhq.com/scale",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Cohere",
+      "scraper": "AshbyScraper",
+      "url": "https://jobs.ashbyhq.com/cohere",
+      "enabled": true,
+      "priority": 2,
+      "note": "AI company"
+    },
+    {
+      "name": "Apna",
+      "scraper": "AshbyScraper",
+      "url": "https://jobs.ashbyhq.com/apna",
+      "enabled": true,
+      "priority": 1,
+      "note": "Indian jobs platform unicorn"
+    },
+    {
+      "name": "Paytm",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/paytm",
+      "enabled": true,
+      "priority": 1,
+      "note": "Indian fintech giant"
+    },
+    {
+      "name": "Swiggy",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/swiggy",
+      "enabled": true,
+      "priority": 1,
+      "note": "Indian food delivery unicorn - moved to Greenhouse"
+    },
+    {
+      "name": "OYO",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/oyorooms",
+      "enabled": true,
+      "priority": 1,
+      "note": "Indian hospitality unicorn"
+    },
+    {
+      "name": "Byju's",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/byjus",
+      "enabled": true,
+      "priority": 1,
+      "note": "Indian edtech giant"
+    },
+    {
+      "name": "Vedantu",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/vedantu",
+      "enabled": true,
+      "priority": 1,
+      "note": "Indian edtech"
+    },
+    {
+      "name": "Dailyhunt",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/dailyhunt",
+      "enabled": true,
+      "priority": 2,
+      "note": "Indian news aggregator"
+    },
+    {
+      "name": "BigBasket",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/bigbasket",
+      "enabled": true,
+      "priority": 1,
+      "note": "Indian grocery delivery"
+    },
+    {
+      "name": "Udaan",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/udaan",
+      "enabled": true,
+      "priority": 1,
+      "note": "Indian B2B e-commerce unicorn"
+    },
+    {
+      "name": "Pine Labs",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/pinelabs",
+      "enabled": true,
+      "priority": 1,
+      "note": "Indian fintech - payments"
+    },
+    {
+      "name": "PharmEasy",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/pharmeasy",
+      "enabled": true,
+      "priority": 1,
+      "note": "Indian healthtech unicorn"
+    },
+    {
+      "name": "Quikr",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/quikr",
+      "enabled": true,
+      "priority": 2,
+      "note": "Indian classifieds"
+    },
+    {
+      "name": "Dunzo",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/dunzo",
+      "enabled": true,
+      "priority": 2,
+      "note": "Indian hyperlocal delivery"
+    },
+    {
+      "name": "Rapido",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/rapido",
+      "enabled": true,
+      "priority": 1,
+      "note": "Indian bike taxi"
+    },
+    {
+      "name": "Park+",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/parkplus",
+      "enabled": true,
+      "priority": 2,
+      "note": "Indian parking tech"
+    },
+    {
+      "name": "Spinny",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/spinny",
+      "enabled": true,
+      "priority": 2,
+      "note": "Indian used car platform"
+    },
+    {
+      "name": "LEAD School",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/leadschool",
+      "enabled": true,
+      "priority": 2,
+      "note": "Indian edtech"
+    },
+    {
+      "name": "Stanza Living",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/stanzaliving",
+      "enabled": true,
+      "priority": 2,
+      "note": "Indian co-living"
+    },
+    {
+      "name": "Zetwerk",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/zetwerk",
+      "enabled": true,
+      "priority": 1,
+      "note": "Indian manufacturing unicorn"
+    },
+    {
+      "name": "OfBusiness",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/ofbusiness",
+      "enabled": true,
+      "priority": 1,
+      "note": "Indian B2B commerce unicorn"
+    },
+    {
+      "name": "Elastic Run",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/elasticrun",
+      "enabled": true,
+      "priority": 2,
+      "note": "Indian logistics"
+    },
+    {
+      "name": "Mahindra & Mahindra",
+      "scraper": "WorkdayScraper",
+      "url": "https://mahindra.wd1.myworkdayjobs.com/wday/cxs/mahindra/Careers/jobs",
+      "enabled": true,
+      "priority": 1,
+      "note": "Major Indian conglomerate"
+    },
+    {
+      "name": "Reliance Industries",
+      "scraper": "WorkdayScraper",
+      "url": "https://ril.wd1.myworkdayjobs.com/wday/cxs/ril/RILCareers/jobs",
+      "enabled": true,
+      "priority": 1,
+      "note": "India's largest company - Jio, Retail"
+    },
+    {
+      "name": "Tata Motors",
+      "scraper": "WorkdayScraper",
+      "url": "https://tatamotors.wd1.myworkdayjobs.com/wday/cxs/tatamotors/External/jobs",
+      "enabled": true,
+      "priority": 1,
+      "note": "Major Indian auto company"
+    },
+    {
+      "name": "Tata Steel",
+      "scraper": "WorkdayScraper",
+      "url": "https://tatasteel.wd1.myworkdayjobs.com/wday/cxs/tatasteel/External/jobs",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Larsen & Toubro",
+      "scraper": "WorkdayScraper",
+      "url": "https://lnt.wd1.myworkdayjobs.com/wday/cxs/lnt/Careers/jobs",
+      "enabled": true,
+      "priority": 1,
+      "note": "Major Indian engineering conglomerate"
+    },
+    {
+      "name": "HDFC Bank",
+      "scraper": "WorkdayScraper",
+      "url": "https://hdfcbank.wd1.myworkdayjobs.com/wday/cxs/hdfcbank/HDFCBank/jobs",
+      "enabled": true,
+      "priority": 1,
+      "note": "India's largest private bank"
+    },
+    {
+      "name": "ICICI Bank",
+      "scraper": "WorkdayScraper",
+      "url": "https://icicibank.wd1.myworkdayjobs.com/wday/cxs/icicibank/Careers/jobs",
+      "enabled": true,
+      "priority": 1,
+      "note": "Major Indian private bank"
+    },
+    {
+      "name": "Kotak Mahindra Bank",
+      "scraper": "WorkdayScraper",
+      "url": "https://kotak.wd1.myworkdayjobs.com/wday/cxs/kotak/Careers/jobs",
+      "enabled": true,
+      "priority": 1,
+      "note": "Indian private bank"
+    },
+    {
+      "name": "Axis Bank",
+      "scraper": "WorkdayScraper",
+      "url": "https://axisbank.wd1.myworkdayjobs.com/wday/cxs/axisbank/Careers/jobs",
+      "enabled": true,
+      "priority": 1,
+      "note": "Major Indian private bank"
+    },
+    {
+      "name": "Bajaj Finserv",
+      "scraper": "WorkdayScraper",
+      "url": "https://bajaj.wd1.myworkdayjobs.com/wday/cxs/bajaj/BajajFinserv/jobs",
+      "enabled": true,
+      "priority": 1,
+      "note": "Indian financial services"
+    },
+    {
+      "name": "Sun Pharma",
+      "scraper": "WorkdayScraper",
+      "url": "https://sunpharma.wd1.myworkdayjobs.com/wday/cxs/sunpharma/External/jobs",
+      "enabled": true,
+      "priority": 2,
+      "note": "India's largest pharma company"
+    },
+    {
+      "name": "Dr. Reddy's",
+      "scraper": "WorkdayScraper",
+      "url": "https://drreddys.wd1.myworkdayjobs.com/wday/cxs/drreddys/External/jobs",
+      "enabled": true,
+      "priority": 2,
+      "note": "Major Indian pharma"
+    },
+    {
+      "name": "Cipla",
+      "scraper": "WorkdayScraper",
+      "url": "https://cipla.wd1.myworkdayjobs.com/wday/cxs/cipla/careers/jobs",
+      "enabled": true,
+      "priority": 2,
+      "note": "Major Indian pharma"
+    },
+    {
+      "name": "Asian Paints",
+      "scraper": "WorkdayScraper",
+      "url": "https://asianpaints.wd1.myworkdayjobs.com/wday/cxs/asianpaints/Careers/jobs",
+      "enabled": true,
+      "priority": 2,
+      "note": "India's largest paint company"
+    },
+    {
+      "name": "Hindustan Unilever",
+      "scraper": "WorkdayScraper",
+      "url": "https://hul.wd1.myworkdayjobs.com/wday/cxs/hul/Careers/jobs",
+      "enabled": true,
+      "priority": 1,
+      "note": "Major FMCG - India operations"
+    },
+    {
+      "name": "ITC Limited",
+      "scraper": "WorkdayScraper",
+      "url": "https://itc.wd1.myworkdayjobs.com/wday/cxs/itc/Careers/jobs",
+      "enabled": true,
+      "priority": 1,
+      "note": "Indian conglomerate - FMCG, Hotels"
+    },
+    {
+      "name": "Titan Company",
+      "scraper": "WorkdayScraper",
+      "url": "https://titan.wd1.myworkdayjobs.com/wday/cxs/titan/Careers/jobs",
+      "enabled": true,
+      "priority": 2,
+      "note": "Tata Group - Watches, Jewelry"
+    },
+    {
+      "name": "Godrej",
+      "scraper": "WorkdayScraper",
+      "url": "https://godrej.wd1.myworkdayjobs.com/wday/cxs/godrej/Careers/jobs",
+      "enabled": true,
+      "priority": 2,
+      "note": "Indian conglomerate"
+    },
+    {
+      "name": "Aditya Birla Group",
+      "scraper": "WorkdayScraper",
+      "url": "https://adityabirla.wd1.myworkdayjobs.com/wday/cxs/adityabirla/careers/jobs",
+      "enabled": true,
+      "priority": 1,
+      "note": "Major Indian conglomerate"
+    },
+    {
+      "name": "JSW Steel",
+      "scraper": "WorkdayScraper",
+      "url": "https://jsw.wd1.myworkdayjobs.com/wday/cxs/jsw/Careers/jobs",
+      "enabled": true,
+      "priority": 2,
+      "note": "Major Indian steel company"
+    },
+    {
+      "name": "Adani Group",
+      "scraper": "WorkdayScraper",
+      "url": "https://adani.wd1.myworkdayjobs.com/wday/cxs/adani/Careers/jobs",
+      "enabled": true,
+      "priority": 1,
+      "note": "Major Indian conglomerate - Ports, Energy"
+    },
+    {
+      "name": "Hero MotoCorp",
+      "scraper": "WorkdayScraper",
+      "url": "https://hero.wd1.myworkdayjobs.com/wday/cxs/hero/Careers/jobs",
+      "enabled": true,
+      "priority": 2,
+      "note": "World's largest two-wheeler manufacturer"
+    },
+    {
+      "name": "Maruti Suzuki",
+      "scraper": "WorkdayScraper",
+      "url": "https://maruti.wd1.myworkdayjobs.com/wday/cxs/maruti/Careers/jobs",
+      "enabled": true,
+      "priority": 1,
+      "note": "India's largest car manufacturer"
+    },
+    {
+      "name": "Nestle India",
+      "scraper": "WorkdayScraper",
+      "url": "https://nestle.wd3.myworkdayjobs.com/wday/cxs/nestle/NestleIndiaCareers/jobs",
+      "enabled": true,
+      "priority": 2,
+      "note": "FMCG - India operations"
+    },
+    {
+      "name": "Unilever",
+      "scraper": "WorkdayScraper",
+      "url": "https://unilever.wd3.myworkdayjobs.com/wday/cxs/unilever/Unilever_Experienced_Professionals/jobs",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Johnson & Johnson",
+      "scraper": "WorkdayScraper",
+      "url": "https://jnj.wd5.myworkdayjobs.com/wday/cxs/jnj/JNJExternal/jobs",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Procter & Gamble",
+      "scraper": "WorkdayScraper",
+      "url": "https://pg.wd5.myworkdayjobs.com/wday/cxs/pg/PGCareersDirect/jobs",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "General Electric",
+      "scraper": "WorkdayScraper",
+      "url": "https://ge.wd5.myworkdayjobs.com/wday/cxs/ge/GE_ExternalSite/jobs",
+      "enabled": true,
+      "priority": 2,
+      "note": "GE India - major presence"
+    },
+    {
+      "name": "MediaTek",
+      "scraper": "WorkdayScraper",
+      "url": "https://mediatek.wd1.myworkdayjobs.com/wday/cxs/mediatek/Careers/jobs",
+      "enabled": true,
+      "priority": 2,
+      "note": "Semiconductor - India R&D"
+    },
+    {
+      "name": "AMD",
+      "scraper": "WorkdayScraper",
+      "url": "https://amd.wd1.myworkdayjobs.com/wday/cxs/amd/AMD/jobs",
+      "enabled": true,
+      "priority": 2,
+      "note": "AMD India - chip design"
+    },
+    {
+      "name": "Micron",
+      "scraper": "WorkdayScraper",
+      "url": "https://micron.wd1.myworkdayjobs.com/wday/cxs/micron/External/jobs",
+      "enabled": true,
+      "priority": 2,
+      "note": "Micron India - memory chips"
+    },
+    {
+      "name": "Texas Instruments",
+      "scraper": "WorkdayScraper",
+      "url": "https://ti.wd1.myworkdayjobs.com/wday/cxs/ti/Careers/jobs",
+      "enabled": true,
+      "priority": 2,
+      "note": "TI India - major R&D center"
+    },
+    {
+      "name": "Cisco",
+      "scraper": "WorkdayScraper",
+      "url": "https://cisco.wd1.myworkdayjobs.com/wday/cxs/cisco/ExternalCisco/jobs",
+      "enabled": true,
+      "priority": 1,
+      "note": "Cisco India - major presence"
+    },
+    {
+      "name": "VMware",
+      "scraper": "WorkdayScraper",
+      "url": "https://vmware.wd1.myworkdayjobs.com/wday/cxs/vmware/VMwareCareers/jobs",
+      "enabled": true,
+      "priority": 2,
+      "note": "VMware India - major R&D"
+    },
+    {
+      "name": "ServiceNow",
+      "scraper": "WorkdayScraper",
+      "url": "https://servicenow.wd1.myworkdayjobs.com/wday/cxs/servicenow/Careers/jobs",
+      "enabled": true,
+      "priority": 2,
+      "note": "ServiceNow India"
+    },
+    {
+      "name": "Splunk",
+      "scraper": "WorkdayScraper",
+      "url": "https://splunk.wd1.myworkdayjobs.com/wday/cxs/splunk/Careers/jobs",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Palo Alto Networks",
+      "scraper": "WorkdayScraper",
+      "url": "https://paloaltonetworks.wd1.myworkdayjobs.com/wday/cxs/paloaltonetworks/Careers/jobs",
+      "enabled": true,
+      "priority": 2,
+      "note": "Cybersecurity - India presence"
+    },
+    {
+      "name": "CrowdStrike",
+      "scraper": "WorkdayScraper",
+      "url": "https://crowdstrike.wd5.myworkdayjobs.com/wday/cxs/crowdstrike/crowdstrikecareers/jobs",
+      "enabled": true,
+      "priority": 2,
+      "note": "Cybersecurity - India R&D"
+    },
+    {
+      "name": "Zscaler",
+      "scraper": "WorkdayScraper",
+      "url": "https://zscaler.wd1.myworkdayjobs.com/wday/cxs/zscaler/Careers/jobs",
+      "enabled": true,
+      "priority": 2,
+      "note": "Cloud security - India presence"
+    },
+    {
+      "name": "Nutanix India",
+      "scraper": "WorkdayScraper",
+      "url": "https://nutanix.wd1.myworkdayjobs.com/wday/cxs/nutanix/Careers/jobs",
+      "enabled": true,
+      "priority": 2,
+      "note": "Cloud infrastructure - Bangalore R&D"
+    },
+    {
+      "name": "NetApp",
+      "scraper": "WorkdayScraper",
+      "url": "https://netapp.wd1.myworkdayjobs.com/wday/cxs/netapp/Careers/jobs",
+      "enabled": true,
+      "priority": 2,
+      "note": "Data management - India presence"
+    },
+    {
+      "name": "Juniper Networks",
+      "scraper": "WorkdayScraper",
+      "url": "https://juniper.wd1.myworkdayjobs.com/wday/cxs/juniper/Careers/jobs",
+      "enabled": true,
+      "priority": 2,
+      "note": "Networking - India R&D"
+    },
+    {
+      "name": "Arista Networks",
+      "scraper": "WorkdayScraper",
+      "url": "https://arista.wd3.myworkdayjobs.com/wday/cxs/arista/Careers/jobs",
+      "enabled": true,
+      "priority": 2,
+      "note": "Cloud networking - Bangalore presence"
+    },
+    {
+      "name": "Zoho",
+      "scraper": "WorkdayScraper",
+      "url": "https://zoho.wd1.myworkdayjobs.com/wday/cxs/zoho/Careers/jobs",
+      "enabled": true,
+      "priority": 1,
+      "note": "Indian SaaS giant - Chennai based"
+    },
+    {
+      "name": "Microchip Technology",
+      "scraper": "WorkdayScraper",
+      "url": "https://microchip.wd1.myworkdayjobs.com/wday/cxs/microchip/Careers/jobs",
+      "enabled": true,
+      "priority": 2,
+      "note": "Semiconductor - India presence"
     }
   ]
 }

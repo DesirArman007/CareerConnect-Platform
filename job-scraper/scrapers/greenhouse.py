@@ -93,7 +93,7 @@ class GreenhouseScraper(BaseJobScraper):
         location_name = location_obj.get('name', '') if isinstance(location_obj, dict) else str(location_obj)
         
         # Filter for India 
-        if not self._is_india_location(location_name):
+        if not self._is_eligible_location(location_name):
             return None
             
         # Extract Department safely
@@ -126,7 +126,7 @@ class GreenhouseScraper(BaseJobScraper):
             'source': 'Greenhouse'
         }
     
-    def _is_india_location(self, location: str) -> bool:
+    def _is_eligible_location(self, location: str) -> bool:
         """Check if location is in India."""
         if not location:
             return False
@@ -181,7 +181,7 @@ class GreenhouseScraper(BaseJobScraper):
                     location_elem = section.find('span', class_='location')
                     location = location_elem.get_text(strip=True) if location_elem else ''
                     
-                    if not self._is_india_location(location):
+                    if not self._is_eligible_location(location):
                         continue
                         
                     jobs.append({

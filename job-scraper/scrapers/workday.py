@@ -29,7 +29,7 @@ class WorkdayScraper(BaseJobScraper):
         jobs = []
         offset = 0
         limit = 20
-        max_jobs = 500 # Safety limit
+        max_jobs = 1500 # Safety limit - increased to capture more India jobs
         
         logger.info(f"Starting scrape for {self.company_name}...")
         
@@ -110,8 +110,8 @@ class WorkdayScraper(BaseJobScraper):
         if not location:
             location = "Unspecified"
             
-        # FILTER: Only keep India jobs
-        if not self._is_india_location(location):
+        # FILTER: Only keep India jobs and global remote jobs
+        if not self._is_eligible_location(location):
             return None
             
         # 3. Apply URL
@@ -135,7 +135,12 @@ class WorkdayScraper(BaseJobScraper):
         # Workday list API DOES NOT return full description. 
         # We use a placeholder to avoid making N+1 requests (which is very slow).
         description = posting.get('bulletFields', [])
-        desc_text = "\n".join([str(x) for x in description]) if description else "Description available on apply page"
+        
+        # VALIDATION: Reject jobs with no description
+        if not description:
+            return None
+            
+        desc_text = "\n".join([str(x) for x in description])
 
         return {
             'title': title,
@@ -148,18 +153,68 @@ class WorkdayScraper(BaseJobScraper):
             'source': 'Workday'
         }
     
-    def _is_india_location(self, location: str) -> bool:
-        """Check if location is in India."""
-        if not location: return False
+    def _is_eligible_location(self, location: str) -> bool:
+        """
+        Check if location is eligible for Indian applicants.
+        Includes: India locations + global remote jobs.
+        Excludes: Country-specific remote (US-only, UK-only, etc.)
+        """
+        if not location: 
+            return False
         
+        loc_lower = location.lower()
+        
+        # Check for remote jobs
+        if self._is_remote_job(loc_lower):
+            return self._is_remote_accessible_to_india(loc_lower)
+        
+        # Check for India-based locations
         india_keywords = [
             'india', 'bangalore', 'bengaluru', 'hyderabad', 'mumbai', 
             'delhi', 'noida', 'gurgaon', 'gurugram', 'pune', 'chennai',
-            'kolkata', 'ahmedabad', 'remote'
+            'kolkata', 'ahmedabad', 'jaipur', 'lucknow', 'kochi', 
+            'thiruvananthapuram', 'chandigarh', 'indore', 'bhopal'
         ]
         
-        loc_lower = location.lower()
         return any(keyword in loc_lower for keyword in india_keywords)
+    
+    def _is_remote_job(self, location: str) -> bool:
+        """Check if location indicates a remote position."""
+        remote_indicators = ['remote', 'work from home', 'wfh', 'anywhere', 'distributed']
+        return any(indicator in location for indicator in remote_indicators)
+    
+    def _is_remote_accessible_to_india(self, location: str) -> bool:
+        """
+        Check if a remote job is accessible to Indian applicants.
+        """
+        # Exclusion patterns - country-restricted remote jobs
+        excluded_patterns = [
+            'remote - us', 'remote (us)', 'remote us', 'us only', 'usa only',
+            'remote - uk', 'remote (uk)', 'uk only',
+            'remote - canada', 'canada only',
+            'remote - australia', 'australia only',
+            'remote - europe', 'europe only', 'eu only',
+            'remote - americas', 'americas only', 'north america only',
+            'us-based', 'uk-based', 'eu-based',
+            'united states', 'california', 'new york', 'texas',
+            'san francisco', 'seattle', 'london', 'berlin', 'paris', 'toronto'
+        ]
+        
+        if any(pattern in location for pattern in excluded_patterns):
+            return False
+        
+        # Inclusion patterns - definitely accessible to Indians
+        included_patterns = ['india', 'apac', 'asia', 'worldwide', 'global', 'anywhere']
+        if any(pattern in location for pattern in included_patterns):
+            return True
+        
+        # Generic remote without restriction - include
+        if location.strip() in ['remote', 'fully remote', '100% remote']:
+            return True
+        if location.startswith('remote') and len(location) < 20:
+            return True
+            
+        return False
     
     def _extract_employment_type(self, posting: Dict) -> str:
         """Extract employment type from posting."""

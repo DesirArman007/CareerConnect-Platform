@@ -46,8 +46,13 @@ class ScraperEngine:
             
         try:
             # 2. Dynamic Import Logic
-            # ✅ FIX: Added 'LinkedInScraper' to this list so it looks in the 'custom' folder
-            if scraper_name in ['GoogleScraper', 'AmazonScraper', 'HCLScraper', 'LinkedInScraper']:
+            # Custom scrapers are in scrapers/custom/ folder
+            custom_scrapers = [
+                'GoogleScraper', 'AmazonScraper', 'HCLScraper', 'LinkedInScraper',
+                'UberScraper', 'SpotifyScraper', 'AppleScraper',
+                'WellfoundScraper', 'IndianStartupsScraper'
+            ]
+            if scraper_name in custom_scrapers:
                 module_path = f"scrapers.custom.{scraper_name.replace('Scraper', '').lower()}"
             else:
                 # Standard Scrapers (Greenhouse, Lever, SuccessFactors)

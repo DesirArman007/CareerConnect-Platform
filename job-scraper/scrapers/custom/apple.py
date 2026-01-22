@@ -116,7 +116,7 @@ class AppleScraper(BaseJobScraper):
                 location = job_data.get('positionLocation', '')
             
             # Filter for India jobs only
-            if not self._is_india_location(location):
+            if not self._is_eligible_location(location):
                 return None
             
             # Extract job ID
@@ -173,7 +173,7 @@ class AppleScraper(BaseJobScraper):
             logger.debug(f"Error in _parse_job: {e}")
             return None
     
-    def _is_india_location(self, location: str) -> bool:
+    def _is_eligible_location(self, location: str) -> bool:
         """Check if location is in India."""
         if not location:
             return False
