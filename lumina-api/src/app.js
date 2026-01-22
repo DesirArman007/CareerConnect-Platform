@@ -3,8 +3,9 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 
 import userRouter from "./routes/user.routes.js";
-import uploadRouter from "./routes/upload.routes.js"
-import jobRouter from "./routes/job.routes.js"
+import uploadRouter from "./routes/upload.routes.js";
+import jobRouter from "./routes/job.routes.js";
+import feedbackRouter from "./routes/feedback.routes.js";
 
 const app = express();
 
@@ -41,6 +42,7 @@ app.get("/",(req,res)=>{
 app.use("/api/users", userRouter);
 app.use("/api/uploads", uploadRouter);
 app.use("/api/job",jobRouter);
+app.use("/api/feedback",feedbackRouter)
 // Health
 app.get("/health", (_req, res) => res.json({ ok: true }));
 
