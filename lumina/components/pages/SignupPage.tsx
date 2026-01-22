@@ -151,17 +151,17 @@ export const SignupPage: React.FC = () => {
     };
 
     return (
-        <main className="min-h-screen py-20 sm:py-0 sm:flex sm:items-center sm:justify-center px-4 relative overflow-y-auto">
+        <main className="min-h-screen pt-20 pb-8 px-4 flex items-start md:items-center justify-center overflow-y-auto">
             {/* Back Button - hidden on mobile */}
             <button
                 onClick={() => navigate('/')}
-                className="hidden sm:flex absolute top-24 left-6 md:left-12 items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm"
+                className="hidden md:flex fixed top-24 left-6 lg:left-12 items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm z-10"
             >
                 <ArrowLeft className="w-4 h-4" />
                 <span>Back to Home</span>
             </button>
 
-            <Card className="max-w-md w-full p-4 sm:p-8 mx-auto my-4 sm:my-0 bg-surface/80 border-white/10 backdrop-blur-sm">
+            <Card className="max-w-md w-full p-4 sm:p-6 md:p-8 mx-auto bg-surface/80 border-white/10 backdrop-blur-sm">
                 <div className="text-center mb-4 sm:mb-8">
                     <h1 className="text-xl sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-br from-white to-white/60 mb-1 sm:mb-2">Create an Account</h1>
                     <p className="text-gray-400 text-xs sm:text-sm">Join the future of job hunting</p>

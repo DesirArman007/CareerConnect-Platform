@@ -177,6 +177,7 @@ export const jobs = {
         limit: number,
         department?: string,
         location?: string,
+        employmentType?: string,
         signal?: AbortSignal
     ) => {
         const res = await api.get('/job', {
@@ -185,6 +186,7 @@ export const jobs = {
                 limit,
                 ...(department && { department }),
                 ...(location && { location }),
+                ...(employmentType && { employment_type: employmentType }),
             },
             signal,
         });
@@ -231,6 +233,7 @@ export const jobs = {
         limit: number,
         department?: string,
         location?: string,
+        employmentType?: string,
         signal?: AbortSignal
     ) => {
         const res = await api.get('/job/search/query', {
@@ -240,6 +243,7 @@ export const jobs = {
                 limit,
                 ...(department && { department }),
                 ...(location && { location }),
+                ...(employmentType && { employment_type: employmentType }),
             },
             signal,
         });
