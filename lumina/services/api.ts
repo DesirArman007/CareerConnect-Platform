@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Job, User, AuthResponse } from '../types';
+import { Job, User, AuthResponse, Feedback } from '../types';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
@@ -270,6 +270,32 @@ export const jobs = {
         if (!response.data) throw new Error('Failed to fetch companies');
         // Response: { statusCode: 200, data: { companies: [{ name, jobs }] } }
         return response.data;
+    },
+};
+
+
+
+
+export const feedback = {
+
+    create: async (data: Omit<Feedback, '_id'>): Promise<ApiResponse<Feedback>> => {
+        const res = await api.post('/feedback/create', data);
+        return res.data;
+    },
+
+    getAll: async (): Promise<ApiResponse<Feedback[]>> => {
+        const res = await api.get('/feedback/');
+        return res.data;
+    },
+
+    getById: async (id: string): Promise<ApiResponse<Feedback>> => {
+        const res = await api.get(`/feedback/${id}`);
+        return res.data;
+    },
+
+    delete: async (id: string): Promise<ApiResponse<null>> => {
+        const res = await api.delete(`/feedback/${id}`);
+        return res.data;
     },
 };
 

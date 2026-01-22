@@ -42,3 +42,14 @@ export interface ChatMessage {
   text: string;
   isThinking?: boolean;
 }
+
+export interface Feedback {
+  _id: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  searchExperience?: 'slower_harder' | 'same' | 'faster_smoother';
+  clarityFeeling?: 'no_difference' | 'bit_better' | 'much_clearer';
+  message?: string;
+  createdAt?: string;
+}
