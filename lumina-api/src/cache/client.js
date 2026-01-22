@@ -1,7 +1,8 @@
 import {Redis} from "ioredis";
 
-const client = new Redis(process.env.REDIS_URL);
+const redisUrl = process.env.REDIS_URL;
 
+const client = new Redis(redisUrl);
 
 client.on("connect",() => console.info("Cache is connecting"));
 client.on("ready",() => console.info("Cache is ready"));

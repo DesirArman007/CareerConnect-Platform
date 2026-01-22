@@ -1,7 +1,7 @@
-import { asyncHandler } from "../utils/asyncHandler";
-import ApiError from "../utils/ApiError";
-import ApiResponse from "../utils/ApiResponse";
-import { Feedback } from "../models/feedbackModel";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import ApiError from "../utils/ApiError.js";
+import ApiResponse from "../utils/ApiResponse.js";
+import { Feedback } from "../models/feedbackModel.js";
 
 const createFeedback = asyncHandler(async(req, res) =>{
 

@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { createFeedback,deleteFeedback,getAllFeedback,getFeedbackById } from "../controllers/feedbackController";
-import { verifyJWT } from "../middleware/auth.middleware";
-import { authorizeRoles } from "../middleware/role.middleware";
+import { createFeedback,deleteFeedback,getAllFeedback,getFeedbackById } from "../controllers/feedbackController.js";
+import { verifyJWT } from "../middleware/auth.middleware.js";
+import { authorizeRoles } from "../middleware/role.middleware.js";
 
 const router = Router();
 

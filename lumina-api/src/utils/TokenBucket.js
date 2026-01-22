@@ -1,7 +1,11 @@
-const Redis = require("ioredis");
-const redis = new Redis();
+import {Redis} from "ioredis";
 
-class TokenBucket{
+
+const redisUrl = process.env.REDIS_URL;
+console.log(redisUrl);
+const redis = new Redis(redisUrl);
+
+export class TokenBucket{
 
     constructor(capacity, refillRate){
         this.capacity = capacity,
@@ -34,8 +38,9 @@ class TokenBucket{
             
             if tokenCount > 0 then
             tokenCount = tokenCount - 1
-            redis.call('SET', keyLastRefill, currentTime)
-            redis.call('SET', keyCount, tokenCount)
+            local newLastRefill = lastRefillTime + (tokensToAdd * 1000 / refillRate)
+            redis.call('SET', keyCount, tokenCount, 'EX', 60)
+            redis.call('SET', keyLastRefill, newLastRefill, 'EX', 60)
             return 1
             end
             return 0

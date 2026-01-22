@@ -3,17 +3,18 @@ import { registerUser,loginUser,refreshTokenHandler,logoutUser, resetPassword, f
 import { verifyJWT } from "../middleware/auth.middleware.js";
 import { authorizeRoles } from "../middleware/role.middleware.js";
 import { getUser,updateUser,deleteUser,updatePassword, searchUsers, getAllUsers } from "../controllers/userController.js";
+import {loginRateLimiter, registerRateLimiter, generalRateLimiter} from "../middleware/rateLimiter.middleware.js";
 
 
 const router = Router()
 
-router.route('/register').post(registerUser)
-router.route('/login').post(loginUser);
+router.route('/register').post( registerRateLimiter,registerUser)
+router.route('/login').post(loginRateLimiter ,loginUser);
 router.route("/refreshToken").post(refreshTokenHandler);
 router.route('/logout').post(verifyJWT, logoutUser);
 router.route('/changePassword').post(verifyJWT, changePassword);
-router.route('/forgotPassword').post(forgotPassword);
-router.route('/resetPassword').post(resetPassword);
+router.route('/forgotPassword').post(generalRateLimiter, forgotPassword);
+router.route('/resetPassword').post(generalRateLimiter, resetPassword);
 
 router.route('/getUser').get(verifyJWT, getUser);
 router.route('/updateUser').put(verifyJWT, updateUser);
