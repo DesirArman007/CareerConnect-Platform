@@ -64,7 +64,7 @@ export const Stats: React.FC = () => {
             Active Opportunities Available
           </p>
 
-          <h2 className="text-6xl md:text-9xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-800 font-mono">
+          <h2 className="text-6xl md:text-9xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-800 font-mono min-w-[180px] md:min-w-[350px] inline-block text-center">
             {count.toLocaleString()}
           </h2>
 

@@ -99,7 +99,7 @@ export const Feedback: React.FC = () => {
                                         type="text"
                                         value={name}
                                         onChange={(e) => setName(e.target.value)}
-                                        placeholder="Jane Doe"
+                                        placeholder="Desir Arman"
                                         className="w-full bg-black/20 border border-white/10 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/50 transition-all"
                                         required
                                         disabled={loading}
@@ -114,7 +114,7 @@ export const Feedback: React.FC = () => {
                                         type="email"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
-                                        placeholder="jane@example.com"
+                                        placeholder="desirArman@example.com"
                                         className="w-full bg-black/20 border border-white/10 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/50 transition-all"
                                         // Removed 'required'
                                         disabled={loading}

@@ -100,6 +100,8 @@ export const DashboardPage: React.FC = () => {
                             <img
                                 src={user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(safeString(user.name))}&background=random`}
                                 alt={safeString(user.name)}
+                                width={64}
+                                height={64}
                                 className="w-16 h-16 rounded-full border-2 border-accent"
                             />
                             <div>
@@ -207,7 +209,7 @@ export const DashboardPage: React.FC = () => {
                                                             return <div className="w-12 h-12 rounded-lg flex items-center justify-center">{customIcon}</div>;
                                                         }
                                                         if (job.logo) {
-                                                            return <img src={job.logo} alt={job.company} className="w-12 h-12 rounded-lg bg-white/5" />;
+                                                            return <img src={job.logo} alt={job.company} width={48} height={48} className="w-12 h-12 rounded-lg bg-white/5" />;
                                                         }
                                                         return (
                                                             <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-accent to-purple-600 flex items-center justify-center text-white font-bold text-lg">

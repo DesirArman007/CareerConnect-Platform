@@ -27,7 +27,7 @@ const CompanyLogo: React.FC<{ company: string; logo?: string }> = ({ company, lo
   }
 
   if (logo) {
-    return <img src={logo} alt={company} className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-white/5 object-cover flex-shrink-0" />;
+    return <img src={logo} alt={company} width={40} height={40} className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-white/5 object-cover flex-shrink-0" />;
   }
 
   // Fallback: gradient with first letter
@@ -61,7 +61,7 @@ export const JobList: React.FC<JobListProps> = ({
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-48 sm:h-64 rounded-xl bg-surface/50 animate-pulse border border-white/5" />
+              <div key={i} className="min-h-[220px] sm:min-h-[260px] rounded-xl bg-surface/50 animate-pulse border border-white/5" />
             ))}
           </div>
         ) : (

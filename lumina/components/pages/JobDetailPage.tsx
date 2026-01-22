@@ -368,7 +368,7 @@ export const JobDetailPage: React.FC = () => {
                                         return <div className="w-16 h-16 rounded-xl flex items-center justify-center">{customIcon}</div>;
                                     }
                                     if (job.logo) {
-                                        return <img src={job.logo} alt={job.company} className="w-16 h-16 rounded-xl object-cover bg-white" />;
+                                        return <img src={job.logo} alt={job.company} width={64} height={64} className="w-16 h-16 rounded-xl object-cover bg-white" />;
                                     }
                                     return (
                                         <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-accent to-purple-600 flex items-center justify-center text-white font-bold text-xl">

@@ -161,7 +161,7 @@ export const CompaniesPage: React.FC = () => {
                                                 return <div className="w-16 h-16 rounded-xl flex items-center justify-center border border-white/10">{customIcon}</div>;
                                             }
                                             if (company.logo) {
-                                                return <img src={company.logo} alt={company.name} className="w-16 h-16 rounded-xl bg-white/5 object-cover border border-white/10" />;
+                                                return <img src={company.logo} alt={company.name} width={64} height={64} className="w-16 h-16 rounded-xl bg-white/5 object-cover border border-white/10" />;
                                             }
                                             return (
                                                 <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${getCompanyGradient(company.name)} flex items-center justify-center text-white font-bold text-xl border border-white/10`}>

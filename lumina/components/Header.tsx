@@ -56,7 +56,7 @@ export const Header: React.FC = () => {
           </nav>
 
           {/* Desktop Auth / Hamburger */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 min-w-[100px] sm:min-w-[140px] justify-end">
             {user ? (
               <button
                 onClick={() => navigate('/dashboard')}
@@ -69,6 +69,8 @@ export const Header: React.FC = () => {
                 <img
                   src={user.avatar || `https://ui-avatars.com/api/?name=${user.name}&background=random`}
                   alt={user.name}
+                  width={36}
+                  height={36}
                   className="w-9 h-9 rounded-full border border-white/10"
                 />
               </button>
@@ -139,6 +141,8 @@ export const Header: React.FC = () => {
                 <img
                   src={user.avatar || `https://ui-avatars.com/api/?name=${user.name}&background=random`}
                   alt={user.name}
+                  width={32}
+                  height={32}
                   className="w-8 h-8 rounded-full border border-white/10"
                 />
                 <div>

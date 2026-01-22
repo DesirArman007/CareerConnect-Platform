@@ -53,7 +53,7 @@ export const Hero = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
         <div className="flex flex-col items-start text-left">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm text-[10px] sm:text-xs font-medium text-gray-300 mb-4 sm:mb-6 md:mb-8 animate-fade-in-up">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm text-[10px] sm:text-xs font-medium text-gray-300 mb-4 sm:mb-6 md:mb-8 animate-fade-in-up min-w-[200px] sm:min-w-[220px]">
             <span
               className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${stats.newJobsThisWeek > 0 ? "bg-green-500" : "bg-accent"
                 } animate-pulse`}
