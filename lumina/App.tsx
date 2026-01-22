@@ -1,6 +1,7 @@
 import React from 'react';
 import { Header } from './components/Header';
 import { AuthProvider } from './context/AuthContext';
+import { Analytics } from '@vercel/analytics/react';
 
 import { AIChat } from './components/AIChat';
 
@@ -48,6 +49,9 @@ function App() {
 
           {/* Floating AI Agent */}
           <AIChat />
+
+          {/* Vercel Web Analytics */}
+          <Analytics />
         </div>
       </BrowserRouter>
     </AuthProvider>
