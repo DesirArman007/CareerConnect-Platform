@@ -51,9 +51,9 @@ function App() {
           {/* Floating AI Agent */}
           <AIChat />
 
-          {/* Vercel Speed Insights & Analytics */}
-          <SpeedInsights />
-          <Analytics />
+          {/* Vercel Speed Insights & Analytics - debug disabled to hide console logs */}
+          <SpeedInsights debug={false} />
+          <Analytics debug={false} />
         </div>
       </BrowserRouter>
     </AuthProvider>

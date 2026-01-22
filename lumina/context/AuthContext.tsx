@@ -62,11 +62,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     };
 
-    // ✅ Check auth on app mount
+    // ✅ Check auth on app mount - only if user has logged in before
     useEffect(() => {
         const checkAuth = async () => {
             setIsLoading(true);
-            await fetchUserData();
+
+            // Only attempt to restore session if user has logged in before
+            const hasSession = localStorage.getItem('hasSession');
+            if (hasSession) {
+                const success = await fetchUserData();
+                // If session expired/invalid, clear the flag
+                if (!success) {
+                    localStorage.removeItem('hasSession');
+                }
+            }
+
             setIsLoading(false);
         };
         checkAuth();
@@ -78,6 +88,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // console.log('Login response:', response);
 
         if (response?.success === true) {
+            // Set session flag for future page loads
+            localStorage.setItem('hasSession', 'true');
+
             // Give browser time to store cookie
             await new Promise(resolve => setTimeout(resolve, 100));
 
@@ -120,6 +133,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } catch (error) {
             console.error('Logout error:', error);
         }
+        // Clear session flag
+        localStorage.removeItem('hasSession');
         setUser(null);
         setSavedJobs([]);
     };
