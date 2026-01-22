@@ -51,7 +51,7 @@ export const auth = {
 // Helper to extract job array from various response formats
 // API returns: { statusCode, data: { jobs: [...], pagination: {...} }, message, success }
 const extractJobArray = (response: any): Job[] => {
-    console.log('Raw API response:', response);
+    // console.log('Raw API response:', response);
 
     // Direct array
     if (Array.isArray(response)) return response;
@@ -76,7 +76,7 @@ const extractJobArray = (response: any): Job[] => {
 };
 
 const extractSingleJob = (response: any): Job => {
-    console.log('Raw single job response:', response);
+    // console.log('Raw single job response:', response);
 
     // Nested: response.data.jobData (your single job API structure)
     if (response?.data?.jobData && typeof response.data.jobData === 'object') {
@@ -126,7 +126,7 @@ export interface JobsResponse {
 
 // Helper to extract jobs response with pagination
 const extractJobsWithPagination = (response: any): JobsResponse => {
-    console.log('Raw API response:', response);
+    // console.log('Raw API response:', response);
 
     let jobs: Job[] = [];
     let pagination: PaginationInfo = {
@@ -166,7 +166,7 @@ const extractJobsWithPagination = (response: any): JobsResponse => {
         }
     }
 
-    console.log('Extracted jobs:', jobs.length, 'Pagination:', pagination);
+    // console.log('Extracted jobs:', jobs.length, 'Pagination:', pagination);
     return { jobs, pagination };
 };
 

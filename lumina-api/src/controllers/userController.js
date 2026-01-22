@@ -6,7 +6,7 @@ const getUser = asyncHandler(async (req, res) => {
 
     const user = await User.findById(userId).select("-password -refreshToken ");
 
-    if(!user){
+    if (!user) {
         throw new ApiError(404, "User not found");
     }
     console.log(req.body);
@@ -23,7 +23,7 @@ const updateUser = asyncHandler(async (req, res) => {
 
     const user = await User.findById(userId);
 
-    if(!user){
+    if (!user) {
         throw new ApiError(404, "User not found");
     }
 
@@ -36,14 +36,14 @@ const updateUser = asyncHandler(async (req, res) => {
         success: true,
         data: user
     });
-});       
+});
 
 const deleteUser = asyncHandler(async (req, res) => {
     const userId = req.user._id;
-    
+
     const user = await User.findByIdAndDelete(userId);
 
-    if(!user){
+    if (!user) {
         throw new ApiError(404, "User not found");
     }
 
@@ -59,12 +59,12 @@ const updatePassword = asyncHandler(async (req, res) => {
 
     const user = await User.findById(userId).select("+password");
 
-    if(!user){
+    if (!user) {
         throw new ApiError(404, "User not found");
     }
 
     const isMatch = await user.isPasswordCorrect(oldPassword);
-    if(!isMatch){
+    if (!isMatch) {
         throw new ApiError(400, "Old password is incorrect");
     }
 

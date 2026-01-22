@@ -1,15 +1,15 @@
-import {Redis} from "ioredis";
+import { Redis } from "ioredis";
 
 
 const redisUrl = process.env.REDIS_URL;
 console.log(redisUrl);
 const redis = new Redis(redisUrl);
 
-export class TokenBucket{
+export class TokenBucket {
 
-    constructor(capacity, refillRate){
+    constructor(capacity, refillRate) {
         this.capacity = capacity,
-        this.refillRate = refillRate
+            this.refillRate = refillRate
     }
 
 
@@ -18,7 +18,7 @@ export class TokenBucket{
         const keyLastRefill = `rate_limit:${clientId}:lastRefill`;
         const currentTime = Date.now();
 
-       // Lua script ensures atomic read-modify-write
+        // Lua script ensures atomic read-modify-write
         const script = `
             local keyCount = KEYS[1]
             local keyLastRefill = KEYS[2]
@@ -58,7 +58,7 @@ export class TokenBucket{
         );
 
 
-        return result ===1;
+        return result === 1;
     }
 
 }

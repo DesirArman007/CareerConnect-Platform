@@ -200,7 +200,7 @@ export const JobDetailPage: React.FC = () => {
             try {
                 if (id) {
                     const data = await jobApi.getOne(id);
-                    console.log('Fetched job data:', data);
+                    // console.log('Fetched job data:', data);
                     if (data && typeof data === 'object') {
                         setJob(data);
                     } else {

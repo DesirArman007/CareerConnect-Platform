@@ -43,7 +43,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
             const response = await auth.getUser() as ApiResponse<User>;
 
-            console.log('Fetched user data:', response);
+            // console.log('Fetched user data:', response);
 
             if (response?.success === true && response.data) {
                 const userData = response.data;
@@ -55,7 +55,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             return false;
         } catch (error) {
-            console.log('Failed to fetch user:', error);
+            // console.log('Failed to fetch user:', error);
             setUser(null);
             setSavedJobs([]);
             return false;
@@ -73,9 +73,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, []);
 
     const login = async (credentials: { email: string; password: string }) => {
-        console.log('Attempting login...');
+        // console.log('Attempting login...');
         const response = await auth.login(credentials);
-        console.log('Login response:', response);
+        // console.log('Login response:', response);
 
         if (response?.success === true) {
             // Give browser time to store cookie
@@ -100,9 +100,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // ✅ Register (does NOT log user in - they need to login separately)
     const register = async (data: { name: string; email: string; password: string }) => {
-        console.log('Attempting registration...');
+        // console.log('Attempting registration...');
         const response = await auth.register(data);
-        console.log('Register response:', response);
+        // console.log('Register response:', response);
 
         if (response?.success === true) {
             // Registration successful - do NOT call fetchUserData

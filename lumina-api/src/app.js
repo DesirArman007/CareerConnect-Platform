@@ -10,7 +10,7 @@ import feedbackRouter from "./routes/feedback.routes.js";
 const app = express();
 
 app.use(cors({
-   origin: [
+  origin: [
     "http://localhost:3000",
     "https://luminajobs.vercel.app"
   ],
@@ -35,23 +35,23 @@ app.use((req, res, next) => {
 
 // Mount routers
 
-app.get("/",(req,res)=>{
+app.get("/", (req, res) => {
   res.send("Hello")
 })
 
 app.use("/api/users", userRouter);
 app.use("/api/uploads", uploadRouter);
-app.use("/api/job",jobRouter);
-app.use("/api/feedback",feedbackRouter)
+app.use("/api/job", jobRouter);
+app.use("/api/feedback", feedbackRouter)
 // Health
 app.get("/health", (_req, res) => res.json({ ok: true }));
 
-  
+
 app.use((req, res) => {
   res.status(404).json({
     success: false,
     message: `Route ${req.method} ${req.originalUrl} not found`
   });
-}); 
+});
 
 export { app };
