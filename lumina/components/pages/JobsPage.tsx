@@ -54,7 +54,7 @@ export const JobsPage: React.FC = () => {
     const [selectedDepartment, setSelectedDepartment] = useState(searchParams.get('department') || '');
     const [selectedLocation, setSelectedLocation] = useState(searchParams.get('location') || '');
     const [selectedEmploymentType, setSelectedEmploymentType] = useState(searchParams.get('type') || '');
-    const [selectedExperienceLevel, setSelectedExperienceLevel] = useState(searchParams.get('level') || '');
+    const [selectedExperienceLevel, setSelectedExperienceLevel] = useState(searchParams.get('experience_level') || '');
 
     const [jobs, setJobs] = useState<Job[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -94,7 +94,7 @@ export const JobsPage: React.FC = () => {
         if (selectedDepartment) params.set('department', selectedDepartment);
         if (selectedLocation) params.set('location', selectedLocation);
         if (selectedEmploymentType) params.set('type', selectedEmploymentType);
-        if (selectedExperienceLevel) params.set('level', selectedExperienceLevel);
+        if (selectedExperienceLevel) params.set('experience_level', selectedExperienceLevel);
         if (currentPage > 1) params.set('page', currentPage.toString());
 
         setSearchParams(params, { replace: true });
@@ -163,11 +163,11 @@ export const JobsPage: React.FC = () => {
 
     // Fetching with debounce and abort
     const prevFiltersRef = useRef({
-        searchQuery: "",
-        department: "",
-        location: "",
-        employmentType: "",
-        experienceLevel: ""
+        searchQuery,
+        department: selectedDepartment,
+        location: selectedLocation,
+        employmentType: selectedEmploymentType,
+        experienceLevel: selectedExperienceLevel
     });
 
     useEffect(() => {
