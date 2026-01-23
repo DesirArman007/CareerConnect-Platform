@@ -4,9 +4,12 @@ import { JobList } from '../JobList';
 import { Job } from '../../types';
 import { jobs as jobApi, PaginationInfo } from '../../services/api';
 import { Search, X, Filter } from 'lucide-react';
+import { normalizeLocation, getUniqueLocations } from '../../services/locationService';
 
 const ITEMS_PER_PAGE = 15;
 const DEBOUNCE_DELAY = 300;
+
+
 
 // Simplified department categories
 const DEPARTMENTS = [
@@ -64,8 +67,10 @@ export const JobsPage: React.FC = () => {
         const fetchFilters = async () => {
             try {
                 const filterJobs = await jobApi.getAllForFilters();
-                const locs = Array.from(new Set(filterJobs.map(j => j.location).filter(Boolean))) as string[];
-                setAllLocations(locs.sort());
+
+                // ✅ Use the service to get clean, unique locations
+                const normalizedLocations = getUniqueLocations(filterJobs);
+                setAllLocations(normalizedLocations);
             } catch (error) {
                 console.error("Failed to fetch filter options", error);
             }
