@@ -37,11 +37,10 @@ const getJobById = asyncHandler(async (req, res) => {
   await setInCache(cacheKey, response, 1000);
 
   res.status(200).json(response);
-})
+});
 
 // Fetch All Jobs (Paginated)
 const getAllJobs = asyncHandler(async (req, res) => {
-
   const {
     page = 1,
     limit = 30,
@@ -49,65 +48,49 @@ const getAllJobs = asyncHandler(async (req, res) => {
     location,
     company,
     employment_type,
-    department
+    department,
+    experience_level
   } = req.query;
 
-  const cacheKey = `jobs:
-    page=${page}:
-    limit=${limit}:
-    job_type=${job_type || "any"}:
-    location=${location || "any"}:
-    company=${company || "any"}:
-    employment_type=${employment_type || "any"}:
-    department=${department || "any"}`.replace(/\s+/g, "");
+  // ✅ Parse numbers early
+  const numPage = parseInt(page);
+  const numLimit = parseInt(limit);
+  const skip = (numPage - 1) * numLimit;
+
+  const cacheKey = `jobs:page=${numPage}:limit=${numLimit}:job_type=${job_type || "any"}:location=${location || "any"}:company=${company || "any"}:employment_type=${employment_type || "any"}:department=${department || "any"}:experience_level=${experience_level || "any"}`;
 
   const cached = await getFromCache(cacheKey);
   if (cached) {
     return res.status(200).json(cached);
   }
 
+  const filter = { joblive: true };
 
+  if (job_type) filter.job_type = job_type;
+  if (location?.trim()) filter.location = { $regex: location, $options: 'i' };
+  if (company?.trim()) filter.company = { $regex: company, $options: 'i' };
+  if (employment_type) filter.employment_type = employment_type;
+  if (department?.trim()) filter.department = { $regex: department, $options: 'i' };
 
-  //  How many records to ignore before returning the reults
-  /*   page = 1, limit = 10
-       skip = (1 - 1) * 10 = 0 
-       says -> Skip 0 jobs and Return jobs 1–10
+  // ✅ Experience logic with validation
+  if (experience_level) {
+    const expLevels = {
+      entry: { $lte: 2 },
+      mid: { $gt: 2, $lte: 5 },
+      senior: { $gt: 5 },
+      director: { $gt: 8 }
+    };
 
-       page = 2, limit = 10
-       skip = (2 - 1) * 10 = 10 
-       says -> Skip 10 jobs and Return jobs 11–20  */
-  const skip = (page - 1) * limit;
-
-  // filter object
-  const filter = {};
-
-  if (job_type) {
-    filter.job_type = job_type;
+    if (expLevels[experience_level]) {
+      filter.experience_min_years = expLevels[experience_level];
+    }
   }
 
-  if (location?.trim()) {
-    // i is used for case insensitivity in Mongo
-    filter.location = { $regex: location, $options: 'i' };
-  }
-
-  if (company?.trim()) {
-    filter.company = { $regex: company, $options: 'i' };
-  }
-
-  if (employment_type) {
-    filter.employment_type = employment_type
-  }
-
-  if (department) {
-    filter.department = { $regex: department, $options: 'i' };
-  }
-
-  // Fetch jobs
   const jobs = await Job.find(filter)
-    .sort({ createdAt: -1 }) // newest job post first
-    .limit(parseInt(limit))
+    .sort({ createdAt: -1 })
+    .limit(numLimit)
     .skip(skip)
-    .select('-__v'); // exclude version key
+    .select('-__v');
 
   const totalJobs = await Job.countDocuments(filter);
 
@@ -115,10 +98,10 @@ const getAllJobs = asyncHandler(async (req, res) => {
     jobs,
     pagination: {
       success: true,
-      currentPage: Number(page),
-      totalPages: Math.ceil(totalJobs / Number(limit)),
+      currentPage: numPage,
+      totalPages: Math.ceil(totalJobs / numLimit),
       totalJobs,
-      limit: Number(limit)
+      limit: numLimit
     }
   });
 
@@ -130,7 +113,6 @@ const getAllJobs = asyncHandler(async (req, res) => {
 
 // Search Jobs by keyword, Title, Companies, Skills
 const searchJobs = asyncHandler(async (req, res) => {
-
   const {
     keyword,
     page = 1,
@@ -138,12 +120,15 @@ const searchJobs = asyncHandler(async (req, res) => {
     job_type,
     employment_type,
     department,
-    location
+    location,
+    experience_level
   } = req.query;
 
+  const numPage = parseInt(page);
+  const numLimit = parseInt(limit);
+  const skip = (numPage - 1) * numLimit;
 
-
-  const cacheKey = `job_search:${keyword}:${page}:${limit}:${job_type}:${employment_type}:${department}:${location}`;
+  const cacheKey = `job_search:${keyword}:${numPage}:${numLimit}:${job_type || "any"}:${employment_type || "any"}:${department || "any"}:${location || "any"}:${experience_level || "any"}`;
 
   try {
     const cached = await getFromCache(cacheKey);
@@ -156,60 +141,56 @@ const searchJobs = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Search term/keyword is required");
   }
 
-  const skip = (page - 1) * limit;
-
   const searchFilter = {
     $or: [
       { title: { $regex: keyword, $options: 'i' } },
       { company: { $regex: keyword, $options: 'i' } },
       { skill: { $regex: keyword, $options: 'i' } },
       { location: { $regex: keyword, $options: 'i' } }
-    ]
+    ],
+    joblive: true
   };
 
+  if (job_type) searchFilter.job_type = job_type;
+  if (employment_type) searchFilter.employment_type = employment_type;
+  if (department?.trim()) searchFilter.department = { $regex: department, $options: 'i' };
+  if (location?.trim()) searchFilter.location = { $regex: location, $options: 'i' };
 
-  if (job_type) {
-    searchFilter.job_type = job_type;
-  }
-
-  if (employment_type) {
-    searchFilter.employment_type = employment_type;
-  }
-
-  if (department?.trim()) {
-    searchFilter.department = { $regex: department, $options: 'i' };
-  }
-
-  if (location?.trim()) {
-    searchFilter.location = { $regex: location, $options: 'i' };
+  if (experience_level) {
+    const expLevels = {
+      entry: { $lte: 2 },
+      mid: { $gt: 2, $lte: 5 },
+      senior: { $gt: 5 },
+      director: { $gt: 8 }
+    };
+    if (expLevels[experience_level]) {
+      searchFilter.experience_min_years = expLevels[experience_level];
+    }
   }
 
   const jobs = await Job.find(searchFilter)
     .sort({ createdAt: -1 })
-    .limit(parseInt(limit))
+    .limit(numLimit)
     .skip(skip)
     .select('-__v');
 
   const totalJobs = await Job.countDocuments(searchFilter);
-  const response = new ApiResponse(200,
 
-    {
-      jobs,
-      pagination: {
-        success: true,
-        currentPage: Number(page),
-        totalPages: Math.ceil(totalJobs / Number(limit)),
-        totalJobs: totalJobs,
-        limit: Number(limit),
-      },
-      searchQuery: keyword
-    });
+  const response = new ApiResponse(200, {
+    jobs,
+    pagination: {
+      success: true,
+      currentPage: numPage,
+      totalPages: Math.ceil(totalJobs / numLimit),
+      totalJobs: totalJobs,
+      limit: numLimit,
+    },
+    searchQuery: keyword
+  });
 
-  await setInCache(cacheKey, response, 300)
+  await setInCache(cacheKey, response, 300);
 
   res.status(200).json(response);
-
-
 });
 
 
@@ -315,7 +296,8 @@ const getNewJobs = asyncHandler(async (req, res) => {
   dateThreshold.setDate(dateThreshold.getDate() - Number(days));
 
   const jobs = await Job.find({
-    createdAt: { $gte: dateThreshold }
+    createdAt: { $gte: dateThreshold },
+    joblive: true
   })
     .sort({ createdAt: -1 })
     .limit(parseInt(limit))
@@ -584,18 +566,20 @@ const getJobStats = asyncHandler(async (req, res) => {
     jobsByLocation,
     recentJobs
   ] = await Promise.all([
-    Job.countDocuments(),
+    Job.countDocuments({ joblive: true }),
 
 
     // Finds the job that are added in last 7 days
     Job.countDocuments({
       createdAt: {
         $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-      }
+      },
+      joblive: true
     }),
 
 
     Job.aggregate([
+      { $match: { joblive: true } },
       {
         $group: {
           _id: '$job_type',
@@ -606,6 +590,7 @@ const getJobStats = asyncHandler(async (req, res) => {
 
     // Finds the  top 5 locations with most jobs
     Job.aggregate([
+      { $match: { joblive: true } },
       {
         $group: {
           _id: '$location',
@@ -617,8 +602,8 @@ const getJobStats = asyncHandler(async (req, res) => {
     ]),
 
 
-    // Gets the 5 monst recent jobs
-    Job.find().sort({ createdAt: -1 }).limit(5).select('title company location job_type createdAt')
+    // Gets the 5 monst recent ACTIVE jobs
+    Job.find({ joblive: true }).sort({ createdAt: -1 }).limit(5).select('title company location job_type createdAt')
 
   ]);
 
