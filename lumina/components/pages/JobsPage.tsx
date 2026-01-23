@@ -1,18 +1,43 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { Search, X, Filter } from 'lucide-react';
 import { JobList } from '../JobList';
 import { Job } from '../../types';
 import { jobs as jobApi, PaginationInfo } from '../../services/api';
-import { Search, X, Filter } from 'lucide-react';
-import { normalizeLocation, getUniqueLocations } from '../../services/locationService';
+import { getUniqueLocations } from '../../services/locationService';
+
+// ============================================================================
+// TYPES & INTERFACES
+// ============================================================================
+
+interface FilterOption {
+    value: string;
+    label: string;
+}
+
+interface JobFilters {
+    searchQuery: string;
+    department: string;
+    location: string;
+    company: string;
+    employmentType: string;
+    experienceLevel: string;
+}
+
+interface ActiveFilter {
+    type: keyof Omit<JobFilters, 'searchQuery'> | 'search';
+    label: string;
+    value: string;
+}
+
+// ============================================================================
+// CONSTANTS
+// ============================================================================
 
 const ITEMS_PER_PAGE = 15;
 const DEBOUNCE_DELAY = 300;
 
-
-
-// Simplified department categories
-const DEPARTMENTS = [
+const DEPARTMENTS: FilterOption[] = [
     { value: '', label: 'All Departments' },
     { value: 'Engineering', label: 'Engineering' },
     { value: 'Product', label: 'Product' },
@@ -28,8 +53,7 @@ const DEPARTMENTS = [
     { value: 'Other', label: 'Other' },
 ];
 
-// Employment type options
-const EMPLOYMENT_TYPES = [
+const EMPLOYMENT_TYPES: FilterOption[] = [
     { value: '', label: 'All Types' },
     { value: 'Full-time', label: 'Full-time' },
     { value: 'Part-time', label: 'Part-time' },
@@ -38,7 +62,7 @@ const EMPLOYMENT_TYPES = [
     { value: 'Internship', label: 'Internship' },
 ];
 
-const EXPERIENCE_LEVELS = [
+const EXPERIENCE_LEVELS: FilterOption[] = [
     { value: '', label: 'All Levels' },
     { value: 'entry', label: 'Entry Level (0-2y)' },
     { value: 'mid', label: 'Mid Level (2-5y)' },
@@ -46,260 +70,378 @@ const EXPERIENCE_LEVELS = [
     { value: 'director', label: 'Director (8y+)' },
 ];
 
-export const JobsPage: React.FC = () => {
+// ============================================================================
+// CUSTOM HOOKS
+// ============================================================================
+
+const useUrlFilters = (): [JobFilters, (filters: Partial<JobFilters>) => void] => {
     const [searchParams, setSearchParams] = useSearchParams();
 
-    // Initialize state from URL params
-    const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
-    const [selectedDepartment, setSelectedDepartment] = useState(searchParams.get('department') || '');
-    const [selectedLocation, setSelectedLocation] = useState(searchParams.get('location') || '');
-    const [selectedEmploymentType, setSelectedEmploymentType] = useState(searchParams.get('type') || '');
-    const [selectedExperienceLevel, setSelectedExperienceLevel] = useState(searchParams.get('experience_level') || '');
+    const filters: JobFilters = useMemo(() => ({
+        searchQuery: searchParams.get('search') || '',
+        department: searchParams.get('department') || '',
+        location: searchParams.get('location') || '',
+        company: searchParams.get('company') || '',
+        employmentType: searchParams.get('type') || '',
+        experienceLevel: searchParams.get('experience_level') || '',
+    }), [searchParams]);
 
+    const updateFilters = useCallback((newFilters: Partial<JobFilters>) => {
+        const params = new URLSearchParams();
+        const merged = { ...filters, ...newFilters };
+
+        if (merged.searchQuery) params.set('search', merged.searchQuery);
+        if (merged.department) params.set('department', merged.department);
+        if (merged.location) params.set('location', merged.location);
+        if (merged.company) params.set('company', merged.company);
+        if (merged.employmentType) params.set('type', merged.employmentType);
+        if (merged.experienceLevel) params.set('experience_level', merged.experienceLevel);
+
+        setSearchParams(params, { replace: true });
+    }, [filters, setSearchParams]);
+
+    return [filters, updateFilters];
+};
+
+const useJobsData = (filters: JobFilters, currentPage: number) => {
     const [jobs, setJobs] = useState<Job[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1', 10));
     const [pagination, setPagination] = useState<PaginationInfo>({
         currentPage: 1,
         totalPages: 1,
         totalJobs: 0,
-        limit: ITEMS_PER_PAGE
+        limit: ITEMS_PER_PAGE,
     });
 
-    // For location filter - still fetch dynamically
-    const [allLocations, setAllLocations] = useState<string[]>([]);
+    const prevFiltersRef = useRef(filters);
+    const abortControllerRef = useRef<AbortController | null>(null);
 
-    const searchInputRef = useRef<HTMLInputElement>(null);
-
-    // Fetch location options on mount (departments are now predefined)
     useEffect(() => {
-        const fetchFilters = async () => {
-            try {
-                const filterJobs = await jobApi.getAllForFilters();
+        // Cancel previous request
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
 
-                // ✅ Use the service to get clean, unique locations
-                const normalizedLocations = getUniqueLocations(filterJobs);
-                setAllLocations(normalizedLocations);
-            } catch (error) {
-                console.error("Failed to fetch filter options", error);
+        const abortController = new AbortController();
+        abortControllerRef.current = abortController;
+
+        const fetchJobs = async () => {
+            setIsLoading(true);
+
+            try {
+                const trimmedQuery = filters.searchQuery.trim();
+                let response;
+
+                if (trimmedQuery) {
+                    response = await jobApi.search(
+                        trimmedQuery,
+                        currentPage,
+                        ITEMS_PER_PAGE,
+                        filters.department,
+                        filters.location,
+                        filters.company,
+                        filters.employmentType,
+                        filters.experienceLevel,
+                        abortController.signal
+                    );
+                } else {
+                    response = await jobApi.getAll(
+                        currentPage,
+                        ITEMS_PER_PAGE,
+                        filters.department,
+                        filters.location,
+                        filters.company,
+                        filters.employmentType,
+                        filters.experienceLevel,
+                        abortController.signal
+                    );
+                }
+
+                const fetchedJobs = Array.isArray(response.jobs) ? response.jobs : [];
+                setJobs(fetchedJobs);
+                setPagination({
+                    currentPage: response.pagination?.currentPage || currentPage,
+                    totalPages: response.pagination?.totalPages || 1,
+                    totalJobs: response.pagination?.totalJobs || fetchedJobs.length,
+                    limit: response.pagination?.limit || ITEMS_PER_PAGE,
+                });
+            } catch (error: any) {
+                if (error.name === 'AbortError' || error.name === 'CanceledError') {
+                    return;
+                }
+                console.error('Failed to fetch jobs', error);
+                setJobs([]);
+                setPagination({
+                    currentPage: 1,
+                    totalPages: 1,
+                    totalJobs: 0,
+                    limit: ITEMS_PER_PAGE,
+                });
+            } finally {
+                setIsLoading(false);
             }
         };
-        fetchFilters();
+
+        // Debounce search queries
+        const delay = filters.searchQuery ? DEBOUNCE_DELAY : 0;
+        const timer = setTimeout(() => {
+            fetchJobs();
+        }, delay);
+
+        return () => {
+            clearTimeout(timer);
+            abortController.abort();
+        };
+    }, [filters, currentPage]);
+
+    // Track filter changes
+    useEffect(() => {
+        prevFiltersRef.current = filters;
+    }, [filters]);
+
+    return { jobs, isLoading, pagination };
+};
+
+const useLocations = () => {
+    const [locations, setLocations] = useState<string[]>([]);
+
+    useEffect(() => {
+        const fetchLocations = async () => {
+            try {
+                const filterJobs = await jobApi.getAllForFilters();
+                const normalizedLocations = getUniqueLocations(filterJobs);
+                setLocations(normalizedLocations);
+            } catch (error) {
+                console.error('Failed to fetch locations', error);
+            }
+        };
+
+        fetchLocations();
     }, []);
 
-    // Sync state with URL
+    return locations;
+};
+
+const useKeyboardShortcuts = (inputRef: React.RefObject<HTMLInputElement>, onClear: () => void) => {
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape' && document.activeElement === inputRef.current) {
+                onClear();
+                inputRef.current?.blur();
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [inputRef, onClear]);
+};
+
+// ============================================================================
+// SUB-COMPONENTS
+// ============================================================================
+
+const SearchInput: React.FC<{
+    value: string;
+    onChange: (value: string) => void;
+    onClear: () => void;
+    inputRef: React.RefObject<HTMLInputElement>;
+}> = ({ value, onChange, onClear, inputRef }) => (
+    <div className="relative flex-1">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+        <input
+            ref={inputRef}
+            type="text"
+            placeholder="Search by job title, company, or keywords..."
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            className="w-full pl-12 pr-10 py-3 bg-black/40 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/10 transition-all text-base"
+        />
+        {value && (
+            <button
+                onClick={onClear}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-white/10 rounded-full transition-colors"
+                aria-label="Clear search"
+            >
+                <X className="w-4 h-4 text-gray-400" />
+            </button>
+        )}
+    </div>
+);
+
+const FilterSelect: React.FC<{
+    value: string;
+    onChange: (value: string) => void;
+    options: FilterOption[];
+    className?: string;
+}> = ({ value, onChange, options, className = '' }) => (
+    <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className={`flex-1 lg:flex-none px-4 py-3 bg-black/40 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/20 transition-colors appearance-none text-base cursor-pointer ${className}`}
+    >
+        {options.map((option) => (
+            <option key={option.value} value={option.value}>
+                {option.label}
+            </option>
+        ))}
+    </select>
+);
+
+const ActiveFilterTag: React.FC<{
+    filter: ActiveFilter;
+    onRemove: () => void;
+}> = ({ filter, onRemove }) => (
+    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/10 text-white text-sm rounded-full group hover:bg-white/15 transition-colors">
+        {filter.type === 'search' && <Search className="w-3 h-3 text-gray-400" />}
+        <span className="max-w-[150px] truncate">{filter.label}</span>
+        <button
+            onClick={onRemove}
+            className="p-0.5 hover:bg-white/20 rounded-full transition-colors"
+            aria-label={`Remove ${filter.label} filter`}
+        >
+            <X className="w-3 h-3" />
+        </button>
+    </span>
+);
+
+const EmptyState: React.FC<{
+    hasActiveFilters: boolean;
+    onClearAll: () => void;
+}> = ({ hasActiveFilters, onClearAll }) => (
+    <div className="flex flex-col items-center justify-center py-16 px-6">
+        <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
+            <Search className="w-8 h-8 text-gray-500" />
+        </div>
+        <h3 className="text-xl font-semibold text-white mb-2">No jobs found</h3>
+        <p className="text-gray-400 text-center max-w-md mb-6">
+            {hasActiveFilters
+                ? 'No jobs match your current filters. Try adjusting your search criteria or clearing some filters.'
+                : 'No jobs available at the moment. Check back soon for new opportunities!'}
+        </p>
+        {hasActiveFilters && (
+            <button
+                onClick={onClearAll}
+                className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors"
+            >
+                Clear All Filters
+            </button>
+        )}
+    </div>
+);
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
+
+export const JobsPage: React.FC = () => {
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1', 10));
+    
+    const [filters, setFilters] = useState<JobFilters>({
+        searchQuery: searchParams.get('search') || '',
+        department: searchParams.get('department') || '',
+        location: searchParams.get('location') || '',
+        company: searchParams.get('company') || '',
+        employmentType: searchParams.get('type') || '',
+        experienceLevel: searchParams.get('experience_level') || '',
+    });
+
+    const searchInputRef = useRef<HTMLInputElement>(null);
+    const prevFiltersRef = useRef(filters);
+
+    const locations = useLocations();
+    const { jobs, isLoading, pagination } = useJobsData(filters, currentPage);
+
+    // Sync filters with URL
     useEffect(() => {
         const params = new URLSearchParams();
-        if (searchQuery) params.set('search', searchQuery);
-        if (selectedDepartment) params.set('department', selectedDepartment);
-        if (selectedLocation) params.set('location', selectedLocation);
-        if (selectedEmploymentType) params.set('type', selectedEmploymentType);
-        if (selectedExperienceLevel) params.set('experience_level', selectedExperienceLevel);
+        if (filters.searchQuery) params.set('search', filters.searchQuery);
+        if (filters.department) params.set('department', filters.department);
+        if (filters.location) params.set('location', filters.location);
+        if (filters.company) params.set('company', filters.company);
+        if (filters.employmentType) params.set('type', filters.employmentType);
+        if (filters.experienceLevel) params.set('experience_level', filters.experienceLevel);
         if (currentPage > 1) params.set('page', currentPage.toString());
 
         setSearchParams(params, { replace: true });
-    }, [searchQuery, selectedDepartment, selectedLocation, selectedEmploymentType, currentPage, setSearchParams]);
+    }, [filters, currentPage, setSearchParams]);
 
-    // Handle keyboard shortcuts
+    // Reset page when filters change
     useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape' && document.activeElement === searchInputRef.current) {
-                setSearchQuery('');
-                searchInputRef.current?.blur();
-            }
-        };
-        document.addEventListener('keydown', handleKeyDown);
-        return () => document.removeEventListener('keydown', handleKeyDown);
-    }, []);
-
-    // Main fetch function with abort controller
-    const fetchJobs = useCallback(async (
-        query: string,
-        page: number,
-        department: string,
-        location: string,
-        employmentType: string,
-        experienceLevel: string,
-        signal: AbortSignal
-    ) => {
-        setIsLoading(true);
-        try {
-            const trimmedQuery = query.trim();
-
-            let response;
-
-            if (trimmedQuery && trimmedQuery.length > 0) {
-                response = await jobApi.search(trimmedQuery, page, ITEMS_PER_PAGE, department, location, employmentType, experienceLevel, signal);
-            } else {
-                response = await jobApi.getAll(page, ITEMS_PER_PAGE, department, location, employmentType, experienceLevel, signal);
-            }
-
-            const fetchedJobs = Array.isArray(response.jobs) ? response.jobs : [];
-
-            setJobs(fetchedJobs);
-
-            setPagination({
-                currentPage: response.pagination?.currentPage || page,
-                totalPages: response.pagination?.totalPages || 1,
-                totalJobs: response.pagination?.totalJobs || fetchedJobs.length,
-                limit: response.pagination?.limit || ITEMS_PER_PAGE
-            });
-        } catch (error: any) {
-            if (error.name === 'AbortError' || error.name === 'CanceledError') {
-                return;
-            }
-            console.error("Failed to fetch jobs", error);
-            setJobs([]);
-            setPagination({
-                currentPage: 1,
-                totalPages: 1,
-                totalJobs: 0,
-                limit: ITEMS_PER_PAGE
-            });
-        } finally {
-            setIsLoading(false);
-        }
-    }, []);
-
-    // Fetching with debounce and abort
-    const prevFiltersRef = useRef({
-        searchQuery,
-        department: selectedDepartment,
-        location: selectedLocation,
-        employmentType: selectedEmploymentType,
-        experienceLevel: selectedExperienceLevel
-    });
-
-    useEffect(() => {
-        const abortController = new AbortController();
-
         const filtersChanged =
-            prevFiltersRef.current.searchQuery !== searchQuery ||
-            prevFiltersRef.current.department !== selectedDepartment ||
-            prevFiltersRef.current.location !== selectedLocation ||
-            prevFiltersRef.current.employmentType !== selectedEmploymentType ||
-            prevFiltersRef.current.experienceLevel !== selectedExperienceLevel;
+            prevFiltersRef.current.searchQuery !== filters.searchQuery ||
+            prevFiltersRef.current.department !== filters.department ||
+            prevFiltersRef.current.location !== filters.location ||
+            prevFiltersRef.current.company !== filters.company ||
+            prevFiltersRef.current.employmentType !== filters.employmentType ||
+            prevFiltersRef.current.experienceLevel !== filters.experienceLevel;
 
-        // Reset page ONLY when filters/search change
         if (filtersChanged) {
-            prevFiltersRef.current = {
-                searchQuery,
-                department: selectedDepartment,
-                location: selectedLocation,
-                employmentType: selectedEmploymentType,
-                experienceLevel: selectedExperienceLevel
-            };
-
+            prevFiltersRef.current = filters;
             if (currentPage !== 1) {
                 setCurrentPage(1);
-                return;
             }
         }
+    }, [filters, currentPage]);
 
-        const debounceTimer = setTimeout(() => {
-            fetchJobs(
-                searchQuery,
-                currentPage,
-                selectedDepartment,
-                selectedLocation,
-                selectedEmploymentType,
-                selectedExperienceLevel,
-                abortController.signal
-            );
-        }, searchQuery ? DEBOUNCE_DELAY : 0);
+    // Handlers
+    const updateFilter = useCallback((key: keyof JobFilters, value: string) => {
+        setFilters((prev) => ({ ...prev, [key]: value }));
+    }, []);
 
-        return () => {
-            clearTimeout(debounceTimer);
-            abortController.abort();
-        };
-    }, [searchQuery, currentPage, selectedDepartment, selectedLocation, selectedEmploymentType, fetchJobs]);
+    const handleClearFilter = useCallback((filterType: keyof JobFilters | 'search') => {
+        const key = filterType === 'search' ? 'searchQuery' : filterType;
+        updateFilter(key as keyof JobFilters, '');
+    }, [updateFilter]);
 
-    // Check if any filters are active
-    const hasActiveFilters = useMemo(() => {
-        return searchQuery || selectedDepartment || selectedLocation || selectedEmploymentType || selectedExperienceLevel;
-    }, [searchQuery, selectedDepartment, selectedLocation, selectedEmploymentType, selectedExperienceLevel]);
-
-    // Count active filters (excluding search)
-    const activeFilterCount = useMemo(() => {
-        let count = 0;
-        if (selectedDepartment) count++;
-        if (selectedLocation) count++;
-        if (selectedEmploymentType) count++;
-        if (selectedExperienceLevel) count++;
-        return count;
-    }, [selectedDepartment, selectedLocation, selectedEmploymentType, selectedExperienceLevel]);
-
-    // Clear all filters
     const handleClearAll = useCallback(() => {
-        setSearchQuery('');
-        setSelectedDepartment('');
-        setSelectedLocation('');
-        setSelectedEmploymentType('');
-        setSelectedExperienceLevel('');
+        setFilters({
+            searchQuery: '',
+            department: '',
+            location: '',
+            company: '',
+            employmentType: '',
+            experienceLevel: '',
+        });
         setCurrentPage(1);
     }, []);
 
-    // Clear individual filter
-    const handleClearFilter = useCallback((filterType: 'search' | 'department' | 'location' | 'employmentType' | 'experienceLevel') => {
-        switch (filterType) {
-            case 'search':
-                setSearchQuery('');
-                break;
-            case 'department':
-                setSelectedDepartment('');
-                break;
-            case 'location':
-                setSelectedLocation('');
-                break;
-            case 'employmentType':
-                setSelectedEmploymentType('');
-                break;
-            case 'experienceLevel':
-                setSelectedExperienceLevel('');
-                break;
-        }
-    }, []);
-
-    const handlePageChanges = useCallback((page: number) => {
+    const handlePageChange = useCallback((page: number) => {
         setCurrentPage(page);
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
 
-    const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchQuery(e.target.value);
-    }, []);
+    useKeyboardShortcuts(searchInputRef, () => updateFilter('searchQuery', ''));
 
-    const handleDepartmentChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-        setSelectedDepartment(e.target.value);
-    }, []);
+    // Computed values
+    const activeFilters = useMemo((): ActiveFilter[] => {
+        const result: ActiveFilter[] = [];
 
-    const handleLocationChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-        setSelectedLocation(e.target.value);
-    }, []);
+        if (filters.searchQuery) {
+            result.push({ type: 'search', label: `"${filters.searchQuery}"`, value: filters.searchQuery });
+        }
+        if (filters.department) {
+            result.push({ type: 'department', label: filters.department, value: filters.department });
+        }
+        if (filters.location) {
+            result.push({ type: 'location', label: filters.location, value: filters.location });
+        }
+        if (filters.company) {
+            result.push({ type: 'company', label: filters.company, value: filters.company });
+        }
+        if (filters.employmentType) {
+            result.push({ type: 'employmentType', label: filters.employmentType, value: filters.employmentType });
+        }
+        if (filters.experienceLevel) {
+            const label = EXPERIENCE_LEVELS.find((e) => e.value === filters.experienceLevel)?.label || filters.experienceLevel;
+            result.push({ type: 'experienceLevel', label, value: filters.experienceLevel });
+        }
 
-    const handleEmploymentTypeChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-        setSelectedEmploymentType(e.target.value);
-    }, []);
+        return result;
+    }, [filters]);
 
-    const handleExperienceLevelChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-        setSelectedExperienceLevel(e.target.value);
-    }, []);
-
-    // Active filter tags
-    const activeFilters = useMemo(() => {
-        const filters: { type: 'search' | 'department' | 'location' | 'employmentType' | 'experienceLevel'; label: string; value: string }[] = [];
-        if (searchQuery) filters.push({ type: 'search', label: `"${searchQuery}"`, value: searchQuery });
-        if (selectedDepartment) filters.push({ type: 'department', label: selectedDepartment, value: selectedDepartment });
-        if (selectedLocation) filters.push({ type: 'location', label: selectedLocation, value: selectedLocation });
-        if (selectedEmploymentType) filters.push({ type: 'employmentType', label: selectedEmploymentType, value: selectedEmploymentType });
-        // Find label for experience level
-        const expLabel = EXPERIENCE_LEVELS.find(e => e.value === selectedExperienceLevel)?.label || selectedExperienceLevel;
-        if (selectedExperienceLevel) filters.push({ type: 'experienceLevel', label: expLabel, value: selectedExperienceLevel });
-        return filters;
-    }, [searchQuery, selectedDepartment, selectedLocation, selectedEmploymentType, selectedExperienceLevel]);
+    const hasActiveFilters = activeFilters.length > 0;
+    const activeFilterCount = activeFilters.filter((f) => f.type !== 'search').length;
 
     const resultsText = useMemo(() => {
         if (isLoading) return null;
@@ -311,33 +453,6 @@ export const JobsPage: React.FC = () => {
         );
     }, [isLoading, jobs.length, pagination.totalJobs, pagination.totalPages, currentPage]);
 
-    // Empty state content
-    const emptyState = useMemo(() => {
-        if (isLoading || jobs.length > 0) return null;
-
-        return (
-            <div className="flex flex-col items-center justify-center py-16 px-6">
-                <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
-                    <Search className="w-8 h-8 text-gray-500" />
-                </div>
-                <h3 className="text-xl font-semibold text-white mb-2">No jobs found</h3>
-                <p className="text-gray-400 text-center max-w-md mb-6">
-                    {hasActiveFilters
-                        ? "No jobs match your current filters. Try adjusting your search criteria or clearing some filters."
-                        : "No jobs available at the moment. Check back soon for new opportunities!"}
-                </p>
-                {hasActiveFilters && (
-                    <button
-                        onClick={handleClearAll}
-                        className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors"
-                    >
-                        Clear All Filters
-                    </button>
-                )}
-            </div>
-        );
-    }, [isLoading, jobs.length, hasActiveFilters, handleClearAll]);
-
     return (
         <main className="pt-20">
             {/* Search and Filter Section */}
@@ -345,67 +460,38 @@ export const JobsPage: React.FC = () => {
                 <div className="max-w-7xl mx-auto px-6 space-y-4">
                     {/* Search and Filters Row */}
                     <div className="flex flex-col lg:flex-row gap-4">
-                        {/* Enhanced Search Input */}
-                        <div className="relative flex-1">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-                            <input
-                                ref={searchInputRef}
-                                type="text"
-                                placeholder="Search by job title, company, or keywords..."
-                                value={searchQuery}
-                                onChange={handleSearchChange}
-                                className="w-full pl-12 pr-10 py-3 bg-black/40 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/10 transition-all text-base"
-                            />
-                            {searchQuery && (
-                                <button
-                                    onClick={() => handleClearFilter('search')}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-white/10 rounded-full transition-colors"
-                                    aria-label="Clear search"
-                                >
-                                    <X className="w-4 h-4 text-gray-400" />
-                                </button>
-                            )}
-                        </div>
+                        <SearchInput
+                            value={filters.searchQuery}
+                            onChange={(value) => updateFilter('searchQuery', value)}
+                            onClear={() => handleClearFilter('search')}
+                            inputRef={searchInputRef}
+                        />
 
-                        {/* Filter Dropdowns */}
                         <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-                            <select
-                                value={selectedDepartment}
-                                onChange={handleDepartmentChange}
-                                className="flex-1 lg:flex-none px-4 py-3 bg-black/40 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/20 transition-colors appearance-none lg:min-w-[160px] text-base cursor-pointer"
-                            >
-                                {DEPARTMENTS.map(dept => (
-                                    <option key={dept.value} value={dept.value}>{dept.label}</option>
-                                ))}
-                            </select>
-                            <select
-                                value={selectedLocation}
-                                onChange={handleLocationChange}
-                                className="flex-1 lg:flex-none px-4 py-3 bg-black/40 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/20 transition-colors appearance-none lg:min-w-[160px] text-base cursor-pointer"
-                            >
-                                <option value="">All Locations</option>
-                                {allLocations.map(loc => (
-                                    <option key={loc} value={loc}>{loc}</option>
-                                ))}
-                            </select>
-                            <select
-                                value={selectedEmploymentType}
-                                onChange={handleEmploymentTypeChange}
-                                className="flex-1 lg:flex-none px-4 py-3 bg-black/40 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/20 transition-colors appearance-none lg:min-w-[140px] text-base cursor-pointer"
-                            >
-                                {EMPLOYMENT_TYPES.map(type => (
-                                    <option key={type.value} value={type.value}>{type.label}</option>
-                                ))}
-                            </select>
-                            <select
-                                value={selectedExperienceLevel}
-                                onChange={handleExperienceLevelChange}
-                                className="flex-1 lg:flex-none px-4 py-3 bg-black/40 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/20 transition-colors appearance-none lg:min-w-[140px] text-base cursor-pointer"
-                            >
-                                {EXPERIENCE_LEVELS.map(level => (
-                                    <option key={level.value} value={level.value}>{level.label}</option>
-                                ))}
-                            </select>
+                            <FilterSelect
+                                value={filters.department}
+                                onChange={(value) => updateFilter('department', value)}
+                                options={DEPARTMENTS}
+                                className="lg:min-w-[160px]"
+                            />
+                            <FilterSelect
+                                value={filters.location}
+                                onChange={(value) => updateFilter('location', value)}
+                                options={[{ value: '', label: 'All Locations' }, ...locations.map((loc) => ({ value: loc, label: loc }))]}
+                                className="lg:min-w-[160px]"
+                            />
+                            <FilterSelect
+                                value={filters.employmentType}
+                                onChange={(value) => updateFilter('employmentType', value)}
+                                options={EMPLOYMENT_TYPES}
+                                className="lg:min-w-[140px]"
+                            />
+                            <FilterSelect
+                                value={filters.experienceLevel}
+                                onChange={(value) => updateFilter('experienceLevel', value)}
+                                options={EXPERIENCE_LEVELS}
+                                className="lg:min-w-[140px]"
+                            />
                         </div>
                     </div>
 
@@ -417,20 +503,11 @@ export const JobsPage: React.FC = () => {
                                 Active:
                             </span>
                             {activeFilters.map((filter) => (
-                                <span
+                                <ActiveFilterTag
                                     key={`${filter.type}-${filter.value}`}
-                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/10 text-white text-sm rounded-full group hover:bg-white/15 transition-colors"
-                                >
-                                    {filter.type === 'search' && <Search className="w-3 h-3 text-gray-400" />}
-                                    <span className="max-w-[150px] truncate">{filter.label}</span>
-                                    <button
-                                        onClick={() => handleClearFilter(filter.type)}
-                                        className="p-0.5 hover:bg-white/20 rounded-full transition-colors"
-                                        aria-label={`Remove ${filter.label} filter`}
-                                    >
-                                        <X className="w-3 h-3" />
-                                    </button>
-                                </span>
+                                    filter={filter}
+                                    onRemove={() => handleClearFilter(filter.type)}
+                                />
                             ))}
                             <button
                                 onClick={handleClearAll}
@@ -455,7 +532,9 @@ export const JobsPage: React.FC = () => {
             </div>
 
             {/* Job List or Empty State */}
-            {emptyState || (
+            {!isLoading && jobs.length === 0 ? (
+                <EmptyState hasActiveFilters={hasActiveFilters} onClearAll={handleClearAll} />
+            ) : (
                 <JobList
                     jobs={jobs}
                     isLoading={isLoading}
@@ -463,7 +542,7 @@ export const JobsPage: React.FC = () => {
                     pagination={{
                         currentPage,
                         totalPages: pagination.totalPages,
-                        onPageChange: handlePageChanges
+                        onPageChange: handlePageChange,
                     }}
                 />
             )}
