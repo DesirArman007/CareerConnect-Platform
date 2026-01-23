@@ -17,6 +17,8 @@ export interface Job {
   applyUrl?: string;
   apply_url?: string;
   source?: string; // LinkedIn, Lever, etc.
+  experience?: string; // e.g., "2-5 years"
+  joblive?: boolean;
 }
 
 

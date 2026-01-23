@@ -7,6 +7,7 @@ import { MapPin, Clock, Building, Briefcase, ArrowLeft, ArrowUpRight, Heart, Glo
 import { useAuth } from '../../context/AuthContext';
 import { jobs as jobApi } from '../../services/api';
 import { getCompanyIcon } from '../CompanyLogos';
+import { formatDescription } from '../../utils/formatJobDescription.ts';
 
 // Helper function to format dates nicely
 const formatDate = (dateString?: string): string => {
@@ -21,158 +22,6 @@ const formatDate = (dateString?: string): string => {
     } catch {
         return dateString;
     }
-};
-
-// Helper function to format description with visual hierarchy and highlighting
-const formatDescription = (description?: string): string => {
-    if (!description) return '<p class="text-gray-400">No description provided.</p>';
-
-    let formatted = description;
-
-    // ========== 1. BOLD SECTION HEADERS ==========
-    const sectionHeaders = [
-        'About Us', 'About The Company', 'About Company', 'About',
-        'What\'s the role\\??', 'The Role', 'Role Overview', 'Position Overview',
-        'Our Tech Stack', 'Tech Stack', 'Technology Stack', 'Technologies',
-        'What will be your responsibilities\\??', 'Responsibilities', 'Key Responsibilities',
-        'What\'s required from you\\??', 'Requirements', 'Required Skills', 'Must Have',
-        'Required Qualifications', 'Minimum Qualifications', 'Basic Qualifications',
-        'Preferred Qualifications', 'Nice to Have', 'Good to Have', 'Bonus Points',
-        'What makes us different\\??', 'Why Join Us\\??', 'Why Us\\??',
-        'What employee benefits do we have\\??', 'Benefits', 'Perks', 'What We Offer',
-        'What do we stand for\\??', 'Our Values', 'Company Values',
-        'Overview', 'Summary', 'Description', 'Job Description',
-        'Qualifications', 'Skills', 'Experience', 'Education',
-        'Location', 'Work Location', 'Office Location',
-        'How to Apply', 'Application Process',
-        'Equal Opportunity', 'Diversity', 'Inclusion'
-    ];
-
-    sectionHeaders.forEach(header => {
-        const regex = new RegExp(`(^|\\n)(${header})(:?)\\s*(\\n|$)`, 'gim');
-        formatted = formatted.replace(regex, '$1<h3 class="text-lg font-semibold text-white mt-6 mb-3">$2$3</h3>');
-    });
-
-    // ========== DISABLED - was causing mid-word highlighting ==========
-    // Numbers with units - DISABLED
-    // formatted = formatted.replace(...);
-
-    // Funding amounts - DISABLED
-    // formatted = formatted.replace(...);
-
-    // Experience requirements - DISABLED
-    // formatted = formatted.replace(...);
-
-    // ========== 3. BOLD TECHNOLOGY NAMES ==========
-    const technologies = [
-        'React\\.js', 'React', 'ReactJS', 'Next\\.js', 'NextJS', 'Vue\\.js', 'Vue', 'Angular',
-        'TypeScript', 'JavaScript', 'Node\\.js', 'NodeJS', 'Express\\.js', 'Express',
-        'Python', 'Django', 'Flask', 'FastAPI',
-        'Java', 'Spring', 'Spring Boot', 'Kotlin',
-        'C\\+\\+', 'C#', '\\.NET', 'ASP\\.NET',
-        'Go', 'Golang', 'Rust', 'Ruby', 'Rails', 'Ruby on Rails',
-        'PHP', 'Laravel', 'Symfony',
-        'Swift', 'Objective-C', 'iOS', 'Android', 'React Native', 'Flutter', 'Dart',
-        'TailwindCSS', 'Tailwind', 'CSS', 'SCSS', 'Sass', 'Bootstrap', 'Material UI', 'Chakra UI',
-        'HTML5?', 'HTML', 'CSS3',
-        'GraphQL', 'REST', 'REST API', 'RESTful', 'gRPC', 'WebSocket',
-        'MongoDB', 'PostgreSQL', 'MySQL', 'Redis', 'Elasticsearch', 'DynamoDB',
-        'AWS', 'Azure', 'GCP', 'Google Cloud', 'Docker', 'Kubernetes', 'K8s',
-        'Jenkins', 'CircleCI', 'GitHub Actions', 'GitLab CI', 'Terraform',
-        'Git', 'GitHub', 'GitLab', 'Bitbucket',
-        'Jira', 'Confluence', 'Slack', 'Figma', 'Sketch',
-        'SQL', 'NoSQL', 'ORM', 'Prisma', 'Sequelize',
-        'Jest', 'Mocha', 'Cypress', 'Playwright', 'Selenium',
-        'Webpack', 'Vite', 'Babel', 'ESLint', 'Prettier',
-        'Redux', 'MobX', 'Zustand', 'Recoil',
-        'OAuth', 'JWT', 'SSO', 'SAML',
-        'Microservices', 'Monolith', 'Serverless', 'Lambda',
-        'CI/CD', 'DevOps', 'Agile', 'Scrum', 'Kanban'
-    ];
-
-    technologies.forEach(tech => {
-        const regex = new RegExp(`\\b(${tech})\\b`, 'gi');
-        // Tech names stay normal - no special styling to avoid broken link appearance
-    });
-
-    // ========== 4. BOLD COMPANY NAMES (Common ones) ==========
-    const companies = [
-        'Microsoft', 'Google', 'Amazon', 'Apple', 'Meta', 'Facebook', 'Netflix', 'Uber',
-        'LinkedIn', 'Twitter', 'X', 'Airbnb', 'Spotify', 'Salesforce', 'Oracle', 'IBM',
-        'Adobe', 'Nvidia', 'Intel', 'AMD', 'Cisco', 'SAP', 'VMware', 'ServiceNow',
-        'Stripe', 'PayPal', 'Square', 'Shopify', 'Twilio', 'Zoom', 'Slack', 'Atlassian',
-        'Tiger Global', 'Sequoia', 'Andreessen Horowitz', 'a16z', 'Accel', 'Y Combinator',
-        'Flipkart', 'Swiggy', 'Zomato', 'Ola', 'Paytm', 'PhonePe', 'Razorpay', 'CRED',
-        'Jar', 'Zerodha', 'Groww', 'upGrad', 'Byju\'s', 'Unacademy', 'Meesho', 'Dunzo'
-    ];
-
-    // Company names - DISABLED to prevent mid-word bolding
-    // companies.forEach(company => {
-    //     formatted = formatted.replace(regex, '<strong>...</strong>');
-    // });
-
-    // ========== DEGREES - DISABLED to prevent mid-word bolding ==========
-    // formatted = formatted.replace(...);
-
-
-    // ========== 6. FORMAT BULLET LISTS ==========
-    // Convert lines starting with -, •, *, or numbers to list items
-    const lines = formatted.split('\n');
-    let inList = false;
-    let listType = 'ul';
-    const processedLines: string[] = [];
-
-    lines.forEach((line, index) => {
-        const trimmedLine = line.trim();
-        const bulletMatch = trimmedLine.match(/^[-•*]\s+(.+)$/);
-        const numberedMatch = trimmedLine.match(/^(\d+)[.)]\s+(.+)$/);
-
-        if (bulletMatch) {
-            if (!inList) {
-                processedLines.push('<ul class="list-disc list-inside space-y-2 my-4 text-gray-300">');
-                inList = true;
-                listType = 'ul';
-            }
-            processedLines.push(`<li class="ml-2">${bulletMatch[1]}</li>`);
-        } else if (numberedMatch) {
-            if (!inList) {
-                processedLines.push('<ol class="list-decimal list-inside space-y-2 my-4 text-gray-300">');
-                inList = true;
-                listType = 'ol';
-            }
-            processedLines.push(`<li class="ml-2">${numberedMatch[2]}</li>`);
-        } else {
-            if (inList) {
-                processedLines.push(listType === 'ul' ? '</ul>' : '</ol>');
-                inList = false;
-            }
-            processedLines.push(line);
-        }
-    });
-
-    if (inList) {
-        processedLines.push(listType === 'ul' ? '</ul>' : '</ol>');
-    }
-
-    formatted = processedLines.join('\n');
-
-    // ========== 7. CONVERT NEWLINES TO HTML ==========
-    // Double newlines become paragraph breaks
-    formatted = formatted
-        .split(/\n\n+/)
-        .map(para => {
-            const trimmed = para.trim();
-            // Don't wrap if already has block-level HTML
-            if (trimmed.startsWith('<h3') || trimmed.startsWith('<ul') ||
-                trimmed.startsWith('<ol') || trimmed.startsWith('<li') ||
-                trimmed.startsWith('</ul') || trimmed.startsWith('</ol')) {
-                return trimmed;
-            }
-            return `<p class="text-gray-400 leading-relaxed mb-4">${trimmed.replace(/\n/g, '<br/>')}</p>`;
-        })
-        .join('');
-
-    return formatted;
 };
 
 export const JobDetailPage: React.FC = () => {
@@ -290,11 +139,32 @@ export const JobDetailPage: React.FC = () => {
                         </div>
 
                         {/* Metadata Badges */}
+
+                        {/* CLOSED JOB WARNING */}
+                        {job.joblive === false && (
+                            <div className="bg-red-500/10 border border-red-500/50 p-4 rounded-xl flex items-center gap-3 mb-6">
+                                <div className="p-2 bg-red-500/20 rounded-full">
+                                    <Clock className="w-5 h-5 text-red-500" />
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-red-400">Position Closed</h3>
+                                    <p className="text-sm text-gray-400">This job is no longer accepting applications.</p>
+                                </div>
+                            </div>
+                        )}
+
                         <div className="flex flex-wrap gap-3">
                             {/* Employment Type */}
                             <div className="px-3 py-1.5 rounded-full bg-accent/10 border border-accent/30 text-sm flex items-center gap-2 text-accent">
                                 <Briefcase className="w-4 h-4" /> {employmentType}
                             </div>
+
+                            {/* Experience */}
+                            {job.experience && (
+                                <div className="px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/30 text-sm flex items-center gap-2 text-green-400">
+                                    <Clock className="w-4 h-4" /> {job.experience}
+                                </div>
+                            )}
 
                             {/* Job Type (job/internship) */}
                             {job.job_type && (
@@ -322,7 +192,7 @@ export const JobDetailPage: React.FC = () => {
                         <Card className="p-8 bg-surface/50 border-white/5">
                             <h3 className="text-xl font-bold mb-6">Job Description</h3>
                             <div
-                                className="prose prose-invert prose-p:text-gray-400 prose-p:leading-relaxed prose-headings:text-white max-w-none space-y-4"
+                                className="prose prose-invert prose-p:text-gray-400 prose-p:leading-relaxed prose-headings:text-white max-w-none space-y-4 whitespace-pre-line"
                                 dangerouslySetInnerHTML={{ __html: formatDescription(job.description) }}
                             />
                         </Card>
@@ -345,13 +215,14 @@ export const JobDetailPage: React.FC = () => {
                         <div className="hidden md:block">
                             <h3 className="text-xl font-bold mb-4">Ready to apply?</h3>
                             <a
-                                href={applyUrl}
-                                target="_blank"
+                                href={job.joblive === false ? '#' : applyUrl}
+                                target={job.joblive === false ? '_self' : '_blank'}
                                 rel="noopener noreferrer"
-                                className="inline-block"
+                                className={`inline-block ${job.joblive === false ? 'cursor-not-allowed opacity-50' : ''}`}
+                                onClick={(e) => job.joblive === false && e.preventDefault()}
                             >
-                                <Button className="flex items-center justify-center gap-2" size="lg">
-                                    Apply for this Role <ArrowUpRight className="w-5 h-5" />
+                                <Button className="flex items-center justify-center gap-2" size="lg" disabled={job.joblive === false}>
+                                    {job.joblive === false ? 'Applications Closed' : 'Apply for this Role'} <ArrowUpRight className="w-5 h-5" />
                                 </Button>
                             </a>
                         </div>
@@ -419,13 +290,14 @@ export const JobDetailPage: React.FC = () => {
 
                             {/* Apply Button */}
                             <a
-                                href={applyUrl}
-                                target="_blank"
+                                href={job.joblive === false ? '#' : applyUrl}
+                                target={job.joblive === false ? '_self' : '_blank'}
                                 rel="noopener noreferrer"
-                                className="block w-full"
+                                className={`block w-full ${job.joblive === false ? 'cursor-not-allowed opacity-50' : ''}`}
+                                onClick={(e) => job.joblive === false && e.preventDefault()}
                             >
-                                <Button className="w-full flex items-center justify-center gap-2">
-                                    Apply Now <ArrowUpRight className="w-4 h-4" />
+                                <Button className="w-full flex items-center justify-center gap-2" disabled={job.joblive === false}>
+                                    {job.joblive === false ? 'Closed' : 'Apply Now'} <ArrowUpRight className="w-4 h-4" />
                                 </Button>
                             </a>
                         </Card>

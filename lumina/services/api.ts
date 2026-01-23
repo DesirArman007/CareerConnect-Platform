@@ -178,6 +178,7 @@ export const jobs = {
         department?: string,
         location?: string,
         employmentType?: string,
+        experienceLevel?: string,
         signal?: AbortSignal
     ) => {
         const res = await api.get('/job', {
@@ -187,6 +188,7 @@ export const jobs = {
                 ...(department && { department }),
                 ...(location && { location }),
                 ...(employmentType && { employment_type: employmentType }),
+                ...(experienceLevel && { experience_level: experienceLevel }),
             },
             signal,
         });
@@ -234,6 +236,7 @@ export const jobs = {
         department?: string,
         location?: string,
         employmentType?: string,
+        experienceLevel?: string,
         signal?: AbortSignal
     ) => {
         const res = await api.get('/job/search/query', {
@@ -244,6 +247,7 @@ export const jobs = {
                 ...(department && { department }),
                 ...(location && { location }),
                 ...(employmentType && { employment_type: employmentType }),
+                ...(experienceLevel && { experience_level: experienceLevel }),
             },
             signal,
         });

@@ -38,6 +38,14 @@ const EMPLOYMENT_TYPES = [
     { value: 'Internship', label: 'Internship' },
 ];
 
+const EXPERIENCE_LEVELS = [
+    { value: '', label: 'All Levels' },
+    { value: 'entry', label: 'Entry Level (0-2y)' },
+    { value: 'mid', label: 'Mid Level (2-5y)' },
+    { value: 'senior', label: 'Senior (5y+)' },
+    { value: 'director', label: 'Director (8y+)' },
+];
+
 export const JobsPage: React.FC = () => {
     const [searchParams, setSearchParams] = useSearchParams();
 
@@ -46,6 +54,7 @@ export const JobsPage: React.FC = () => {
     const [selectedDepartment, setSelectedDepartment] = useState(searchParams.get('department') || '');
     const [selectedLocation, setSelectedLocation] = useState(searchParams.get('location') || '');
     const [selectedEmploymentType, setSelectedEmploymentType] = useState(searchParams.get('type') || '');
+    const [selectedExperienceLevel, setSelectedExperienceLevel] = useState(searchParams.get('level') || '');
 
     const [jobs, setJobs] = useState<Job[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -85,6 +94,7 @@ export const JobsPage: React.FC = () => {
         if (selectedDepartment) params.set('department', selectedDepartment);
         if (selectedLocation) params.set('location', selectedLocation);
         if (selectedEmploymentType) params.set('type', selectedEmploymentType);
+        if (selectedExperienceLevel) params.set('level', selectedExperienceLevel);
         if (currentPage > 1) params.set('page', currentPage.toString());
 
         setSearchParams(params, { replace: true });
@@ -109,6 +119,7 @@ export const JobsPage: React.FC = () => {
         department: string,
         location: string,
         employmentType: string,
+        experienceLevel: string,
         signal: AbortSignal
     ) => {
         setIsLoading(true);
@@ -118,9 +129,9 @@ export const JobsPage: React.FC = () => {
             let response;
 
             if (trimmedQuery && trimmedQuery.length > 0) {
-                response = await jobApi.search(trimmedQuery, page, ITEMS_PER_PAGE, department, location, employmentType, signal);
+                response = await jobApi.search(trimmedQuery, page, ITEMS_PER_PAGE, department, location, employmentType, experienceLevel, signal);
             } else {
-                response = await jobApi.getAll(page, ITEMS_PER_PAGE, department, location, employmentType, signal);
+                response = await jobApi.getAll(page, ITEMS_PER_PAGE, department, location, employmentType, experienceLevel, signal);
             }
 
             const fetchedJobs = Array.isArray(response.jobs) ? response.jobs : [];
@@ -155,7 +166,8 @@ export const JobsPage: React.FC = () => {
         searchQuery: "",
         department: "",
         location: "",
-        employmentType: ""
+        employmentType: "",
+        experienceLevel: ""
     });
 
     useEffect(() => {
@@ -165,7 +177,8 @@ export const JobsPage: React.FC = () => {
             prevFiltersRef.current.searchQuery !== searchQuery ||
             prevFiltersRef.current.department !== selectedDepartment ||
             prevFiltersRef.current.location !== selectedLocation ||
-            prevFiltersRef.current.employmentType !== selectedEmploymentType;
+            prevFiltersRef.current.employmentType !== selectedEmploymentType ||
+            prevFiltersRef.current.experienceLevel !== selectedExperienceLevel;
 
         // Reset page ONLY when filters/search change
         if (filtersChanged) {
@@ -173,7 +186,8 @@ export const JobsPage: React.FC = () => {
                 searchQuery,
                 department: selectedDepartment,
                 location: selectedLocation,
-                employmentType: selectedEmploymentType
+                employmentType: selectedEmploymentType,
+                experienceLevel: selectedExperienceLevel
             };
 
             if (currentPage !== 1) {
@@ -189,6 +203,7 @@ export const JobsPage: React.FC = () => {
                 selectedDepartment,
                 selectedLocation,
                 selectedEmploymentType,
+                selectedExperienceLevel,
                 abortController.signal
             );
         }, searchQuery ? DEBOUNCE_DELAY : 0);
@@ -201,8 +216,8 @@ export const JobsPage: React.FC = () => {
 
     // Check if any filters are active
     const hasActiveFilters = useMemo(() => {
-        return searchQuery || selectedDepartment || selectedLocation || selectedEmploymentType;
-    }, [searchQuery, selectedDepartment, selectedLocation, selectedEmploymentType]);
+        return searchQuery || selectedDepartment || selectedLocation || selectedEmploymentType || selectedExperienceLevel;
+    }, [searchQuery, selectedDepartment, selectedLocation, selectedEmploymentType, selectedExperienceLevel]);
 
     // Count active filters (excluding search)
     const activeFilterCount = useMemo(() => {
@@ -210,8 +225,9 @@ export const JobsPage: React.FC = () => {
         if (selectedDepartment) count++;
         if (selectedLocation) count++;
         if (selectedEmploymentType) count++;
+        if (selectedExperienceLevel) count++;
         return count;
-    }, [selectedDepartment, selectedLocation, selectedEmploymentType]);
+    }, [selectedDepartment, selectedLocation, selectedEmploymentType, selectedExperienceLevel]);
 
     // Clear all filters
     const handleClearAll = useCallback(() => {
@@ -219,11 +235,12 @@ export const JobsPage: React.FC = () => {
         setSelectedDepartment('');
         setSelectedLocation('');
         setSelectedEmploymentType('');
+        setSelectedExperienceLevel('');
         setCurrentPage(1);
     }, []);
 
     // Clear individual filter
-    const handleClearFilter = useCallback((filterType: 'search' | 'department' | 'location' | 'employmentType') => {
+    const handleClearFilter = useCallback((filterType: 'search' | 'department' | 'location' | 'employmentType' | 'experienceLevel') => {
         switch (filterType) {
             case 'search':
                 setSearchQuery('');
@@ -236,6 +253,9 @@ export const JobsPage: React.FC = () => {
                 break;
             case 'employmentType':
                 setSelectedEmploymentType('');
+                break;
+            case 'experienceLevel':
+                setSelectedExperienceLevel('');
                 break;
         }
     }, []);
@@ -264,15 +284,22 @@ export const JobsPage: React.FC = () => {
         setSelectedEmploymentType(e.target.value);
     }, []);
 
+    const handleExperienceLevelChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+        setSelectedExperienceLevel(e.target.value);
+    }, []);
+
     // Active filter tags
     const activeFilters = useMemo(() => {
-        const filters: { type: 'search' | 'department' | 'location' | 'employmentType'; label: string; value: string }[] = [];
+        const filters: { type: 'search' | 'department' | 'location' | 'employmentType' | 'experienceLevel'; label: string; value: string }[] = [];
         if (searchQuery) filters.push({ type: 'search', label: `"${searchQuery}"`, value: searchQuery });
         if (selectedDepartment) filters.push({ type: 'department', label: selectedDepartment, value: selectedDepartment });
         if (selectedLocation) filters.push({ type: 'location', label: selectedLocation, value: selectedLocation });
         if (selectedEmploymentType) filters.push({ type: 'employmentType', label: selectedEmploymentType, value: selectedEmploymentType });
+        // Find label for experience level
+        const expLabel = EXPERIENCE_LEVELS.find(e => e.value === selectedExperienceLevel)?.label || selectedExperienceLevel;
+        if (selectedExperienceLevel) filters.push({ type: 'experienceLevel', label: expLabel, value: selectedExperienceLevel });
         return filters;
-    }, [searchQuery, selectedDepartment, selectedLocation, selectedEmploymentType]);
+    }, [searchQuery, selectedDepartment, selectedLocation, selectedEmploymentType, selectedExperienceLevel]);
 
     const resultsText = useMemo(() => {
         if (isLoading) return null;
@@ -368,6 +395,15 @@ export const JobsPage: React.FC = () => {
                             >
                                 {EMPLOYMENT_TYPES.map(type => (
                                     <option key={type.value} value={type.value}>{type.label}</option>
+                                ))}
+                            </select>
+                            <select
+                                value={selectedExperienceLevel}
+                                onChange={handleExperienceLevelChange}
+                                className="flex-1 lg:flex-none px-4 py-3 bg-black/40 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/20 transition-colors appearance-none lg:min-w-[140px] text-base cursor-pointer"
+                            >
+                                {EXPERIENCE_LEVELS.map(level => (
+                                    <option key={level.value} value={level.value}>{level.label}</option>
                                 ))}
                             </select>
                         </div>

@@ -5,6 +5,7 @@ import { Button } from './ui/Button';
 import { MapPin, Clock, DollarSign, ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getCompanyIcon } from './CompanyLogos';
+import { formatTimeAgo } from '../utils/formatDate';
 
 interface JobListProps {
   jobs: Job[];
@@ -114,7 +115,9 @@ export const JobList: React.FC<JobListProps> = ({
                     <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-400">
                       <Clock className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" /> {job.employment_type || job.type || 'Full-time'}
                     </div>
-                    <span className="text-xs text-gray-600 font-mono">{job.postedAt}</span>
+                    <span className="text-xs text-gray-600 font-mono">
+                      {job.createdAt ? formatTimeAgo(job.createdAt) : job.postedAt}
+                    </span>
                   </div>
                 </div>
               </Card>
