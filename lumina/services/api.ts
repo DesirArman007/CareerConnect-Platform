@@ -177,6 +177,7 @@ export const jobs = {
         limit: number,
         department?: string,
         location?: string,
+        company?:string,
         employmentType?: string,
         experienceLevel?: string,
         signal?: AbortSignal
@@ -187,6 +188,7 @@ export const jobs = {
                 limit,
                 ...(department && { department }),
                 ...(location && { location }),
+                ...(company && {company}),
                 ...(employmentType && { employment_type: employmentType }),
                 ...(experienceLevel && { experience_level: experienceLevel }),
             },
@@ -235,6 +237,7 @@ export const jobs = {
         limit: number,
         department?: string,
         location?: string,
+        company?:string,
         employmentType?: string,
         experienceLevel?: string,
         signal?: AbortSignal
@@ -246,6 +249,7 @@ export const jobs = {
                 limit,
                 ...(department && { department }),
                 ...(location && { location }),
+                ...(company && {company}),
                 ...(employmentType && { employment_type: employmentType }),
                 ...(experienceLevel && { experience_level: experienceLevel }),
             },
