@@ -6,6 +6,7 @@ import crypto from "crypto";
 import { sendEmail } from "../utils/sendEmail.js";
 import { log } from "console";
 import jwt from "jsonwebtoken";
+import { Roles } from "../constants/roles.js";
 
 const registerUser = asyncHandler(async (req, res) => {
 
@@ -29,7 +30,7 @@ const registerUser = asyncHandler(async (req, res) => {
         name,
         email,
         password,
-        role,
+        role: role || Roles.USER,
         authProvider: 'email',
     });
 
