@@ -19,6 +19,7 @@ interface AuthContextType {
     register: (data: { name: string; email: string; password: string }) => Promise<void>;
     logout: () => Promise<void>;
     updateProfile: (data: Partial<User>) => Promise<void>;
+    googleLogin: (idToken:string) => Promise<void>;
     toggleSaveJob: (jobId: string) => void;
     isJobSaved: (jobId: string) => boolean;
 }
@@ -174,6 +175,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const isJobSaved = (jobId: string) => savedJobs.includes(jobId);
 
+    const googleLogin = async(idToken: string) => {
+        const response = await auth.googleAuth(idToken);
+
+        if(response?.success === true){
+            localStorage.setItem('hasSession', 'true');
+
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            try{
+                const success = await fetchUserData();
+                if(!success){
+                    console.warn('Google login succeeded but getUser failed');
+                }
+            } catch(error){
+                console.warn('Ignoring getUser error after Google login:',error);
+            }
+            return;
+        }
+        throw new Error('Google Login Failed');
+    };
+
     return (
         <AuthContext.Provider
             value={{
@@ -181,6 +203,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 savedJobs,
                 isLoading,
                 login,
+                googleLogin,
                 register,
                 logout,
                 updateProfile,

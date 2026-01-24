@@ -11,6 +11,19 @@ const api = axios.create({
     },
 });
 
+// Add this immediately after 'const api = axios.create({...})'
+api.interceptors.request.use((config) => {
+    // 1. Get the token from the storage we just saved to
+    const token = localStorage.getItem('authToken');
+
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    return config;
+}, (error) => {
+    return Promise.reject(error);
+});
 /* ---------- SHARED API RESPONSE ---------- */
 export interface ApiResponse<T> {
     success: boolean;
@@ -35,7 +48,6 @@ export const auth = {
         return res.data;
     },
 
-    // ✅ FIXED: use api instance + correct path
     getUser: async (): Promise<ApiResponse<User>> => {
         const res = await api.get('/users/getUser');
         return res.data;
@@ -45,7 +57,24 @@ export const auth = {
         const res = await api.put('/users/updateUser', data);
         return res.data;
     },
+
+
+
+    googleAuth: async (idToken: string): Promise<AuthResponse> => {
+        const res = await api.post('/users/googleAuth', { idToken });
+
+        // Extract token safely (handled nested data structure)
+        const token = res.data.token || res.data.accessToken || res.data.data?.token || res.data.data?.accessToken;
+
+        if (token) {
+            localStorage.setItem('authToken', token);
+        }
+
+        return res.data;
+    },
 };
+
+
 
 /* ---------- JOBS ---------- */
 // Helper to extract job array from various response formats
@@ -177,7 +206,7 @@ export const jobs = {
         limit: number,
         department?: string,
         location?: string,
-        company?:string,
+        company?: string,
         employmentType?: string,
         experienceLevel?: string,
         signal?: AbortSignal
@@ -188,7 +217,7 @@ export const jobs = {
                 limit,
                 ...(department && { department }),
                 ...(location && { location }),
-                ...(company && {company}),
+                ...(company && { company }),
                 ...(employmentType && { employment_type: employmentType }),
                 ...(experienceLevel && { experience_level: experienceLevel }),
             },
@@ -237,7 +266,7 @@ export const jobs = {
         limit: number,
         department?: string,
         location?: string,
-        company?:string,
+        company?: string,
         employmentType?: string,
         experienceLevel?: string,
         signal?: AbortSignal
@@ -249,7 +278,7 @@ export const jobs = {
                 limit,
                 ...(department && { department }),
                 ...(location && { location }),
-                ...(company && {company}),
+                ...(company && { company }),
                 ...(employmentType && { employment_type: employmentType }),
                 ...(experienceLevel && { experience_level: experienceLevel }),
             },
