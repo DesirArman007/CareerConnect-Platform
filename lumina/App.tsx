@@ -3,6 +3,7 @@ import { SpeedInsights } from '@vercel/speed-insights/react';
 import { Analytics } from '@vercel/analytics/react';
 import { Header } from './components/Header';
 import { AuthProvider } from './context/AuthContext';
+import { Toaster } from 'react-hot-toast';
 
 import { AIChat } from './components/AIChat';
 
@@ -22,6 +23,12 @@ function App() {
   return (
     <GoogleOAuthProvider clientId='1051348061346-0n56hv8e0t80a5m3sqsnta4dait4mvqf.apps.googleusercontent.com'>
       <AuthProvider>
+        <Toaster position="top-center" toastOptions={{
+          style: {
+            background: '#333',
+            color: '#fff',
+          },
+        }} />
         <BrowserRouter>
           <div className="min-h-screen bg-background text-foreground selection:bg-accent selection:text-white overflow-x-hidden">
             {/* Global subtle grid background */}

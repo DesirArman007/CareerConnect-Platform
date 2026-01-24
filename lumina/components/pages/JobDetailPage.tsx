@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { Job } from '../../types';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
-import { MapPin, Clock, Building, Briefcase, ArrowLeft, ArrowUpRight, Heart, Globe, Calendar, Tag } from 'lucide-react';
+import { MapPin, Clock, Building, Briefcase, ArrowLeft, ArrowUpRight, Heart, Globe, Calendar, Tag, Lock } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { jobs as jobApi } from '../../services/api';
 import { getCompanyIcon } from '../CompanyLogos';
 import { formatDescription } from '../../utils/formatJobDescription.ts';
+
 
 // Helper function to format dates nicely
 const formatDate = (dateString?: string): string => {
@@ -27,6 +29,7 @@ const formatDate = (dateString?: string): string => {
 export const JobDetailPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const location = useLocation();
     const { user, toggleSaveJob, isJobSaved } = useAuth();
     const [job, setJob] = useState<Job | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -98,6 +101,46 @@ export const JobDetailPage: React.FC = () => {
 
     // Get posted date
     const postedDate = formatDate(job.createdAt || job.postedAt);
+
+    const handleAction = (actionType: 'apply' | 'save') => {
+        if (!user) {
+            const isMobile = window.innerWidth < 768;
+
+            toast("Sign in to unlock application", {
+                icon: <Lock className="w-4 h-4 text-blue-400" />,
+                id: 'auth-lock',
+                duration: 4000,
+                style: isMobile ? {
+                    // Mobile: Thin & Minimal
+                    borderRadius: '8px',
+                    padding: '10px 16px',
+                    background: '#171717',
+                    color: '#e5e5e5',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    fontSize: '13px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                    maxWidth: '350px',
+                } : {
+                    // Desktop: Standard Size (Previous)
+                    borderRadius: '12px',
+                    padding: '16px 24px', // Standard comfortable padding
+                    background: '#171717',
+                    color: '#e5e5e5',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    fontSize: '16px', // Standard font size
+                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                },
+                className: 'font-medium',
+            });
+            return;
+        }
+
+        if (actionType === 'apply') {
+            window.open(applyUrl, '_blank');
+        } else if (actionType === 'save') {
+            if (job._id) toggleSaveJob(job._id);
+        }
+    };
 
     return (
         <main className="pt-24 min-h-screen px-6 pb-24">
@@ -199,32 +242,27 @@ export const JobDetailPage: React.FC = () => {
 
                         {/* Mobile Apply Button */}
                         <div className="flex flex-col gap-4 md:hidden">
-                            <a
-                                href={applyUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="block w-full"
+                            <Button
+                                onClick={() => handleAction('apply')}
+                                className="w-full flex items-center justify-center gap-2"
+                                size="lg"
+                                disabled={job.joblive === false}
                             >
-                                <Button className="w-full flex items-center justify-center gap-2" size="lg">
-                                    Apply Now <ArrowUpRight className="w-5 h-5" />
-                                </Button>
-                            </a>
+                                {job.joblive === false ? 'Closed' : 'Apply Now'} <ArrowUpRight className="w-5 h-5" />
+                            </Button>
                         </div>
 
                         {/* Desktop Bottom Apply Section */}
                         <div className="hidden md:block">
                             <h3 className="text-xl font-bold mb-4">Ready to apply?</h3>
-                            <a
-                                href={job.joblive === false ? '#' : applyUrl}
-                                target={job.joblive === false ? '_self' : '_blank'}
-                                rel="noopener noreferrer"
-                                className={`inline-block ${job.joblive === false ? 'cursor-not-allowed opacity-50' : ''}`}
-                                onClick={(e) => job.joblive === false && e.preventDefault()}
+                            <Button
+                                className="flex items-center justify-center gap-2"
+                                onClick={() => handleAction('apply')}
+                                size="lg"
+                                disabled={job.joblive === false}
                             >
-                                <Button className="flex items-center justify-center gap-2" size="lg" disabled={job.joblive === false}>
-                                    {job.joblive === false ? 'Applications Closed' : 'Apply for this Role'} <ArrowUpRight className="w-5 h-5" />
-                                </Button>
-                            </a>
+                                {job.joblive === false ? 'Applications Closed' : 'Apply for this Role'} <ArrowUpRight className="w-5 h-5" />
+                            </Button>
                         </div>
                     </div>
 
@@ -289,17 +327,14 @@ export const JobDetailPage: React.FC = () => {
                             </div>
 
                             {/* Apply Button */}
-                            <a
-                                href={job.joblive === false ? '#' : applyUrl}
-                                target={job.joblive === false ? '_self' : '_blank'}
-                                rel="noopener noreferrer"
-                                className={`block w-full ${job.joblive === false ? 'cursor-not-allowed opacity-50' : ''}`}
-                                onClick={(e) => job.joblive === false && e.preventDefault()}
+                            {/* Apply Button */}
+                            <Button
+                                className="w-full flex items-center justify-center gap-2"
+                                disabled={job.joblive === false}
+                                onClick={() => handleAction('apply')}
                             >
-                                <Button className="w-full flex items-center justify-center gap-2" disabled={job.joblive === false}>
-                                    {job.joblive === false ? 'Closed' : 'Apply Now'} <ArrowUpRight className="w-4 h-4" />
-                                </Button>
-                            </a>
+                                {job.joblive === false ? 'Closed' : 'Apply Now'} <ArrowUpRight className="w-4 h-4" />
+                            </Button>
                         </Card>
                     </div>
                 </div>
