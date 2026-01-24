@@ -18,11 +18,19 @@ const userSchema = new Schema(
             unique: true,
             lowercase: true,
             trim: true,
+            index: true
         },
         password: {
             type: String,
-            required: [true, 'Password is required'],
+            required: function(){
+                return this.authProvider ==='email';
+            },
             select: false
+        },
+
+        avatar: {
+            type: String,
+            default: null
         },
         resetPasswordToken: String,
 
@@ -38,9 +46,25 @@ const userSchema = new Schema(
         },
         authProvider: {
             type: String,
-            enum: ["email", "google", "github", "linkedin"],
+            enum: ["email", "google", "linkedin"],
             default: "email"
+        },
+        googleId: {
+            type: String,
+            index: true,
+            sparse: true
+        },
+        githubId: {
+            type: String,
+            index: true,
+            sparse: true
+        },
+        linkedinId: {
+            type: String,
+            index: true,
+            sparse: true
         }
+
 
     },
     {
@@ -48,12 +72,18 @@ const userSchema = new Schema(
     }
 )
 
+ // 1. No password → OAuth user → skip
+// 2. Password exists but not changed → skip
+ // 3. Hash only when needed
 userSchema.pre("save", async function (next) {
+    if (!this.password) return next();
+
     if (!this.isModified("password")) return next();
 
-    this.password = await bcrypt.hash(this.password, 10)
-    next()
-})
+    this.password = await bcrypt.hash(this.password, 10);
+    next();
+});
+
 
 userSchema.methods.isPasswordCorrect = async function (password) {
     return await bcrypt.compare(password, this.password)

@@ -7,6 +7,7 @@ import { sendEmail } from "../utils/sendEmail.js";
 import { log } from "console";
 import jwt from "jsonwebtoken";
 import { Roles } from "../constants/roles.js";
+import {OAuth2Client} from "google-auth-library";
 
 const registerUser = asyncHandler(async (req, res) => {
 
@@ -277,4 +278,77 @@ const resetPassword = asyncHandler(async (req, res) => {
 
 });
 
-export { registerUser, loginUser, logoutUser, refreshTokenHandler, changePassword, forgotPassword, resetPassword };
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const googleAuth = asyncHandler(async(req, res) =>{
+    const {idToken} = req.body;
+
+    if(!idToken){
+        throw new ApiError(400, "Google ID Token is required");
+    }
+
+    const ticket = await client.verifyIdToken({
+        idToken: idToken,
+        audience: process.env.GOOGLE_CLIENT_ID
+    });
+
+    const payload = ticket.getPayload();
+    
+    if(!payload){
+        throw new ApiError(401, "Invalid Google token");
+    }
+
+    const {sub:googleId, email, name, picture} = payload;
+
+    if(!email){
+        throw new ApiError(400, "Google account has no email");
+    }
+
+    let user = await User.findOne({
+        $or:[ {googleId},{email}]
+    });
+
+    // user exits -> link to google if not linked
+    if (user) {
+        if (!user.googleId) {
+        user.googleId = googleId;
+        user.authProvider = "google";
+        user.avatar = user.avatar || picture || null;
+        await user.save();
+        }
+    }
+
+    if(!user){
+        user = await User.create({
+            name,
+            email,
+            googleId,
+            authProvider:"google",
+            avatar: picture || null
+
+        });
+    }
+
+    // Issue tokens
+    const accessToken = user.generateAccessToken();
+    const refreshToken = user.generateRefreshToken();
+
+    user.refreshToken = refreshToken;
+    await user.save();
+
+    res.status(200).json(
+        new ApiResponse(200,{
+                user: {
+                        id: user._id,
+                        name: user.name,
+                        email: user.email,
+                        avatar: user.avatar,
+                        role: user.role
+                    },
+                    accessToken,
+                    refreshToken
+        })
+    )
+
+})
+
+export { registerUser, loginUser, logoutUser, refreshTokenHandler, changePassword, forgotPassword, resetPassword, googleAuth };

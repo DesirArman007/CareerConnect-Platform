@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { registerUser,loginUser,refreshTokenHandler,logoutUser, resetPassword, forgotPassword, changePassword } from "../controllers/authController.js";
+import { registerUser,loginUser,refreshTokenHandler,logoutUser, resetPassword, forgotPassword, changePassword, googleAuth } from "../controllers/authController.js";
 import { verifyJWT } from "../middleware/auth.middleware.js";
 import { authorizeRoles } from "../middleware/role.middleware.js";
 import { getUser,updateUser,deleteUser,updatePassword, searchUsers, getAllUsers } from "../controllers/userController.js";
@@ -15,6 +15,7 @@ router.route('/logout').post(verifyJWT, logoutUser);
 router.route('/changePassword').post(verifyJWT, changePassword);
 router.route('/forgotPassword').post(generalRateLimiter, forgotPassword);
 router.route('/resetPassword').post(generalRateLimiter, resetPassword);
+router.route('/googleAuth').post(registerRateLimiter,googleAuth)
 
 router.route('/getUser').get(verifyJWT, getUser);
 router.route('/updateUser').put(verifyJWT, updateUser);
