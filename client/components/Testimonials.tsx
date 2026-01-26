@@ -11,7 +11,7 @@ export const Testimonials: React.FC = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6">
                 <div className="text-center mb-8 sm:mb-12 md:mb-16">
                     <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-2 sm:mb-4">No more endless searching</h2>
-                    <p className="text-sm sm:text-base text-gray-500">See why engineers are switching their search to Lumina.</p>
+                    <p className="text-sm sm:text-base text-gray-500">See why engineers are switching their search to WorkRaze.</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">

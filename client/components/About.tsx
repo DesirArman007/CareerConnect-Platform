@@ -28,10 +28,10 @@ export const About: React.FC = () => {
                                     Hi, I'm <span className="text-white font-medium">Abhishek Yadav</span> — a developer passionate about building tools that solve real problems.
                                 </p>
                                 <p className="text-sm sm:text-base leading-relaxed">
-                                    I built Lumina because I was tired of the job hunt shuffle—opening fifty tabs, dealing with broken recruiter sites, and endlessly re-entering my resume data. I wanted a place that just works.
+                                    I built WorkRaze because I was tired of the job hunt shuffle—opening fifty tabs, dealing with broken recruiter sites, and endlessly re-entering my resume data. I wanted a place that just works.
                                 </p>
                                 <p className="text-sm sm:text-base leading-relaxed">
-                                    Lumina aggregates jobs directly from company career pages, giving you a clean, noise-free feed of opportunities. No third-party recruiters, no ghost jobs.
+                                    WorkRaze aggregates jobs directly from company career pages, giving you a clean, noise-free feed of opportunities. No third-party recruiters, no ghost jobs.
                                 </p>
                             </div>
                         </div>

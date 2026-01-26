@@ -34,6 +34,7 @@ export const JobDetailPage: React.FC = () => {
     const [job, setJob] = useState<Job | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [isExpanded, setIsExpanded] = useState(false);
 
     const isSaved = id ? isJobSaved(id) : false;
 
@@ -143,7 +144,7 @@ export const JobDetailPage: React.FC = () => {
     };
 
     return (
-        <main className="pt-24 min-h-screen px-6 pb-24">
+        <main className="pt-24 min-h-screen px-3 sm:px-6 pb-24">
             <div className="max-w-4xl mx-auto">
                 {/* Header Actions */}
                 <div className="flex items-center justify-between mb-8">
@@ -232,12 +233,25 @@ export const JobDetailPage: React.FC = () => {
                         </div>
 
                         {/* Job Description */}
-                        <Card className="p-8 bg-surface/50 border-white/5">
+                        <Card className="p-4 md:p-8 bg-surface/50 border-white/5 relative">
                             <h3 className="text-xl font-bold mb-6">Job Description</h3>
                             <div
-                                className="prose prose-invert prose-p:text-gray-400 prose-p:leading-relaxed prose-headings:text-white max-w-none space-y-4 whitespace-pre-line"
+                                className={`prose prose-invert prose-p:text-gray-400 prose-p:leading-relaxed prose-headings:text-white max-w-none space-y-4 whitespace-pre-line ${!isExpanded ? 'max-h-[140px] overflow-hidden md:max-h-none md:overflow-visible' : ''
+                                    }`}
                                 dangerouslySetInnerHTML={{ __html: formatDescription(job.description) }}
                             />
+
+                            {/* Mobile Expand Gradient & Button */}
+                            {!isExpanded && (
+                                <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#0a0a0a] to-transparent md:hidden flex flex-col justify-end pb-4 items-center">
+                                    <button
+                                        onClick={() => setIsExpanded(true)}
+                                        className="bg-surface border border-white/10 px-4 py-2 rounded-full text-sm font-medium text-white shadow-lg hover:bg-surface-hover transition-colors flex items-center gap-2"
+                                    >
+                                        Show full job details <div className="w-2 h-2 border-r border-b border-white rotate-45 mt-[-2px]"></div>
+                                    </button>
+                                </div>
+                            )}
                         </Card>
 
                         {/* Mobile Apply Button */}

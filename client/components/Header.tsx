@@ -44,7 +44,7 @@ export const Header: React.FC = () => {
               <Sparkles className="w-6 h-6 text-white relative z-10" />
             </div>
             <span className="text-lg font-bold tracking-tight text-white group-hover:text-gray-200 transition-colors">
-              Lumina
+              WorkRaze
             </span>
           </div>
 

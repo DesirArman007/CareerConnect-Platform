@@ -31,7 +31,7 @@ export const AIChat: React.FC = () => {
     setLoading(true);
 
     const response = await generateCareerAdvice(userMsg);
-    
+
     setLoading(false);
     setMessages(prev => [...prev, { role: 'model', text: response }]);
   };
@@ -60,7 +60,7 @@ export const AIChat: React.FC = () => {
               <Sparkles className="w-4 h-4 text-white" />
             </div>
             <div>
-              <h3 className="font-bold text-white text-sm">Lumina AI Agent</h3>
+              <h3 className="font-bold text-white text-sm">WorkRaze AI Agent</h3>
               <p className="text-xs text-gray-400 flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span> Online
               </p>
@@ -71,11 +71,11 @@ export const AIChat: React.FC = () => {
           <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
             {messages.map((msg, idx) => (
               <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div 
+                <div
                   className={`
                     max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed
-                    ${msg.role === 'user' 
-                      ? 'bg-accent text-white rounded-br-none' 
+                    ${msg.role === 'user'
+                      ? 'bg-accent text-white rounded-br-none'
                       : 'bg-white/10 text-gray-200 rounded-bl-none border border-white/5'}
                   `}
                 >
@@ -86,9 +86,9 @@ export const AIChat: React.FC = () => {
             {loading && (
               <div className="flex justify-start">
                 <div className="bg-white/5 rounded-2xl rounded-bl-none px-4 py-3 border border-white/5 flex gap-1 items-center">
-                  <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}/>
-                  <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}/>
-                  <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}/>
+                  <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                 </div>
               </div>
             )}
@@ -105,7 +105,7 @@ export const AIChat: React.FC = () => {
                 placeholder="Ask for career advice..."
                 className="w-full bg-surface border border-white/10 rounded-full pl-4 pr-12 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all"
               />
-              <button 
+              <button
                 type="submit"
                 disabled={!query.trim() || loading}
                 className="absolute right-1.5 top-1.5 p-1.5 bg-accent hover:bg-accent-hover text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
