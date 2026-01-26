@@ -13,7 +13,8 @@ app.use(cors({
   origin: [
     "http://localhost:3000",
     "https://luminajobs.vercel.app",
-    "https://www.workraze.com/"
+    "https://www.workraze.com",
+    "https://workraze.com"
   ],
   credentials: true
 }));
