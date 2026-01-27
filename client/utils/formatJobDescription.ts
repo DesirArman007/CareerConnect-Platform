@@ -2,6 +2,8 @@
  * Utility to format job descriptions.
  * Converts HTML-like lists to bullets and cleans up whitespace.
  */
+import DOMPurify from 'isomorphic-dompurify';
+
 export const formatDescription = (description: string): string => {
     if (!description) return '';
 
@@ -44,5 +46,7 @@ export const formatDescription = (description: string): string => {
         // Let's just return it for now, usually Workday HTML is okay.
     }
 
-    return formatted;
+    // Sanitize the final output to prevent XSS (Stored XSS protection)
+    // This is critical because we use dangerouslySetInnerHTML in the component
+    return DOMPurify.sanitize(formatted);
 };

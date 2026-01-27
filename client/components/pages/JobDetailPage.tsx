@@ -9,6 +9,7 @@ import { useAuth } from '../../context/AuthContext';
 import { jobs as jobApi } from '../../services/api';
 import { getCompanyIcon } from '../CompanyLogos';
 import { formatDescription } from '../../utils/formatJobDescription.ts';
+import { openExternalLink } from '../../utils/security';
 
 
 // Helper function to format dates nicely
@@ -116,7 +117,7 @@ export const JobDetailPage: React.FC = () => {
         }
 
         if (actionType === 'apply') {
-            window.open(applyUrl, '_blank');
+            openExternalLink(applyUrl);
             if (job._id || id) {
                 // Mark as applied AFTER redirecting
                 await markJobAsApplied((job._id || id) as string);

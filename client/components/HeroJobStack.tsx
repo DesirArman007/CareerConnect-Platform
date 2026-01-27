@@ -5,6 +5,7 @@ import { Button } from './ui/Button';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getCompanyIcon } from './CompanyLogos';
+import { openExternalLink } from '../utils/security';
 
 interface HeroJobStackProps {
     jobs: Job[];
@@ -44,7 +45,7 @@ export const HeroJobStack: React.FC<HeroJobStackProps> = ({ jobs }) => {
             return;
         }
         const applyUrl = job.apply_url || job.applyUrl;
-        if (applyUrl) window.open(applyUrl, '_blank');
+        if (applyUrl) openExternalLink(applyUrl);
         else navigate(`/jobs/${job._id || job.id}`);
     };
 

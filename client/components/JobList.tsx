@@ -6,6 +6,7 @@ import { MapPin, Clock, DollarSign, ArrowUpRight, ChevronLeft, ChevronRight } fr
 import { useNavigate } from 'react-router-dom';
 import { getCompanyIcon } from './CompanyLogos';
 import { formatTimeAgo } from '../utils/formatDate';
+import { openExternalLink } from '../utils/security';
 
 interface JobListProps {
   jobs: Job[];
@@ -92,7 +93,7 @@ export const JobList: React.FC<JobListProps> = ({
                 onClick={(e) => {
                   const jobUrl = `/jobs/${job._id || job.id}`;
                   if (e.ctrlKey || e.metaKey) {
-                    window.open(jobUrl, '_blank');
+                    openExternalLink(jobUrl);
                   } else {
                     navigate(jobUrl);
                   }
