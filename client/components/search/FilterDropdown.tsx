@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, ArrowLeft, Check, Layers } from 'lucide-react';
+import { ChevronDown, ArrowLeft, Check, Layers, Search } from 'lucide-react';
 
 /* ---------------- animation variants ---------------- */
 
@@ -31,11 +31,26 @@ export const FilterDropdown = ({
     const [activeCategoryId, setActiveCategoryId] = useState(null);
     const [direction, setDirection] = useState(1);
 
+    // NEW: Search state for filter options
+    const [filterSearch, setFilterSearch] = useState('');
+
     const buttonRef = useRef<HTMLButtonElement>(null);
     const panelRef = useRef<HTMLDivElement>(null);
 
     const activeCategory = activeCategoryId ? categories.find(c => c.id === activeCategoryId) : null;
     const isCategoryView = activeCategoryId === null;
+
+    // Reset search when switching categories
+    useEffect(() => {
+        setFilterSearch('');
+    }, [activeCategoryId]);
+
+    // Derived filtered options
+    const filteredOptions = activeCategory && activeCategory.options
+        ? activeCategory.options.filter(opt =>
+            opt.label.toLowerCase().includes(filterSearch.toLowerCase())
+        )
+        : [];
 
     /* ---------- outside click (PORTAL SAFE) ---------- */
 
@@ -144,6 +159,23 @@ export const FilterDropdown = ({
                                 )}
                             </div>
 
+                            {/* SEARCH INPUT (Sticky under Header) - Only in Option View */}
+                            {!isCategoryView && (
+                                <div className="p-2 border-b border-white/5 bg-[#1a1a1a]">
+                                    <div className="relative">
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                                        <input
+                                            type="text"
+                                            placeholder={`Search ${activeCategory?.label}...`}
+                                            value={filterSearch}
+                                            onChange={(e) => setFilterSearch(e.target.value)}
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-white/20"
+                                            autoFocus
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
                             {/* BODY (ANIMATED) */}
                             <div className="relative h-[220px] overflow-hidden">
                                 <AnimatePresence initial={false} custom={direction}>
@@ -176,14 +208,13 @@ export const FilterDropdown = ({
                                             ))
                                         ) : (
                                             <>
-                                                {(!activeCategory?.options ||
-                                                    activeCategory.options.length === 0) && (
-                                                        <div className="px-4 py-6 text-sm text-gray-500 text-center">
-                                                            No options available
-                                                        </div>
-                                                    )}
+                                                {filteredOptions.length === 0 && (
+                                                    <div className="px-4 py-6 text-sm text-gray-500 text-center">
+                                                        No matching options
+                                                    </div>
+                                                )}
 
-                                                {activeCategory?.options?.map(option => {
+                                                {filteredOptions.map(option => {
                                                     const selected = activeCategory.value === option.value;
 
                                                     return (
