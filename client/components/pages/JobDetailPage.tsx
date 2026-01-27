@@ -35,6 +35,7 @@ export const JobDetailPage: React.FC = () => {
     const [job, setJob] = useState<Job | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [imgError, setImgError] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
 
     const isSaved = id ? isJobSaved(id) : false;
@@ -277,6 +278,22 @@ export const JobDetailPage: React.FC = () => {
                                     if (customIcon) {
                                         return <div className="w-16 h-16 rounded-xl flex items-center justify-center">{customIcon}</div>;
                                     }
+
+                                    // Try Logo.dev first
+                                    const logoDevKey = import.meta.env.VITE_LOGO_DEV_PUBLIC_KEY;
+                                    if (!imgError && logoDevKey) {
+                                        return (
+                                            <img
+                                                src={`https://img.logo.dev/name/${encodeURIComponent(job.company)}?token=${logoDevKey}`}
+                                                alt={job.company}
+                                                width={64}
+                                                height={64}
+                                                className="w-16 h-16 rounded-xl object-cover bg-white"
+                                                onError={() => setImgError(true)}
+                                            />
+                                        );
+                                    }
+
                                     if (job.logo) {
                                         return <img src={job.logo} alt={job.company} width={64} height={64} className="w-16 h-16 rounded-xl object-cover bg-white" />;
                                     }

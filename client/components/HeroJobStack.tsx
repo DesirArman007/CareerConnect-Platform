@@ -11,6 +11,40 @@ interface HeroJobStackProps {
     jobs: Job[];
 }
 
+// Helper to render company logo - consistent with JobList/JobDetail
+const CompanyLogo: React.FC<{ company: string; logo?: string }> = ({ company, logo }) => {
+    const [imgError, setImgError] = React.useState(false);
+    const customIcon = getCompanyIcon(company, 20);
+    const logoDevKey = import.meta.env.VITE_LOGO_DEV_PUBLIC_KEY;
+
+    if (customIcon) {
+        return <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0">{customIcon}</div>;
+    }
+
+    if (!imgError && logoDevKey) {
+        return (
+            <img
+                src={`https://img.logo.dev/name/${encodeURIComponent(company)}?token=${logoDevKey}`}
+                alt={company}
+                width={20}
+                height={20}
+                onError={() => setImgError(true)}
+                className="w-10 h-10 rounded-lg bg-surface flex-shrink-0 object-cover border border-white/10"
+            />
+        );
+    }
+
+    if (logo) {
+        return <img src={logo} alt={company} width={20} height={20} className="w-10 h-10 rounded-lg bg-white/5 object-cover flex-shrink-0" />;
+    }
+
+    return (
+        <div className="w-10 h-10 rounded-lg bg-surface flex items-center justify-center flex-shrink-0 border border-white/10 text-white font-bold text-sm">
+            {company?.charAt(0) || 'J'}
+        </div>
+    );
+};
+
 export const HeroJobStack: React.FC<HeroJobStackProps> = ({ jobs }) => {
     const navigate = useNavigate();
     const { user } = useAuth();
@@ -131,9 +165,7 @@ export const HeroJobStack: React.FC<HeroJobStackProps> = ({ jobs }) => {
                                 onClick={() => navigate(`/jobs/${job._id || job.id}`)}
                             >
                                 <div className="flex items-start gap-3">
-                                    <div className="w-10 h-10 rounded-lg bg-surface flex items-center justify-center flex-shrink-0 border border-white/10 text-white font-bold text-sm">
-                                        {getCompanyIcon(job.company, 20) || job.company.charAt(0)}
-                                    </div>
+                                    <CompanyLogo company={job.company} logo={job.logo} />
                                     <div className="flex-1 min-w-0">
                                         <h4 className="text-white font-medium text-xs sm:text-sm line-clamp-2 leading-tight group-hover/item:text-accent transition-colors mb-0.5">
                                             {job.title}
