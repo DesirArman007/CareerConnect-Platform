@@ -1,145 +1,348 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { GoogleLogin } from '@react-oauth/google';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
-import { Link, useNavigate, Navigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { ArrowLeft, Edit2 } from 'lucide-react';
+
+type AuthStep = 'email' | 'login' | 'signup';
 
 export const LoginPage: React.FC = () => {
     const navigate = useNavigate();
-    const { login, user, isLoading: authLoading, googleLogin } = useAuth();
+    const location = useLocation();
+    const { login, register, googleLogin, user, isLoading: authLoading } = useAuth();
+
+    // Flow state
+    const [step, setStep] = useState<AuthStep>('email');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
+    const [name, setName] = useState('');
 
-    // Redirect authenticated users to dashboard
+    // UI state
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState('');
+    const [message, setMessage] = useState('');
+
+    // Dynamic width for Google Button
+    const googleButtonWrapper = useRef<HTMLDivElement>(null);
+    const [googleBtnWidth, setGoogleBtnWidth] = useState<string>('300');
+
+    useEffect(() => {
+        const updateWidth = () => {
+            if (googleButtonWrapper.current) {
+                // Determine width, ensuring it doesn't break if 0 or hidden
+                const width = googleButtonWrapper.current.offsetWidth;
+                if (width > 0) {
+                    setGoogleBtnWidth(width.toString());
+                }
+            }
+        };
+
+        // Initial update
+        updateWidth();
+
+        // Observer for robust updates
+        const observer = new ResizeObserver(updateWidth);
+        if (googleButtonWrapper.current) {
+            observer.observe(googleButtonWrapper.current);
+        }
+
+        return () => observer.disconnect();
+    }, []);
+
+    /**
+     * Handle redirect message / prefilled email / step
+     */
+    useEffect(() => {
+        if (location.state?.message) setMessage(location.state.message);
+        if (location.state?.email) setEmail(location.state.email);
+        // Default to email step if not specified, but respect if passed
+        if (location.state?.step) setStep(location.state.step);
+    }, [location.state]);
+
+    /**
+     * ✅ SINGLE redirect authority
+     */
+    useEffect(() => {
+        if (!authLoading && user) {
+            const returnUrl = location.state?.returnUrl || '/dashboard';
+            navigate(returnUrl, { replace: true });
+        }
+    }, [user, authLoading, navigate, location.state]);
+
+    /**
+     * Global auth loading screen
+     */
     if (authLoading) {
         return (
-            <main className="min-h-screen flex items-center justify-center">
-                <div className="text-gray-400">Loading...</div>
+            <main className="min-h-screen flex items-center justify-center bg-zinc-950">
+                <div className="text-gray-400 animate-pulse">Loading...</div>
             </main>
         );
     }
 
-    if (user) {
-        return <Navigate to="/dashboard" replace />;
-    }
-
-    const handleSubmit = async (e: React.FormEvent) => {
+    /**
+     * Event handlers
+     */
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
-        setIsLoading(true);
+        setIsSubmitting(true);
         try {
             await login({ email, password });
-            navigate('/dashboard');
         } catch (err: any) {
-            console.error('Login error:', err);
-            const msg = err.response?.data?.message;
-            if (typeof msg === 'string') {
-                setError(msg);
-            } else if (msg && typeof msg === 'object') {
-                // If message is the validation object itself
-                setError(Object.values(msg).join(', ') || 'Login failed.');
-            } else {
-                setError('Login failed. Please check your credentials.');
-            }
+            setError(err.response?.data?.message || 'Invalid credentials');
         } finally {
-            setIsLoading(false);
+            setIsSubmitting(false);
         }
     };
 
-    return (
-        <main className="min-h-screen pt-32 pb-8 px-4 flex items-start md:items-center justify-center overflow-y-auto relative">
-            {/* Back Button - hidden on mobile */}
-            <button
-                onClick={() => navigate('/')}
-                className="hidden sm:flex absolute top-24 left-6 md:left-12 items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm"
-            >
-                <ArrowLeft className="w-4 h-4" />
-                <span>Back to Home</span>
-            </button>
+    const handleSignup = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError('');
+        setIsSubmitting(true);
+        try {
+            if (password.length < 6) {
+                throw new Error('Password must be at least 6 characters');
+            }
+            await register({ name, email, password });
+        } catch (err: any) {
+            setError(err.response?.data?.message || err.message || 'Registration failed');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
-            <Card className="max-w-md w-full p-5 sm:p-8 bg-surface/80 border-white/10 backdrop-blur-sm">
-                <div className="text-center mb-6 sm:mb-8">
-                    <h1 className="text-xl sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-br from-white to-white/60 mb-2">Welcome Back</h1>
-                    <p className="text-gray-400 text-xs sm:text-sm">Log in to continue your career journey</p>
+    const handleGoogleSuccess = async (credential: string) => {
+        setError('');
+        try {
+            await googleLogin(credential);
+        } catch {
+            setError('Google login failed');
+        }
+    };
+
+    const handleEmailContinue = (nextStep: 'login' | 'signup') => {
+        if (!email) {
+            setError('Please enter your email address');
+            return;
+        }
+        if (!/\S+@\S+\.\S+/.test(email)) {
+            setError('Please enter a valid email address');
+            return;
+        }
+        setError('');
+        setStep(nextStep);
+    };
+
+    // Render Steps
+    return (
+        <main className="min-h-screen pt-16 md:pt-24 px-4 flex items-center justify-center bg-[#f0f2f5] dark:bg-[#0a0a0a]">
+            {/* Background hint if needed, or keep clean */}
+
+            <Card className="w-full max-w-[440px] p-6 md:p-10 bg-white dark:bg-surface border border-gray-200 dark:border-white/10 shadow-xl rounded-2xl">
+                {/* Message Banner - styled like reference */}
+                {message && (
+                    <div className="mb-6 p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 text-sm text-center">
+                        {message}
+                    </div>
+                )}
+
+                {/* Header Section */}
+                <div className="text-center mb-8">
+                    <img src="/assets/logo.png" alt="WorkRaze" className="w-12 h-12 mx-auto mb-4" />
+
+                    <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                        {step === 'email' && 'Continue to WorkRaze'}
+                        {step === 'login' && 'Welcome back'}
+                        {step === 'signup' && 'Create your account'}
+                    </h2>
                 </div>
 
-                <div className="space-y-4">
-                    <div className="w-full flex justify-center">
-                        <GoogleLogin
-                            onSuccess={async (credentialResponse) => {
-                                if (credentialResponse.credential) {
-                                    try {
-                                        await googleLogin(credentialResponse.credential);
-                                        navigate("/dashboard");
-                                    } catch (err) {
-                                        setError("Google Login failed. Please try again.");
-                                    }
-                                }
-                            }}
-                            onError={() => {
-                                setError("Google Login Failed");
-                            }}
-                            theme="filled_black"
-                            width="250"
-                            text="continue_with"
-                            shape="pill"
-
-                        />
-                    </div>
-
-                    <div className="relative my-4 sm:my-6">
-                        <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-white/10"></div>
-                        </div>
-                        <div className="relative flex justify-center text-xs uppercase">
-                            <span className="bg-surface px-2 text-gray-500">Or continue with</span>
-                        </div>
-                    </div>
-
-                    <form className="space-y-4" onSubmit={handleSubmit}>
+                {/* Step 1: Email Input & Selection */}
+                {step === 'email' && (
+                    <div className="space-y-6">
                         {error && (
-                            <div className="p-3 rounded bg-red-500/10 border border-red-500/20 text-red-500 text-sm">
+                            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm text-center">
                                 {error}
                             </div>
                         )}
-                        <Input
-                            type="email"
-                            placeholder="m@example.com"
-                            label="Email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                        />
-                        <Input
-                            type="password"
-                            placeholder="••••••••"
-                            label="Password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                        />
 
-                        <div className="flex justify-end">
-                            <Link to="#" className="text-xs text-brand-primary hover:text-white transition-colors">
-                                Forgot password?
-                            </Link>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Email address</label>
+                            <Input
+                                type="email"
+                                value={email}
+                                onChange={(e) => {
+                                    setEmail(e.target.value);
+                                    if (error) setError('');
+                                }}
+                                placeholder="name@work.com"
+                                className="bg-white dark:bg-black/20"
+                                autoFocus
+                            />
                         </div>
 
-                        <Button type="submit" variant="primary" className="w-full" disabled={isLoading}>
-                            {isLoading ? 'Logging in...' : 'Log In'}
-                        </Button>
-                    </form>
+                        <div className="space-y-3 pt-2">
+                            <Button
+                                onClick={() => handleEmailContinue('login')}
+                                className="w-full h-11 text-base font-medium"
+                            >
+                                Login
+                            </Button>
+                            <Button
+                                variant="outline"
+                                onClick={() => handleEmailContinue('signup')}
+                                className="w-full h-11 text-base font-medium border-gray-300 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/5"
+                            >
+                                Sign Up
+                            </Button>
+                        </div>
 
-                    <div className="mt-4 sm:mt-6 text-center text-xs sm:text-sm text-gray-400">
-                        Don't have an account?{' '}
-                        <Link to="/signup" className="text-white hover:underline">
-                            Sign up
-                        </Link>
+                        <div className="relative py-2">
+                            <div className="absolute inset-0 flex items-center">
+                                <div className="w-full border-t border-gray-200 dark:border-white/10"></div>
+                            </div>
+                            <div className="relative flex justify-center text-sm">
+                                <span className="px-2 bg-white dark:bg-surface text-gray-500">Or continue with</span>
+                            </div>
+                        </div>
+
+                        <div ref={googleButtonWrapper} className="flex justify-center w-full">
+                            <GoogleLogin
+                                onSuccess={credentialResponse => {
+                                    if (credentialResponse.credential) {
+                                        handleGoogleSuccess(credentialResponse.credential);
+                                    }
+                                }}
+                                onError={() => setError('Google Login Failed')}
+                                theme="filled_blue"
+                                shape="pill"
+                                width={googleBtnWidth}
+                            />
+                        </div>
                     </div>
-                </div>
+                )}
+
+                {/* Step 2: Login (Password) */}
+                {step === 'login' && (
+                    <form onSubmit={handleLogin} className="space-y-6">
+                        {error && (
+                            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm text-center">
+                                {error}
+                            </div>
+                        )}
+
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-white/5 rounded-lg border border-gray-100 dark:border-white/5">
+                            <span className="text-sm text-gray-600 dark:text-gray-300 truncate max-w-[200px]">{email}</span>
+                            <button
+                                type="button"
+                                onClick={() => setStep('email')}
+                                className="text-xs font-medium text-accent hover:underline flex items-center gap-1"
+                            >
+                                <Edit2 className="w-3 h-3" /> Change
+                            </button>
+                        </div>
+
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
+                                <button type="button" className="text-xs text-accent hover:underline" tabIndex={-1}>Forgot?</button>
+                            </div>
+                            <Input
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="Enter your password"
+                                className="bg-white dark:bg-black/20"
+                                autoFocus
+                                required
+                            />
+                        </div>
+
+                        <div className="space-y-3 pt-2">
+                            <Button
+                                type="submit"
+                                className="w-full h-11 text-base"
+                                disabled={isSubmitting}
+                            >
+                                {isSubmitting ? 'Logging in...' : 'Login'}
+                            </Button>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                onClick={() => setStep('email')}
+                                className="w-full text-gray-500 hover:text-gray-900 dark:hover:text-white"
+                            >
+                                <ArrowLeft className="w-4 h-4 mr-2" /> Back
+                            </Button>
+                        </div>
+                    </form>
+                )}
+
+                {/* Step 3: Signup (Name + Password) */}
+                {step === 'signup' && (
+                    <form onSubmit={handleSignup} className="space-y-6">
+                        {error && (
+                            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm text-center">
+                                {error}
+                            </div>
+                        )}
+
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-white/5 rounded-lg border border-gray-100 dark:border-white/5">
+                            <span className="text-sm text-gray-600 dark:text-gray-300 truncate max-w-[200px]">{email}</span>
+                            <button
+                                type="button"
+                                onClick={() => setStep('email')}
+                                className="text-xs font-medium text-accent hover:underline flex items-center gap-1"
+                            >
+                                <Edit2 className="w-3 h-3" /> Change
+                            </button>
+                        </div>
+
+                        <div className="space-y-4">
+                            <Input
+                                label="Full Name"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                placeholder="Jane Doe"
+                                className="bg-white dark:bg-black/20"
+                                autoFocus
+                                required
+                            />
+
+                            <Input
+                                label="Create Password"
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="Min 6 characters"
+                                className="bg-white dark:bg-black/20"
+                                required
+                            />
+                        </div>
+
+                        <div className="space-y-3 pt-4">
+                            <Button
+                                type="submit"
+                                className="w-full h-11 text-base"
+                                disabled={isSubmitting}
+                            >
+                                {isSubmitting ? 'Creating Account...' : 'Sign Up'}
+                            </Button>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                onClick={() => setStep('email')}
+                                className="w-full text-gray-500 hover:text-gray-900 dark:hover:text-white"
+                            >
+                                <ArrowLeft className="w-4 h-4 mr-2" /> Back
+                            </Button>
+                        </div>
+                    </form>
+                )}
             </Card>
         </main>
     );

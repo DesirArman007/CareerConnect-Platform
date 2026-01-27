@@ -30,13 +30,14 @@ export const JobDetailPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const location = useLocation();
-    const { user, toggleSaveJob, isJobSaved } = useAuth();
+    const { user, toggleSaveJob, isJobSaved, markJobAsApplied } = useAuth();
     const [job, setJob] = useState<Job | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isExpanded, setIsExpanded] = useState(false);
 
     const isSaved = id ? isJobSaved(id) : false;
+    const isApplied = user?.appliedJobs?.some(a => a.jobId === id) || false;
 
     const handleToggleSave = () => {
         if (!user) {
@@ -103,41 +104,24 @@ export const JobDetailPage: React.FC = () => {
     // Get posted date
     const postedDate = formatDate(job.createdAt || job.postedAt);
 
-    const handleAction = (actionType: 'apply' | 'save') => {
+    const handleAction = async (actionType: 'apply' | 'save') => {
         if (!user) {
-            const isMobile = window.innerWidth < 768;
-
-            toast("Sign in to unlock application", {
-                icon: <Lock className="w-4 h-4 text-blue-400" />,
-                id: 'auth-lock',
-                duration: 4000,
-                style: isMobile ? {
-                    // Mobile: Thin & Minimal
-                    borderRadius: '8px',
-                    padding: '10px 16px',
-                    background: '#171717',
-                    color: '#e5e5e5',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    fontSize: '13px',
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-                    maxWidth: '350px',
-                } : {
-                    // Desktop: Standard Size (Previous)
-                    borderRadius: '12px',
-                    padding: '16px 24px', // Standard comfortable padding
-                    background: '#171717',
-                    color: '#e5e5e5',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    fontSize: '16px', // Standard font size
-                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-                },
-                className: 'font-medium',
+            navigate('/login', {
+                state: {
+                    message: "You need to be logged in to continue",
+                    returnUrl: window.location.pathname
+                }
             });
             return;
         }
 
         if (actionType === 'apply') {
             window.open(applyUrl, '_blank');
+            if (job._id || id) {
+                // Mark as applied AFTER redirecting
+                await markJobAsApplied((job._id || id) as string);
+                // toast.success('Job marked as applied!'); 
+            }
         } else if (actionType === 'save') {
             if (job._id) toggleSaveJob(job._id);
         }
@@ -258,11 +242,12 @@ export const JobDetailPage: React.FC = () => {
                         <div className="flex flex-col gap-4 md:hidden">
                             <Button
                                 onClick={() => handleAction('apply')}
-                                className="w-full flex items-center justify-center gap-2"
+                                className={`w-full flex items-center justify-center gap-2 ${isApplied ? 'text-green-500 border-green-500 hover:bg-green-500/10' : ''}`}
                                 size="lg"
                                 disabled={job.joblive === false}
+                                variant={isApplied ? 'outline' : 'default'}
                             >
-                                {job.joblive === false ? 'Closed' : 'Apply Now'} <ArrowUpRight className="w-5 h-5" />
+                                {job.joblive === false ? 'Closed' : isApplied ? 'Apply Again' : 'Apply Now'} <ArrowUpRight className="w-5 h-5" />
                             </Button>
                         </div>
 
@@ -270,12 +255,13 @@ export const JobDetailPage: React.FC = () => {
                         <div className="hidden md:block">
                             <h3 className="text-xl font-bold mb-4">Ready to apply?</h3>
                             <Button
-                                className="flex items-center justify-center gap-2"
+                                className={`flex items-center justify-center gap-2 ${isApplied ? 'text-green-500 border-green-500 hover:bg-green-500/10' : ''}`}
                                 onClick={() => handleAction('apply')}
                                 size="lg"
                                 disabled={job.joblive === false}
+                                variant={isApplied ? 'outline' : 'default'}
                             >
-                                {job.joblive === false ? 'Applications Closed' : 'Apply for this Role'} <ArrowUpRight className="w-5 h-5" />
+                                {job.joblive === false ? 'Applications Closed' : isApplied ? 'Applied' : 'Apply for this Role'} <ArrowUpRight className="w-5 h-5" />
                             </Button>
                         </div>
                     </div>
@@ -343,11 +329,12 @@ export const JobDetailPage: React.FC = () => {
                             {/* Apply Button */}
                             {/* Apply Button */}
                             <Button
-                                className="w-full flex items-center justify-center gap-2"
+                                className={`w-full flex items-center justify-center gap-2 ${isApplied ? 'text-green-500 border-green-500 hover:bg-green-500/10' : ''}`}
                                 disabled={job.joblive === false}
                                 onClick={() => handleAction('apply')}
+                                variant={isApplied ? 'outline' : 'default'}
                             >
-                                {job.joblive === false ? 'Closed' : 'Apply Now'} <ArrowUpRight className="w-4 h-4" />
+                                {job.joblive === false ? 'Closed' : isApplied ? 'Applied' : 'Apply Now'} <ArrowUpRight className="w-4 h-4" />
                             </Button>
                         </Card>
                     </div>

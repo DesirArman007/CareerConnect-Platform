@@ -25,10 +25,10 @@ export const About: React.FC = () => {
 
                             <div className="space-y-4 text-gray-400">
                                 <p className="text-sm sm:text-base leading-relaxed">
-                                    Hi, I'm <span className="text-white font-medium">Abhishek Yadav</span> — a developer passionate about building tools that solve real problems.
+                                    Hi, I'm <span className="text-white font-medium">Abhishek Yadav</span> - a developer passionate about building tools that solve real problems.
                                 </p>
                                 <p className="text-sm sm:text-base leading-relaxed">
-                                    I built WorkRaze because I was tired of the job hunt shuffle—opening fifty tabs, dealing with broken recruiter sites, and endlessly re-entering my resume data. I wanted a place that just works.
+                                    I built WorkRaze because I was tired of the job hunt shuffle opening fifty tabs, dealing with broken recruiter sites. I wanted a place that just works.
                                 </p>
                                 <p className="text-sm sm:text-base leading-relaxed">
                                     WorkRaze aggregates jobs directly from company career pages, giving you a clean, noise-free feed of opportunities. No third-party recruiters, no ghost jobs.

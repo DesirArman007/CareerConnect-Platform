@@ -8,16 +8,19 @@ import { Toaster } from 'react-hot-toast';
 import { AIChat } from './components/AIChat';
 
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { HomePage } from './components/pages/HomePage';
 import { JobsPage } from './components/pages/JobsPage';
 import { JobDetailPage } from './components/pages/JobDetailPage';
 import { CompaniesPage } from './components/pages/CompaniesPage';
 import { DashboardPage } from './components/pages/DashboardPage';
-import { LandingPage } from './components/pages/LandingPage';
-import { AboutPage } from './components/pages/AboutPage';
+import { AboutPage } from './components/pages/AboutPage'; // Removed LandingPage import if unused, or keep
 import { LoginPage } from './components/pages/LoginPage';
 import { SignupPage } from './components/pages/SignupPage';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
+
+import { MobileTopBar } from './components/mobile/MobileTopBar';
+import { MobileBottomNav } from './components/mobile/MobileBottomNav';
 
 function App() {
   return (
@@ -30,14 +33,16 @@ function App() {
           },
         }} />
         <BrowserRouter>
-          <div className="min-h-screen bg-background text-foreground selection:bg-accent selection:text-white overflow-x-hidden">
+          <div className="min-h-screen bg-background text-foreground selection:bg-accent selection:text-white overflow-x-hidden pb-16 md:pb-0">
             {/* Global subtle grid background */}
             <div className="fixed inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none z-50 mix-blend-overlay"></div>
 
+            <MobileTopBar className="md:hidden" />
             <Header />
 
             <Routes>
-              <Route path="/" element={<LandingPage />} />
+              <Route path="/" element={<HomePage />} />
+              <Route path="/explore" element={<JobsPage />} />
               <Route path="/jobs" element={<JobsPage />} />
               <Route path="/jobs/:id" element={<JobDetailPage />} />
               <Route path="/companies" element={<CompaniesPage />} />
@@ -59,6 +64,8 @@ function App() {
                 </div>
               </div>
             </footer>
+
+            <MobileBottomNav className="md:hidden" />
 
             {/* Floating AI Agent */}
             <AIChat />

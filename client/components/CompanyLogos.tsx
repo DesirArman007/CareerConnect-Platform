@@ -118,25 +118,50 @@ export const ZeeLogo: React.FC<{ className?: string }> = ({ className = '' }) =>
     </div>
 );
 
+const DynamicStatsLogo: React.FC<{ name: string }> = ({ name }) => {
+    const [imgError, setImgError] = React.useState(false);
+    const logoDevKey = import.meta.env.VITE_LOGO_DEV_PUBLIC_KEY;
+
+    if (!imgError && logoDevKey) {
+        return (
+            <div className="flex items-center gap-2">
+                <img
+                    src={`https://img.logo.dev/name/${encodeURIComponent(name)}?token=${logoDevKey}`}
+                    alt={name}
+                    width={24}
+                    height={24}
+                    onError={() => setImgError(true)}
+                    className="w-6 h-6 object-contain rounded"
+                />
+                <span className="text-white font-semibold tracking-tight">{name}</span>
+            </div>
+        );
+    }
+
+    // Fallback if needed (can be text or specific fallback logic, but here we just render text if image fails to keep it simple, or maybe the gradient icon?)
+    // Let's use a simple fallback icon
+    return (
+        <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded bg-white/10 flex items-center justify-center text-[10px] font-bold text-white">
+                {name[0]}
+            </div>
+            <span className="text-white font-semibold tracking-tight">{name}</span>
+        </div>
+    );
+};
+
 // Combined component showing all logos (for Stats section)
 export const CompanyLogos: React.FC = () => {
-    const logos = [
-        { Component: MicrosoftLogo, name: 'Microsoft' },
-        { Component: LinkedInLogo, name: 'LinkedIn' },
-        { Component: CiscoLogo, name: 'Cisco' },
-        { Component: IntuitLogo, name: 'Intuit' },
-        { Component: JarLogo, name: 'Jar' },
-        { Component: ZeeLogo, name: 'ZEE' },
-    ];
+    const companies = ['Microsoft', 'LinkedIn', 'Cisco', 'Intuit', 'Jar', 'ZEE'];
 
     return (
         <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
-            {logos.map(({ Component, name }) => (
+            {companies.map((name) => (
                 <div
                     key={name}
-                    className="opacity-60 hover:opacity-100 grayscale hover:grayscale-0 transition-all duration-300 cursor-default"
+                    className="opacity-60 hover:opacity-100 grayscale-[50%] hover:grayscale-0 transition-all duration-300 cursor-default"
                 >
-                    <Component />
+                    <DynamicStatsLogo name={name} />
                 </div>
             ))}
         </div>

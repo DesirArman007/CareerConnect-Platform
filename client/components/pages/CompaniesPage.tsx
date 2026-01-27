@@ -92,13 +92,29 @@ const generatePaginationButtons = (currentPage: number, totalPages: number): (nu
 // ============================================================================
 
 const CompanyLogo: React.FC<{ company: CompanyData }> = ({ company }) => {
+    const [imgError, setImgError] = useState(false);
     const customIcon = getCompanyIcon(company.name, 64);
+    const logoDevKey = import.meta.env.VITE_LOGO_DEV_PUBLIC_KEY;
 
     if (customIcon) {
         return (
             <div className="w-16 h-16 rounded-xl flex items-center justify-center border border-white/10">
                 {customIcon}
             </div>
+        );
+    }
+
+    // Try Logo.dev first
+    if (!imgError && logoDevKey) {
+        return (
+            <img
+                src={`https://img.logo.dev/name/${encodeURIComponent(company.name)}?token=${logoDevKey}`}
+                alt={company.name}
+                width={64}
+                height={64}
+                onError={() => setImgError(true)}
+                className="w-16 h-16 rounded-xl bg-white/5 object-cover border border-white/10"
+            />
         );
     }
 
@@ -125,7 +141,7 @@ const CompanyCard: React.FC<{
     company: CompanyData;
     onViewJobs: (companyName: string) => void;
 }> = ({ company, onViewJobs }) => {
-    
+
     const handleCardClick = useCallback(() => {
         onViewJobs(company.name);
     }, [company.name, onViewJobs]);
@@ -226,11 +242,10 @@ const Pagination: React.FC<PaginationProps> = ({
                         <button
                             key={page}
                             onClick={() => onPageChange(page as number)}
-                            className={`w-8 sm:w-10 h-8 sm:h-10 rounded-lg flex items-center justify-center transition-colors text-sm sm:text-base ${
-                                currentPage === page
-                                    ? 'bg-accent text-white font-bold'
-                                    : 'bg-surface hover:bg-surface/80 text-gray-400 hover:text-white'
-                            }`}
+                            className={`w-8 sm:w-10 h-8 sm:h-10 rounded-lg flex items-center justify-center transition-colors text-sm sm:text-base ${currentPage === page
+                                ? 'bg-accent text-white font-bold'
+                                : 'bg-surface hover:bg-surface/80 text-gray-400 hover:text-white'
+                                }`}
                         >
                             {page}
                         </button>
@@ -347,17 +362,17 @@ export const CompaniesPage: React.FC = () => {
     );
 
     return (
-        <main className="pt-24 min-h-screen px-6 pb-24">
+        <main className="pt-6 md:pt-24 min-h-screen px-4 md:px-6 pb-24">
             <div className="max-w-7xl mx-auto">
                 {/* Header Section */}
-                <div className="mb-12">
-                    <h1 className="text-4xl font-bold mb-4">Browse Companies</h1>
-                    <p className="text-gray-400 max-w-2xl">
+                <div className="mb-8 md:mb-12">
+                    <h1 className="text-3xl md:text-4xl font-bold mb-3 md:mb-4">Browse Companies</h1>
+                    <p className="text-gray-400 max-w-2xl text-sm md:text-base">
                         Explore companies actively hiring. All job counts are based on actual open
                         positions.
                     </p>
                     {!isLoading && companies.length > 0 && (
-                        <p className="text-sm text-gray-500 mt-2">
+                        <p className="text-xs md:text-sm text-gray-500 mt-2">
                             Showing {startIndex + 1}-{Math.min(endIndex, companies.length)} of{' '}
                             {companies.length} companies with active job listings
                         </p>

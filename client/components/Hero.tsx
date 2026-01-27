@@ -3,8 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { Button } from "./ui/Button";
 import { jobs as jobApi } from "../services/api";
+import { Job } from "../types";
+import { HeroJobStack } from "./HeroJobStack";
+import { Particles } from "./ui/Particles";
 
-export const Hero = () => {
+interface HeroProps {
+  jobs?: Job[];
+}
+
+export const Hero: React.FC<HeroProps> = ({ jobs = [] }) => {
   const navigate = useNavigate();
 
   const [stats, setStats] = useState({
@@ -47,11 +54,12 @@ export const Hero = () => {
   };
 
   return (
-    <section className="relative pt-20 pb-12 sm:pt-24 sm:pb-16 md:pt-32 md:pb-24 lg:pt-48 lg:pb-32 overflow-hidden">
+    <section className="relative pt-12 pb-12 sm:pt-10 sm:pb-16 md:pt-28 md:pb-24 lg:pt-32 lg:pb-32 overflow-hidden">
+
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[1000px] h-[200px] sm:h-[300px] md:h-[500px] bg-accent/20 blur-[120px] rounded-full opacity-20 pointer-events-none" />
       <div className="absolute top-1/2 right-0 w-[50vw] max-w-[800px] h-[300px] sm:h-[400px] md:h-[600px] bg-blue-500/10 blur-[100px] rounded-full opacity-20 pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 grid lg:grid-cols-[1.4fr_1fr] gap-12 lg:gap-20 items-center">
         <div className="flex flex-col items-start text-left">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm text-[10px] sm:text-xs font-medium text-gray-300 mb-4 sm:mb-6 md:mb-8 animate-fade-in-up min-w-[200px] sm:min-w-[220px]">
             <span
@@ -78,7 +86,7 @@ export const Hero = () => {
               variant="secondary"
               size="lg"
               className="w-full sm:w-auto text-sm sm:text-base"
-              onClick={() => navigate("/jobs")}
+              onClick={() => navigate("/explore")}
             >
               Start Applying Now <ArrowRight className="w-4 h-4" />
             </Button>
@@ -86,7 +94,7 @@ export const Hero = () => {
               variant="outline"
               size="lg"
               className="w-full sm:w-auto text-sm sm:text-base"
-              onClick={() => navigate("/jobs")}
+              onClick={() => navigate("/explore")}
             >
               View Open Roles
             </Button>
@@ -118,8 +126,23 @@ export const Hero = () => {
           </div>
         </div>
 
-        <div className="relative h-[400px] w-full hidden lg:flex items-center justify-center">
-          <div className="absolute inset-0 bg-grid opacity-30 mask-radial" />
+        <div className="relative w-full hidden lg:flex items-center justify-center lg:justify-end perspective-1000 group">
+          {jobs.length > 0 ? (
+            <div className="relative">
+              {/* Particles Originating from Bottom-Left of Card */}
+              <div className="absolute -left-32 -bottom-20 w-[600px] h-[700px] -z-10 pointer-events-none opacity-80">
+                <Particles />
+              </div>
+
+              <div className="relative z-10 animate-fade-in-up delay-200 transform rotate-y-[-5deg] group-hover:rotate-y-0 transition-transform duration-700 ease-out">
+                <HeroJobStack jobs={jobs} />
+              </div>
+            </div>
+          ) : (
+            <div className="relative h-[400px] w-full flex items-center justify-center">
+              <div className="absolute inset-0 bg-grid opacity-30 mask-radial" />
+            </div>
+          )}
         </div>
       </div>
     </section>

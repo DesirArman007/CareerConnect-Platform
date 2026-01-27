@@ -19,7 +19,7 @@ interface AuthContextType {
     register: (data: { name: string; email: string; password: string }) => Promise<void>;
     logout: () => Promise<void>;
     updateProfile: (data: Partial<User>) => Promise<void>;
-    googleLogin: (idToken:string) => Promise<void>;
+    googleLogin: (idToken: string) => Promise<void>;
     toggleSaveJob: (jobId: string) => void;
     isJobSaved: (jobId: string) => boolean;
 }
@@ -175,25 +175,50 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const isJobSaved = (jobId: string) => savedJobs.includes(jobId);
 
-    const googleLogin = async(idToken: string) => {
+    const googleLogin = async (idToken: string) => {
         const response = await auth.googleAuth(idToken);
 
-        if(response?.success === true){
+        if (response?.success === true) {
             localStorage.setItem('hasSession', 'true');
 
             await new Promise(resolve => setTimeout(resolve, 100));
 
-            try{
+            try {
                 const success = await fetchUserData();
-                if(!success){
+                if (!success) {
                     console.warn('Google login succeeded but getUser failed');
                 }
-            } catch(error){
-                console.warn('Ignoring getUser error after Google login:',error);
+            } catch (error) {
+                console.warn('Ignoring getUser error after Google login:', error);
             }
             return;
         }
         throw new Error('Google Login Failed');
+    };
+
+    // ✅ Mark job as applied
+    const markJobAsApplied = async (jobId: string) => {
+        if (!user) return;
+
+        const currentApplied = user.appliedJobs || [];
+        const isAlreadyApplied = currentApplied.some(a => a.jobId === jobId);
+
+        if (isAlreadyApplied) return;
+
+        const newAppliedJob = { jobId, date: new Date().toISOString() };
+        const newAppliedJobs = [...currentApplied, newAppliedJob];
+
+        // Optimistic update
+        const updatedUser = { ...user, appliedJobs: newAppliedJobs };
+        setUser(updatedUser);
+
+        try {
+            await auth.updateUser({ appliedJobs: newAppliedJobs });
+        } catch (error) {
+            console.error('Failed to mark job as applied:', error);
+            // Revert if needed, or just let next fetch fix it
+            setUser(user);
+        }
     };
 
     return (
@@ -208,7 +233,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 logout,
                 updateProfile,
                 toggleSaveJob,
-                isJobSaved
+                isJobSaved,
+                markJobAsApplied
             }}
         >
             {children}

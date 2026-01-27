@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom';
 import { Search, X, Filter } from 'lucide-react';
 import { JobList } from '../JobList';
+import { SearchControls } from '../search/SearchControls';
 import { Job } from '../../types';
 import { jobs as jobApi, PaginationInfo } from '../../services/api';
 import { getUniqueLocations } from '../../services/locationService';
@@ -336,7 +337,7 @@ const EmptyState: React.FC<{
 export const JobsPage: React.FC = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1', 10));
-    
+
     const [filters, setFilters] = useState<JobFilters>({
         searchQuery: searchParams.get('search') || '',
         department: searchParams.get('department') || '',
@@ -454,79 +455,41 @@ export const JobsPage: React.FC = () => {
     }, [isLoading, jobs.length, pagination.totalJobs, pagination.totalPages, currentPage]);
 
     return (
-        <main className="pt-20">
+        <main className=" md:pt-16">
             {/* Search and Filter Section */}
-            <div className="bg-surface/30 border-b border-white/5 py-8">
-                <div className="max-w-7xl mx-auto px-6 space-y-4">
-                    {/* Search and Filters Row */}
-                    <div className="flex flex-col lg:flex-row gap-4">
-                        <SearchInput
-                            value={filters.searchQuery}
-                            onChange={(value) => updateFilter('searchQuery', value)}
-                            onClear={() => handleClearFilter('search')}
-                            inputRef={searchInputRef}
-                        />
+            <div className="bg-surface/30 border-b border-white/5 py-8 md:py-12">
+                <div className="max-w-4xl mx-auto px-4 md:px-6">
+                    <h1 className="text-2xl md:text-3xl font-bold text-white mb-6 md:mb-8 text-center">
+                        Explore Opportunities
+                    </h1>
 
-                        <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-                            <FilterSelect
-                                value={filters.department}
-                                onChange={(value) => updateFilter('department', value)}
-                                options={DEPARTMENTS}
-                                className="lg:min-w-[160px]"
-                            />
-                            <FilterSelect
-                                value={filters.location}
-                                onChange={(value) => updateFilter('location', value)}
-                                options={[{ value: '', label: 'All Locations' }, ...locations.map((loc) => ({ value: loc, label: loc }))]}
-                                className="lg:min-w-[160px]"
-                            />
-                            <FilterSelect
-                                value={filters.employmentType}
-                                onChange={(value) => updateFilter('employmentType', value)}
-                                options={EMPLOYMENT_TYPES}
-                                className="lg:min-w-[140px]"
-                            />
-                            <FilterSelect
-                                value={filters.experienceLevel}
-                                onChange={(value) => updateFilter('experienceLevel', value)}
-                                options={EXPERIENCE_LEVELS}
-                                className="lg:min-w-[140px]"
-                            />
-                        </div>
-                    </div>
+                    <SearchControls
+                        searchQuery={filters.searchQuery}
+                        onSearchChange={(val) => updateFilter('searchQuery', val)}
+                        onClearSearch={() => handleClearFilter('search')}
 
-                    {/* Active Filters Row */}
-                    {activeFilters.length > 0 && (
-                        <div className="flex flex-wrap items-center gap-2">
-                            <span className="text-sm text-gray-500 flex items-center gap-1">
-                                <Filter className="w-4 h-4" />
-                                Active:
-                            </span>
-                            {activeFilters.map((filter) => (
-                                <ActiveFilterTag
-                                    key={`${filter.type}-${filter.value}`}
-                                    filter={filter}
-                                    onRemove={() => handleClearFilter(filter.type)}
-                                />
-                            ))}
-                            <button
-                                onClick={handleClearAll}
-                                className="text-sm text-gray-400 hover:text-white transition-colors underline underline-offset-2"
-                            >
-                                Clear all
-                            </button>
-                        </div>
-                    )}
+                        department={filters.department}
+                        onDepartmentChange={(val) => updateFilter('department', val)}
+                        departments={DEPARTMENTS}
+
+                        location={filters.location}
+                        onLocationChange={(val) => updateFilter('location', val)}
+                        locations={locations.map(l => ({ value: l, label: l }))}
+
+                        employmentType={filters.employmentType}
+                        onTypeChange={(val) => updateFilter('employmentType', val)}
+                        types={EMPLOYMENT_TYPES}
+
+                        experienceLevel={filters.experienceLevel}
+                        onExperienceChange={(val) => updateFilter('experienceLevel', val)}
+                        experienceLevels={EXPERIENCE_LEVELS}
+
+                        onClearAllFilters={handleClearAll}
+                    />
 
                     {/* Results count & Mobile filter badge */}
-                    <div className="flex items-center justify-between">
+                    <div className="mt-6 flex items-center justify-between text-sm text-gray-400">
                         {resultsText}
-                        {activeFilterCount > 0 && (
-                            <span className="sm:hidden text-sm text-gray-400 flex items-center gap-1">
-                                <Filter className="w-4 h-4" />
-                                {activeFilterCount} filter{activeFilterCount !== 1 ? 's' : ''} applied
-                            </span>
-                        )}
                     </div>
                 </div>
             </div>

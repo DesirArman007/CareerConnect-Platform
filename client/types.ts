@@ -30,6 +30,7 @@ export interface User {
   role?: string;
   avatar?: string;
   savedJobs?: string[];
+  appliedJobs?: { jobId: string; date: string }[];
 }
 
 export interface AuthResponse {

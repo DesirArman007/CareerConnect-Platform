@@ -396,11 +396,62 @@ export const TESTIMONIALS = [
   {
     name: 'Elena Rodriguez',
     role: 'Senior Frontend Dev',
-    text: '"I used to have twenty tabs open for different company career pages. Now I just come here. It’s the only workflow that makes sense."'
+    text: '"I used to have twenty tabs open for different company career pages. Now I just come here. It’s the only workflow that makes sense."',
+    image: 'https://i.pravatar.cc/150?u=elena'
   },
   {
     name: 'David Kim',
     role: 'Backend Engineer',
-    text: '"The one-click apply actually works. I didn\'t have to re-enter my work history ten times. I applied to five relevant roles in 15 minutes."'
+    text: '"The one-click apply actually works. I didn\'t have to re-enter my work history ten times. I applied to five relevant roles in 15 minutes."',
+    image: 'https://i.pravatar.cc/150?u=david'
+  },
+  {
+    name: 'Sarah Chen',
+    role: 'Product Designer',
+    text: '"The quality of job listings here is unmatched. I found my dream role at a startup I hadn\'t even heard of before. Highly recommended."',
+    image: 'https://i.pravatar.cc/150?u=sarah'
+  },
+  {
+    name: 'James Wilson',
+    role: 'DevOps Engineer',
+    text: '"Finally, a platform that doesn\'t feel like a spreadsheet. The interface is beautiful, and the tracking features keep me organized."',
+    image: 'https://i.pravatar.cc/150?u=james'
+  },
+  {
+    name: 'Anita Patel',
+    role: 'Full Stack Developer',
+    text: '"WorkRaze helped me negotiate a better salary by showing me comparable roles. It\'s more than just a job board; it\'s a career tool."',
+    image: 'https://i.pravatar.cc/150?u=anita'
+  },
+  // Duplicates for seamless loop buffer
+  {
+    name: 'Elena Rodriguez',
+    role: 'Senior Frontend Dev',
+    text: '"I used to have twenty tabs open for different company career pages. Now I just come here. It’s the only workflow that makes sense."',
+    image: 'https://i.pravatar.cc/150?u=elena'
+  },
+  {
+    name: 'David Kim',
+    role: 'Backend Engineer',
+    text: '"The one-click apply actually works. I didn\'t have to re-enter my work history ten times. I applied to five relevant roles in 15 minutes."',
+    image: 'https://i.pravatar.cc/150?u=david'
+  },
+  {
+    name: 'Sarah Chen',
+    role: 'Product Designer',
+    text: '"The quality of job listings here is unmatched. I found my dream role at a startup I hadn\'t even heard of before. Highly recommended."',
+    image: 'https://i.pravatar.cc/150?u=sarah'
+  },
+  {
+    name: 'James Wilson',
+    role: 'DevOps Engineer',
+    text: '"Finally, a platform that doesn\'t feel like a spreadsheet. The interface is beautiful, and the tracking features keep me organized."',
+    image: 'https://i.pravatar.cc/150?u=james'
+  },
+  {
+    name: 'Anita Patel',
+    role: 'Full Stack Developer',
+    text: '"WorkRaze helped me negotiate a better salary by showing me comparable roles. It\'s more than just a job board; it\'s a career tool."',
+    image: 'https://i.pravatar.cc/150?u=anita'
   }
 ];

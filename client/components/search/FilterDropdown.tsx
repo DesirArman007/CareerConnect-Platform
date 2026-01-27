@@ -1,0 +1,221 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronDown, ArrowLeft, Check, Layers } from 'lucide-react';
+
+/* ---------------- animation variants ---------------- */
+
+const slideVariants = {
+    enter: (direction: number) => ({
+        x: direction > 0 ? 32 : -32,
+        opacity: 0,
+    }),
+    center: {
+        x: 0,
+        opacity: 1,
+    },
+    exit: (direction: number) => ({
+        x: direction > 0 ? -32 : 32,
+        opacity: 0,
+    }),
+};
+
+/* ---------------- component ---------------- */
+
+export const FilterDropdown = ({
+    categories,
+    onClearAll,
+    hasActiveFilters,
+}) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [activeCategoryId, setActiveCategoryId] = useState(null);
+    const [direction, setDirection] = useState(1);
+
+    const buttonRef = useRef<HTMLButtonElement>(null);
+    const panelRef = useRef<HTMLDivElement>(null);
+
+    const activeCategory = activeCategoryId ? categories.find(c => c.id === activeCategoryId) : null;
+    const isCategoryView = activeCategoryId === null;
+
+    /* ---------- outside click (PORTAL SAFE) ---------- */
+
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            const target = e.target as Node;
+
+            if (
+                buttonRef.current?.contains(target) ||
+                panelRef.current?.contains(target)
+            ) {
+                return;
+            }
+
+            setIsOpen(false);
+            setActiveCategoryId(null);
+        };
+
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
+
+    /* ---------- responsive check ---------- */
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 640);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    /* ---------- position calculation ---------- */
+
+    const rect = buttonRef.current?.getBoundingClientRect();
+
+    /* ---------------- render ---------------- */
+
+    return (
+        <>
+            {/* TOGGLE BUTTON */}
+            <button
+                ref={buttonRef}
+                onClick={() => {
+                    setIsOpen(v => !v);
+                    setActiveCategoryId(null);
+                }}
+                className={`flex items-center gap-2 px-4 py-3 rounded-xl border transition-colors ${isOpen
+                    ? 'bg-white/10 border-white/20 text-white'
+                    : 'bg-black/40 border-white/10 text-gray-300 hover:text-white'
+                    }`}
+            >
+                <Layers className="w-5 h-5" />
+                <span className="hidden sm:inline">Filters</span>
+                <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {/* DROPDOWN (PORTAL) */}
+            {isOpen &&
+                (isMobile || rect) &&
+                createPortal(
+                    <>
+                        {/* BACKDROP (Mobile only) */}
+                        <div
+                            className="fixed inset-0 bg-black/60 z-50 sm:hidden"
+                            onClick={() => setIsOpen(false)}
+                        />
+
+                        <div
+                            ref={panelRef}
+                            className={`
+                                fixed z-50 bg-[#1a1a1a] border border-white/10 shadow-[0_-8px_30px_rgba(0,0,0,0.8)] overflow-hidden
+                                sm:rounded-2xl sm:w-[320px]
+                                inset-x-0 bottom-0 rounded-t-2xl w-full border-b-0
+                                sm:inset-auto
+                            `}
+                            style={isMobile ? {} : {
+                                top: (rect?.bottom ?? 0) + 12,
+                                left: (rect?.right ?? 0) - 320,
+                            }}
+                        >
+                            {/* HEADER */}
+                            <div className="flex items-center gap-2 p-4 border-b border-white/5">
+                                {!isCategoryView && (
+                                    <button
+                                        onClick={() => {
+                                            setDirection(-1);
+                                            setActiveCategoryId(null);
+                                        }}
+                                        className="p-1 rounded hover:bg-white/5"
+                                    >
+                                        <ArrowLeft className="w-4 h-4" />
+                                    </button>
+                                )}
+
+                                <span className="font-semibold text-white text-sm">
+                                    {isCategoryView ? 'Filters' : activeCategory?.label}
+                                </span>
+
+                                {hasActiveFilters && (
+                                    <button
+                                        onClick={onClearAll}
+                                        className="ml-auto text-xs text-orange-500"
+                                    >
+                                        Reset
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* BODY (ANIMATED) */}
+                            <div className="relative h-[220px] overflow-hidden">
+                                <AnimatePresence initial={false} custom={direction}>
+                                    <motion.div
+                                        key={isCategoryView ? 'categories' : 'options'}
+                                        custom={direction}
+                                        variants={slideVariants}
+                                        initial="enter"
+                                        animate="center"
+                                        exit="exit"
+                                        transition={{ duration: 0.25, ease: 'easeOut' }}
+                                        className="absolute inset-0 overflow-y-auto"
+                                    >
+                                        {isCategoryView ? (
+                                            categories.map(cat => (
+                                                <button
+                                                    key={cat.id}
+                                                    onClick={() => {
+                                                        setDirection(1);
+                                                        setActiveCategoryId(cat.id);
+                                                    }}
+                                                    className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-300 hover:bg-white/5 hover:text-white"
+                                                >
+                                                    <cat.icon className="w-4 h-4" />
+                                                    {cat.label}
+                                                    {cat.value && (
+                                                        <span className="ml-auto w-1.5 h-1.5 bg-orange-500 rounded-full" />
+                                                    )}
+                                                </button>
+                                            ))
+                                        ) : (
+                                            <>
+                                                {(!activeCategory?.options ||
+                                                    activeCategory.options.length === 0) && (
+                                                        <div className="px-4 py-6 text-sm text-gray-500 text-center">
+                                                            No options available
+                                                        </div>
+                                                    )}
+
+                                                {activeCategory?.options?.map(option => {
+                                                    const selected = activeCategory.value === option.value;
+
+                                                    return (
+                                                        <button
+                                                            key={option.value}
+                                                            onClick={() => {
+                                                                activeCategory.onChange(option.value);
+                                                                // Check option-level override first, then category-level, then default
+                                                                const shouldClose = option.closeOnSelect ?? activeCategory.closeOnSelect ?? true;
+                                                                if (shouldClose) {
+                                                                    setActiveCategoryId(null);
+                                                                }
+                                                            }}
+                                                            className={`w-full flex items-center justify-between px-4 py-3 text-sm ${selected
+                                                                ? 'bg-orange-500/10 text-orange-500'
+                                                                : 'text-gray-300 hover:bg-white/5 hover:text-white'
+                                                                }`}
+                                                        >
+                                                            {option.label}
+                                                            {selected && <Check className="w-4 h-4" />}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </>
+                                        )}
+                                    </motion.div>
+                                </AnimatePresence>
+                            </div>
+                        </div>
+                    </>,
+                    document.getElementById('portal-root') ?? document.body
+                )}
+        </>
+    );
+};

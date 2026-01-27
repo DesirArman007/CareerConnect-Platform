@@ -20,18 +20,36 @@ interface JobListProps {
 
 // Helper to render company logo - uses custom icon for known companies
 const CompanyLogo: React.FC<{ company: string; logo?: string }> = ({ company, logo }) => {
+  const [imgError, setImgError] = React.useState(false);
   // Use smaller size on mobile via responsive classes
   const customIcon = getCompanyIcon(company, 40);
+  const logoDevKey = import.meta.env.VITE_LOGO_DEV_PUBLIC_KEY;
 
   if (customIcon) {
     return <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center flex-shrink-0">{customIcon}</div>;
   }
 
+  // Try Logo.dev first (or provided logo if we prefer). 
+  // Given the request, I'll use logo.dev.
+  if (!imgError && logoDevKey) {
+    return (
+      <img
+        src={`https://img.logo.dev/name/${encodeURIComponent(company)}?token=${logoDevKey}`}
+        alt={company}
+        width={40}
+        height={40}
+        onError={() => setImgError(true)}
+        className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-white/5 object-cover flex-shrink-0"
+      />
+    );
+  }
+
+  // Fallback to provided logo if logo.dev fails
   if (logo) {
     return <img src={logo} alt={company} width={40} height={40} className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-white/5 object-cover flex-shrink-0" />;
   }
 
-  // Fallback: gradient with first letter
+  // Final Fallback: gradient with first letter
   return (
     <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-br from-accent to-purple-600 flex items-center justify-center text-white font-bold text-base sm:text-lg flex-shrink-0">
       {company?.charAt(0) || 'J'}

@@ -3,7 +3,7 @@ import { About } from '../About';
 
 export const AboutPage: React.FC = () => {
     return (
-        <main className="pt-20">
+        <main className="">
             <About />
         </main>
     );
