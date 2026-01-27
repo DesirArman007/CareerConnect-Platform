@@ -54,12 +54,11 @@ export const Hero: React.FC<HeroProps> = ({ jobs = [] }) => {
   };
 
   return (
-    <section className="relative pt-12 pb-12 sm:pt-10 sm:pb-16 md:pt-28 md:pb-24 lg:pt-32 lg:pb-32 overflow-hidden">
-
+    <section className="relative pt-8 pb-8 sm:pt-10 sm:pb-16 md:pt-28 md:pb-24 lg:pt-32 lg:pb-32 overflow-hidden">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[1000px] h-[200px] sm:h-[300px] md:h-[500px] bg-accent/20 blur-[120px] rounded-full opacity-20 pointer-events-none" />
       <div className="absolute top-1/2 right-0 w-[50vw] max-w-[800px] h-[300px] sm:h-[400px] md:h-[600px] bg-blue-500/10 blur-[100px] rounded-full opacity-20 pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 grid lg:grid-cols-[1.4fr_1fr] gap-12 lg:gap-20 items-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 grid lg:grid-cols-[1.4fr_1fr] gap-8 lg:gap-20 items-center">
         <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm text-[10px] sm:text-xs font-medium text-gray-300 mb-4 sm:mb-6 md:mb-8 animate-fade-in-up min-w-[200px] sm:min-w-[220px]">
             <span
@@ -69,7 +68,7 @@ export const Hero: React.FC<HeroProps> = ({ jobs = [] }) => {
             {getNewJobsText()}
           </div>
 
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight leading-[1.1] sm:leading-[1.05] mb-4 sm:mb-5 md:mb-6">
+          <h1 className="text-xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight leading-[1.1] sm:leading-[1.05] mb-4 sm:mb-5 md:mb-6 break-words w-full max-w-full px-1">
             Direct Access to{" "}
             <span className="text-gradient-accent">Top MNCs & Startups</span> in one
             place.

@@ -23,10 +23,10 @@ export const HeroJobStack: React.FC<HeroJobStackProps> = ({ jobs }) => {
     const rotateX = useSpring(useTransform(y, [-250, 250], [16, -16]), { stiffness: 150, damping: 20 });
     const rotateY = useSpring(useTransform(x, [-250, 250], [-16, 16]), { stiffness: 150, damping: 20 });
 
-    const [isMobile, setIsMobile] = React.useState(false);
+    const [isMobile, setIsMobile] = React.useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
 
     React.useEffect(() => {
-        const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+        const checkMobile = () => setIsMobile(window.innerWidth < 768);
         checkMobile();
         window.addEventListener('resize', checkMobile);
         return () => window.removeEventListener('resize', checkMobile);
@@ -68,7 +68,7 @@ export const HeroJobStack: React.FC<HeroJobStackProps> = ({ jobs }) => {
 
     return (
         <div
-            className="relative w-[380px] h-[500px] perspective-1000"
+            className="relative w-[90vw] max-w-[380px] h-[360px] sm:h-[500px] perspective-1000 mx-auto"
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
         >
@@ -134,10 +134,10 @@ export const HeroJobStack: React.FC<HeroJobStackProps> = ({ jobs }) => {
                                         {getCompanyIcon(job.company, 20) || job.company.charAt(0)}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <h4 className="text-white font-medium text-sm truncate group-hover/item:text-accent transition-colors">
+                                        <h4 className="text-white font-medium text-xs sm:text-sm line-clamp-2 leading-tight group-hover/item:text-accent transition-colors mb-0.5">
                                             {job.title}
                                         </h4>
-                                        <p className="text-gray-500 text-xs truncate">{job.company}</p>
+                                        <p className="text-gray-500 text-[10px] sm:text-xs truncate">{job.company}</p>
                                         <div className="flex items-center gap-2 mt-2">
                                             <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-gray-400">
                                                 {job.type || 'Full-time'}
