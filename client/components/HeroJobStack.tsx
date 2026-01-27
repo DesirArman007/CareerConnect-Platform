@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { Job } from '../types';
 import { Button } from './ui/Button';
 import { useNavigate } from 'react-router-dom';
@@ -14,6 +14,23 @@ export const HeroJobStack: React.FC<HeroJobStackProps> = ({ jobs }) => {
     const navigate = useNavigate();
     const { user } = useAuth();
     const displayJobs = jobs.slice(0, 5);
+
+    // Mouse tracking motion values
+    const x = useMotionValue(0);
+    const y = useMotionValue(0);
+
+    // Smooth springs for rotation - REFINE
+    const rotateX = useSpring(useTransform(y, [-250, 250], [16, -16]), { stiffness: 150, damping: 20 });
+    const rotateY = useSpring(useTransform(x, [-250, 250], [-16, 16]), { stiffness: 150, damping: 20 });
+
+    const [isMobile, setIsMobile] = React.useState(false);
+
+    React.useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     const handleApply = (e: React.MouseEvent, job: Job) => {
         e.stopPropagation();
@@ -31,23 +48,48 @@ export const HeroJobStack: React.FC<HeroJobStackProps> = ({ jobs }) => {
         else navigate(`/jobs/${job._id || job.id}`);
     };
 
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (isMobile) return;
+        const rect = e.currentTarget.getBoundingClientRect();
+        const width = rect.width;
+        const height = rect.height;
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        const xPct = mouseX - width / 2;
+        const yPct = mouseY - height / 2;
+        x.set(xPct);
+        y.set(yPct);
+    };
+
+    const handleMouseLeave = () => {
+        x.set(0);
+        y.set(0);
+    };
+
     return (
-        <div className="relative w-[380px] h-[500px] perspective-1000">
+        <div
+            className="relative w-[380px] h-[500px] perspective-1000"
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+        >
             {/* 3D Container */}
             <motion.div
                 className="relative w-full h-full preserve-3d"
-                initial={{ rotateY: -15, rotateX: 5 }}
-                animate={{
+                style={isMobile ? {} : { rotateX, rotateY }}
+                initial={isMobile ? { rotateY: -15, rotateX: 5 } : {}}
+                animate={isMobile ? {
                     rotateY: -10,
                     rotateX: 2,
-                    y: [0, -10, 0] // Gentle float
+                    y: [0, -10, 0] // Gentle float for mobile "still" look
+                } : {
+                    y: [0, -15, 0] // Gentle float for desktop
                 }}
-                whileHover={{ rotateY: 0, rotateX: 0 }} // Straighten on interaction
                 transition={{
                     rotateY: { type: "spring", stiffness: 50 },
                     y: { repeat: Infinity, duration: 6, ease: "easeInOut" }
                 }}
             >
+
                 {/* Back Card 2 (Deepest) */}
                 <div
                     className="absolute inset-0 bg-white/5 rounded-2xl border border-white/5 shadow-2xl"
