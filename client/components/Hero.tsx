@@ -69,9 +69,8 @@ export const Hero: React.FC<HeroProps> = ({ jobs = [] }) => {
           </div>
 
           <h1 className="text-xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight leading-[1.1] sm:leading-[1.05] mb-4 sm:mb-5 md:mb-6 break-words w-full max-w-full px-1">
-            Direct Access to{" "}
-            <span className="text-gradient-accent">Top MNCs & Startups</span> in one
-            place.
+             Top Companies{" "}  
+            <span className="text-gradient-accent">That Are Actively</span> Hiring.
           </h1>
 
           <p className="text-xs sm:text-sm md:text-base text-gray-400 mb-6 sm:mb-7 md:mb-8 max-w-lg leading-relaxed mx-auto lg:mx-0">
