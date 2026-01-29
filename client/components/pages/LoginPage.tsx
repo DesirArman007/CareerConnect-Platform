@@ -30,9 +30,9 @@ export const LoginPage: React.FC = () => {
     const [googleBtnWidth, setGoogleBtnWidth] = useState<string>('300');
 
     useEffect(() => {
-        const updateWidth = () => {
+        // Simple resizing logic
+        const handleResize = () => {
             if (googleButtonWrapper.current) {
-                // Determine width, ensuring it doesn't break if 0 or hidden
                 const width = googleButtonWrapper.current.offsetWidth;
                 if (width > 0) {
                     setGoogleBtnWidth(width.toString());
@@ -40,16 +40,10 @@ export const LoginPage: React.FC = () => {
             }
         };
 
-        // Initial update
-        updateWidth();
+        window.addEventListener('resize', handleResize);
+        handleResize(); // Initial call
 
-        // Observer for robust updates
-        const observer = new ResizeObserver(updateWidth);
-        if (googleButtonWrapper.current) {
-            observer.observe(googleButtonWrapper.current);
-        }
-
-        return () => observer.disconnect();
+        return () => window.removeEventListener('resize', handleResize);
     }, []);
 
     /**
@@ -139,7 +133,7 @@ export const LoginPage: React.FC = () => {
 
     // Render Steps
     return (
-        <main className="min-h-screen pt-16 md:pt-24 px-4 flex items-center justify-center bg-[#f0f2f5] dark:bg-[#0a0a0a]">
+        <main className="min-h-screen pt-16 pb-32 md:pt-24 md:pb-0 px-4 flex items-center justify-center bg-[#f0f2f5] dark:bg-[#0a0a0a]">
             {/* Background hint if needed, or keep clean */}
 
             <Card className="w-full max-w-[440px] p-6 md:p-10 bg-white dark:bg-surface border border-gray-200 dark:border-white/10 shadow-xl rounded-2xl">
@@ -154,7 +148,7 @@ export const LoginPage: React.FC = () => {
                 <div className="text-center mb-8">
                     <img src="/assets/logo.png" alt="WorkRaze" className="w-12 h-12 mx-auto mb-4" />
 
-                    <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                    <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
                         {step === 'email' && 'Continue to WorkRaze'}
                         {step === 'login' && 'Welcome back'}
                         {step === 'signup' && 'Create your account'}

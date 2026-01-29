@@ -118,11 +118,17 @@ export const JobDetailPage: React.FC = () => {
         }
 
         if (actionType === 'apply') {
+            if (!applyUrl || applyUrl === '#' || applyUrl.length < 5) {
+                toast.error('Application link is not available');
+                return;
+            }
+
             openExternalLink(applyUrl);
+
             if (job._id || id) {
-                // Mark as applied AFTER redirecting
+                // Mark as applied
                 await markJobAsApplied((job._id || id) as string);
-                // toast.success('Job marked as applied!'); 
+                // toast.success('Marked as applied');
             }
         } else if (actionType === 'save') {
             if (job._id) toggleSaveJob(job._id);
@@ -247,7 +253,7 @@ export const JobDetailPage: React.FC = () => {
                                 className={`w-full flex items-center justify-center gap-2 ${isApplied ? 'text-green-500 border-green-500 hover:bg-green-500/10' : ''}`}
                                 size="lg"
                                 disabled={job.joblive === false}
-                                variant={isApplied ? 'outline' : 'default'}
+                                variant={isApplied ? 'outline' : 'secondary'}
                             >
                                 {job.joblive === false ? 'Closed' : isApplied ? 'Apply Again' : 'Apply Now'} <ArrowUpRight className="w-5 h-5" />
                             </Button>
@@ -261,7 +267,7 @@ export const JobDetailPage: React.FC = () => {
                                 onClick={() => handleAction('apply')}
                                 size="lg"
                                 disabled={job.joblive === false}
-                                variant={isApplied ? 'outline' : 'default'}
+                                variant={isApplied ? 'outline' : 'secondary'}
                             >
                                 {job.joblive === false ? 'Applications Closed' : isApplied ? 'Applied' : 'Apply for this Role'} <ArrowUpRight className="w-5 h-5" />
                             </Button>
@@ -350,7 +356,7 @@ export const JobDetailPage: React.FC = () => {
                                 className={`w-full flex items-center justify-center gap-2 ${isApplied ? 'text-green-500 border-green-500 hover:bg-green-500/10' : ''}`}
                                 disabled={job.joblive === false}
                                 onClick={() => handleAction('apply')}
-                                variant={isApplied ? 'outline' : 'default'}
+                                variant={isApplied ? 'outline' : 'secondary'}
                             >
                                 {job.joblive === false ? 'Closed' : isApplied ? 'Applied' : 'Apply Now'} <ArrowUpRight className="w-4 h-4" />
                             </Button>

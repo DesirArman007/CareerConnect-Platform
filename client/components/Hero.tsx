@@ -54,7 +54,7 @@ export const Hero: React.FC<HeroProps> = ({ jobs = [] }) => {
   };
 
   return (
-    <section className="relative pt-8 pb-8 sm:pt-10 sm:pb-16 md:pt-28 md:pb-24 lg:pt-32 lg:pb-32 overflow-hidden">
+    <section className="relative pt-24 pb-8 sm:pt-10 sm:pb-16 md:pt-28 md:pb-24 lg:pt-32 lg:pb-32 overflow-hidden">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[1000px] h-[200px] sm:h-[300px] md:h-[500px] bg-accent/20 blur-[120px] rounded-full opacity-20 pointer-events-none" />
       <div className="absolute top-1/2 right-0 w-[50vw] max-w-[800px] h-[300px] sm:h-[400px] md:h-[600px] bg-blue-500/10 blur-[100px] rounded-full opacity-20 pointer-events-none" />
 
@@ -68,8 +68,8 @@ export const Hero: React.FC<HeroProps> = ({ jobs = [] }) => {
             {getNewJobsText()}
           </div>
 
-          <h1 className="text-xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight leading-[1.1] sm:leading-[1.05] mb-4 sm:mb-5 md:mb-6 break-words w-full max-w-full px-1">
-             Top Companies{" "}  
+          <h1 className="text-4xl sm:text-5xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight leading-[1.1] sm:leading-[1.05] mb-4 sm:mb-5 md:mb-6 break-words w-full max-w-full px-1">
+            Top Companies{" "}
             <span className="text-gradient-accent">That Are Actively</span> Hiring.
           </h1>
 
@@ -124,7 +124,7 @@ export const Hero: React.FC<HeroProps> = ({ jobs = [] }) => {
           </div>
         </div>
 
-        <div className="relative w-full flex flex-col items-center justify-center lg:block lg:perspective-1000 group mt-12 lg:mt-0">
+        <div className="hidden lg:block relative w-full perspective-1000 group mt-12 lg:mt-0">
 
           {/* Separator Line (Visible only on mobile now) */}
           <div className="w-full max-w-[200px] h-px bg-gradient-to-r from-transparent via-accent/50 to-transparent mb-12 lg:hidden" />

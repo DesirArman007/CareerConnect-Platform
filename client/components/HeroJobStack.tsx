@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getCompanyIcon } from './CompanyLogos';
 import { openExternalLink } from '../utils/security';
+import { ArrowUpRight, ChevronUp, ChevronDown } from 'lucide-react';
 
 interface HeroJobStackProps {
     jobs: Job[];
@@ -48,7 +49,9 @@ const CompanyLogo: React.FC<{ company: string; logo?: string }> = ({ company, lo
 export const HeroJobStack: React.FC<HeroJobStackProps> = ({ jobs }) => {
     const navigate = useNavigate();
     const { user } = useAuth();
-    const displayJobs = jobs.slice(0, 5);
+
+    // Simplified: Just show the top 3 recent jobs that fit perfectly without scrolling
+    const visibleJobs = jobs.slice(0, 3);
 
     // Mouse tracking motion values
     const x = useMotionValue(0);
@@ -156,37 +159,43 @@ export const HeroJobStack: React.FC<HeroJobStackProps> = ({ jobs }) => {
                         </div>
                     </div>
 
-                    {/* Scrollable List */}
-                    <div className="flex-1 overflow-y-auto custom-scrollbar relative z-10 p-2">
-                        {displayJobs.map((job) => (
-                            <div
-                                key={job._id || job.id}
-                                className="p-3 mb-2 rounded-xl border border-transparent hover:border-white/10 hover:bg-white/5 transition-all group/item cursor-pointer"
-                                onClick={() => navigate(`/jobs/${job._id || job.id}`)}
-                            >
-                                <div className="flex items-start gap-3">
-                                    <CompanyLogo company={job.company} logo={job.logo} />
-                                    <div className="flex-1 min-w-0">
-                                        <h4 className="text-white font-medium text-xs sm:text-sm line-clamp-2 leading-tight group-hover/item:text-accent transition-colors mb-0.5">
-                                            {job.title}
-                                        </h4>
-                                        <p className="text-gray-500 text-[10px] sm:text-xs truncate">{job.company}</p>
-                                        <div className="flex items-center gap-2 mt-2">
-                                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-gray-400">
-                                                {job.type || 'Full-time'}
-                                            </span>
-                                            <Button
-                                                size="sm"
-                                                className="h-6 px-3 text-[10px] ml-auto opacity-0 group-hover/item:opacity-100 transition-opacity"
-                                                onClick={(e) => handleApply(e, job)}
-                                            >
-                                                Apply Now
-                                            </Button>
+                    {/* Content Area with Fixed List */}
+                    <div className="flex-1 relative z-10 p-2 flex flex-col overflow-hidden">
+                        <div className="flex-1 flex flex-col gap-2">
+                            {visibleJobs.map((job) => (
+                                <motion.div
+                                    key={job._id || job.id}
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: 20 }}
+                                    transition={{ duration: 0.2 }}
+                                    className="p-3 rounded-xl border border-transparent hover:border-white/10 hover:bg-white/5 transition-all group/item cursor-pointer"
+                                    onClick={() => navigate(`/jobs/${job._id || job.id}`)}
+                                >
+                                    <div className="flex items-start gap-3">
+                                        <CompanyLogo company={job.company} logo={job.logo} />
+                                        <div className="flex-1 min-w-0">
+                                            <h4 className="text-white font-medium text-xs sm:text-sm line-clamp-2 leading-tight group-hover/item:text-accent transition-colors mb-0.5">
+                                                {job.title}
+                                            </h4>
+                                            <p className="text-gray-500 text-[10px] sm:text-xs truncate">{job.company}</p>
+                                            <div className="flex items-center gap-2 mt-2">
+                                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-gray-400">
+                                                    {job.type || 'Full-time'}
+                                                </span>
+                                                <Button
+                                                    size="sm"
+                                                    className="h-6 px-3 text-[10px] ml-auto opacity-0 group-hover/item:opacity-100 transition-opacity"
+                                                    onClick={(e) => handleApply(e, job)}
+                                                >
+                                                    Apply Now
+                                                </Button>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                        ))}
+                                </motion.div>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </motion.div>
