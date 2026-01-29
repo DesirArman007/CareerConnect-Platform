@@ -56,11 +56,11 @@ const DEPARTMENTS: FilterOption[] = [
 
 const EMPLOYMENT_TYPES: FilterOption[] = [
     { value: '', label: 'All Types' },
+    { value: 'Internship', label: 'Internship' },
     { value: 'Full-time', label: 'Full-time' },
     { value: 'Part-time', label: 'Part-time' },
     { value: 'Contract', label: 'Contract' },
     { value: 'Remote', label: 'Remote' },
-    { value: 'Internship', label: 'Internship' },
 ];
 
 const EXPERIENCE_LEVELS: FilterOption[] = [
