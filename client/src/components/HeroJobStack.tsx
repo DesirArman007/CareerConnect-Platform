@@ -76,14 +76,14 @@ export const HeroJobStack: React.FC<HeroJobStackProps> = ({ jobs }) => {
             navigate('/login', {
                 state: {
                     message: "You need to be logged in to apply",
-                    returnUrl: `/jobs/${job._id || job.id}`
+                    returnUrl: `/jobs/${job.id}`
                 }
             });
             return;
         }
-        const applyUrl = job.apply_url || job.applyUrl;
+        const applyUrl = job.apply_url;
         if (applyUrl) openExternalLink(applyUrl);
-        else navigate(`/jobs/${job._id || job.id}`);
+        else navigate(`/jobs/${job.id}`);
     };
 
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -141,7 +141,7 @@ export const HeroJobStack: React.FC<HeroJobStackProps> = ({ jobs }) => {
                 />
 
                 {/* Front Card (Main) */}
-                <div className="absolute inset-0 bg-[#0A0A0A]/90 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
+                <div className="absolute inset-0 bg-[#0A0A0A]/90 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col z-40">
                     {/* Glow Effects */}
                     <div className="absolute top-0 right-0 w-64 h-64 bg-accent/20 blur-[80px] rounded-full pointer-events-none" />
                     <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 blur-[80px] rounded-full pointer-events-none" />
@@ -164,13 +164,13 @@ export const HeroJobStack: React.FC<HeroJobStackProps> = ({ jobs }) => {
                         <div className="flex-1 flex flex-col gap-2">
                             {visibleJobs.map((job) => (
                                 <motion.div
-                                    key={job._id || job.id}
+                                    key={job.id}
                                     initial={{ opacity: 0, x: -20 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     exit={{ opacity: 0, x: 20 }}
                                     transition={{ duration: 0.2 }}
                                     className="p-3 rounded-xl border border-transparent hover:border-white/10 hover:bg-white/5 transition-all group/item cursor-pointer"
-                                    onClick={() => navigate(`/jobs/${job._id || job.id}`)}
+                                    onClick={() => navigate(`/jobs/${job.id}`)}
                                 >
                                     <div className="flex items-start gap-3">
                                         <CompanyLogo company={job.company} logo={job.logo} />
@@ -181,7 +181,7 @@ export const HeroJobStack: React.FC<HeroJobStackProps> = ({ jobs }) => {
                                             <p className="text-gray-500 text-[10px] sm:text-xs truncate">{job.company}</p>
                                             <div className="flex items-center gap-2 mt-2">
                                                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-gray-400">
-                                                    {job.type || 'Full-time'}
+                                                    {job.employment_type || 'Full-time'}
                                                 </span>
                                                 <Button
                                                     size="sm"

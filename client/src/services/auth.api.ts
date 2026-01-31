@@ -1,0 +1,24 @@
+import api, { ApiResponse } from './api';
+import { User } from '../types';
+
+export const authApi = {
+    register: (data: any) =>
+        api
+            .post<ApiResponse<User>>("/users/register", data)
+            .then((r) => r.data),
+
+    login: (data: any) =>
+        api
+            .post<ApiResponse<{ user: User }>>("/users/login", data)
+            .then((r) => r.data),
+
+    logout: () =>
+        api
+            .post<ApiResponse<null>>("/users/logout")
+            .then((r) => r.data),
+
+    googleAuth: (idToken: string) =>
+        api
+            .post<ApiResponse<{ user: User }>>("/users/googleAuth", { idToken })
+            .then((r) => r.data),
+};

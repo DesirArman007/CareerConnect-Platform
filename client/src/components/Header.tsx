@@ -113,7 +113,6 @@ export const Header: React.FC = () => {
                 >
                   <div className="text-right hidden md:block">
                     <div className="text-sm font-medium text-white">{user.name}</div>
-                    <div className="text-xs text-gray-400 truncate max-w-[100px]">{user.email}</div>
                   </div>
                   <img
                     src={user.avatar || `https://ui-avatars.com/api/?name=${user.name}&background=random`}

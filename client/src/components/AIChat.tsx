@@ -39,7 +39,7 @@ export const AIChat: React.FC = () => {
   return (
     <>
       {/* Trigger Button */}
-      <div className="fixed bottom-24 md:bottom-6 right-4 md:right-6 z-50">
+      <div className="fixed bottom-24 md:bottom-6 right-4 md:right-6 z-[100]">
         <button
           onClick={() => setIsOpen(!isOpen)}
           className={`
@@ -53,7 +53,7 @@ export const AIChat: React.FC = () => {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-40 md:bottom-24 right-4 md:right-6 w-[calc(100vw-2rem)] md:w-[400px] h-[500px] max-h-[calc(100vh-12rem)] bg-surface/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl z-40 flex flex-col overflow-hidden animate-fade-in-up origin-bottom-right">
+        <div className="fixed bottom-40 md:bottom-24 right-4 md:right-6 w-[calc(100vw-2rem)] md:w-[400px] h-[500px] max-h-[calc(100vh-12rem)] bg-surface/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl z-[90] flex flex-col overflow-hidden animate-fade-in-up origin-bottom-right">
           {/* Header */}
           <div className="p-4 border-b border-white/10 flex items-center gap-3 bg-white/5 shrink-0">
             <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center overflow-hidden">

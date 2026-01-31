@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { jobs as jobApi } from "../services/api";
+import { jobApi } from "../services/jobs.api";
 import { CompanyLogos } from "./CompanyLogos";
 
 export const Stats: React.FC = () => {

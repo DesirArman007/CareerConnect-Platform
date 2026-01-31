@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { Button } from "./ui/Button";
-import { jobs as jobApi } from "../services/api";
+import { jobApi } from "../services/jobs.api";
 import { Job } from "../types";
 import { HeroJobStack } from "./HeroJobStack";
 import { Particles } from "./ui/Particles";

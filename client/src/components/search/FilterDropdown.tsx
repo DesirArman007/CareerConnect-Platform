@@ -3,57 +3,78 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, ArrowLeft, Check, Layers, Search } from 'lucide-react';
 
-/* ---------------- animation variants ---------------- */
+/* ===================== TYPES ===================== */
+
+interface FilterOption {
+    label: string;
+    value: string;
+    closeOnSelect?: boolean;
+}
+
+interface FilterCategory {
+    id: string;
+    label: string;
+    icon: React.ElementType;
+    value?: string;
+    options: FilterOption[];
+    onChange: (value: string) => void;
+    closeOnSelect?: boolean;
+}
+
+interface FilterDropdownProps {
+    categories: FilterCategory[];
+    hasActiveFilters: boolean;
+    onClearAll: () => void;
+}
+
+/* ===================== ANIMATION ===================== */
 
 const slideVariants = {
     enter: (direction: number) => ({
         x: direction > 0 ? 32 : -32,
         opacity: 0,
     }),
-    center: {
-        x: 0,
-        opacity: 1,
-    },
+    center: { x: 0, opacity: 1 },
     exit: (direction: number) => ({
         x: direction > 0 ? -32 : 32,
         opacity: 0,
     }),
 };
 
-/* ---------------- component ---------------- */
+/* ===================== COMPONENT ===================== */
 
-export const FilterDropdown = ({
+export const FilterDropdown: React.FC<FilterDropdownProps> = ({
     categories,
     onClearAll,
     hasActiveFilters,
 }) => {
     const [isOpen, setIsOpen] = useState(false);
-    const [activeCategoryId, setActiveCategoryId] = useState(null);
+    const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
     const [direction, setDirection] = useState(1);
-
-    // NEW: Search state for filter options
     const [filterSearch, setFilterSearch] = useState('');
 
     const buttonRef = useRef<HTMLButtonElement>(null);
     const panelRef = useRef<HTMLDivElement>(null);
 
-    const activeCategory = activeCategoryId ? categories.find(c => c.id === activeCategoryId) : null;
+    const activeCategory =
+        activeCategoryId != null
+            ? categories.find(c => c.id === activeCategoryId) ?? null
+            : null;
+
     const isCategoryView = activeCategoryId === null;
 
-    // Reset search when switching categories
+    /* ---------- reset search on category change ---------- */
     useEffect(() => {
         setFilterSearch('');
     }, [activeCategoryId]);
 
-    // Derived filtered options
-    const filteredOptions = activeCategory && activeCategory.options
-        ? activeCategory.options.filter(opt =>
+    /* ---------- filter options ---------- */
+    const filteredOptions =
+        activeCategory?.options.filter(opt =>
             opt.label.toLowerCase().includes(filterSearch.toLowerCase())
-        )
-        : [];
+        ) ?? [];
 
-    /* ---------- outside click (PORTAL SAFE) ---------- */
-
+    /* ---------- outside click (portal safe) ---------- */
     useEffect(() => {
         const handler = (e: MouseEvent) => {
             const target = e.target as Node;
@@ -73,20 +94,19 @@ export const FilterDropdown = ({
         return () => document.removeEventListener('mousedown', handler);
     }, []);
 
-    /* ---------- responsive check ---------- */
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
+    /* ---------- mobile detection ---------- */
+    const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
-        const handleResize = () => setIsMobile(window.innerWidth < 640);
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
+        const update = () => setIsMobile(window.innerWidth < 640);
+        update();
+        window.addEventListener('resize', update);
+        return () => window.removeEventListener('resize', update);
     }, []);
-
-    /* ---------- position calculation ---------- */
 
     const rect = buttonRef.current?.getBoundingClientRect();
 
-    /* ---------------- render ---------------- */
+    /* ===================== RENDER ===================== */
 
     return (
         <>
@@ -98,38 +118,51 @@ export const FilterDropdown = ({
                     setActiveCategoryId(null);
                 }}
                 className={`flex items-center gap-2 px-4 py-3 rounded-xl border transition-colors ${isOpen
-                    ? 'bg-white/10 border-white/20 text-white'
-                    : 'bg-black/40 border-white/10 text-gray-300 hover:text-white'
+                        ? 'bg-white/10 border-white/20 text-white'
+                        : 'bg-black/40 border-white/10 text-gray-300 hover:text-white'
                     }`}
             >
                 <Layers className="w-5 h-5" />
                 <span className="hidden sm:inline">Filters</span>
-                <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown
+                    className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''
+                        }`}
+                />
             </button>
 
-            {/* DROPDOWN (PORTAL) */}
+            {/* DROPDOWN */}
             {isOpen &&
                 (isMobile || rect) &&
                 createPortal(
                     <>
-                        {/* BACKDROP (Mobile only) */}
-                        <div
-                            className="fixed inset-0 bg-black/60 z-50 sm:hidden"
-                            onClick={() => setIsOpen(false)}
-                        />
+                        {/* MOBILE BACKDROP */}
+                        {isMobile && (
+                            <div
+                                className="fixed inset-0 bg-black/60 z-50"
+                                onClick={() => {
+                                    setIsOpen(false);
+                                    setActiveCategoryId(null);
+                                }}
+                            />
+                        )}
 
                         <div
                             ref={panelRef}
-                            className={`
-                                fixed z-50 bg-[#1a1a1a] border border-white/10 shadow-[0_-8px_30px_rgba(0,0,0,0.8)] overflow-hidden
-                                sm:rounded-2xl sm:w-[320px]
-                                inset-x-0 bottom-0 rounded-t-2xl w-full border-b-0
-                                sm:inset-auto
-                            `}
-                            style={isMobile ? {} : {
-                                top: (rect?.bottom ?? 0) + 12,
-                                left: (rect?.right ?? 0) - 320,
-                            }}
+                            className="
+                fixed z-50 bg-[#1a1a1a] border border-white/10 overflow-hidden
+                shadow-[0_-8px_30px_rgba(0,0,0,0.8)]
+                sm:rounded-2xl sm:w-[320px]
+                inset-x-0 bottom-0 rounded-t-2xl w-full
+                sm:inset-auto
+              "
+                            style={
+                                !isMobile
+                                    ? {
+                                        top: (rect?.bottom ?? 0) + 12,
+                                        left: (rect?.right ?? 0) - 320,
+                                    }
+                                    : undefined
+                            }
                         >
                             {/* HEADER */}
                             <div className="flex items-center gap-2 p-4 border-b border-white/5">
@@ -145,7 +178,7 @@ export const FilterDropdown = ({
                                     </button>
                                 )}
 
-                                <span className="font-semibold text-white text-sm">
+                                <span className="font-semibold text-sm text-white">
                                     {isCategoryView ? 'Filters' : activeCategory?.label}
                                 </span>
 
@@ -159,24 +192,23 @@ export const FilterDropdown = ({
                                 )}
                             </div>
 
-                            {/* SEARCH INPUT (Sticky under Header) - Only in Option View */}
+                            {/* SEARCH */}
                             {!isCategoryView && (
-                                <div className="p-2 border-b border-white/5 bg-[#1a1a1a]">
+                                <div className="p-2 border-b border-white/5">
                                     <div className="relative">
                                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                                         <input
-                                            type="text"
-                                            placeholder={`Search ${activeCategory?.label}...`}
-                                            value={filterSearch}
-                                            onChange={(e) => setFilterSearch(e.target.value)}
-                                            className="w-full bg-white/5 border border-white/10 rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-white/20"
                                             autoFocus
+                                            value={filterSearch}
+                                            onChange={e => setFilterSearch(e.target.value)}
+                                            placeholder={`Search ${activeCategory?.label}...`}
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-white/20"
                                         />
                                     </div>
                                 </div>
                             )}
 
-                            {/* BODY (ANIMATED) */}
+                            {/* BODY */}
                             <div className="relative h-[220px] overflow-hidden">
                                 <AnimatePresence initial={false} custom={direction}>
                                     <motion.div
@@ -206,39 +238,39 @@ export const FilterDropdown = ({
                                                     )}
                                                 </button>
                                             ))
+                                        ) : filteredOptions.length === 0 ? (
+                                            <div className="px-4 py-6 text-sm text-gray-500 text-center">
+                                                No matching options
+                                            </div>
                                         ) : (
-                                            <>
-                                                {filteredOptions.length === 0 && (
-                                                    <div className="px-4 py-6 text-sm text-gray-500 text-center">
-                                                        No matching options
-                                                    </div>
-                                                )}
+                                            filteredOptions.map(option => {
+                                                const selected =
+                                                    activeCategory?.value === option.value;
 
-                                                {filteredOptions.map(option => {
-                                                    const selected = activeCategory.value === option.value;
-
-                                                    return (
-                                                        <button
-                                                            key={option.value}
-                                                            onClick={() => {
-                                                                activeCategory.onChange(option.value);
-                                                                // Check option-level override first, then category-level, then default
-                                                                const shouldClose = option.closeOnSelect ?? activeCategory.closeOnSelect ?? true;
-                                                                if (shouldClose) {
-                                                                    setActiveCategoryId(null);
-                                                                }
-                                                            }}
-                                                            className={`w-full flex items-center justify-between px-4 py-3 text-sm ${selected
+                                                return (
+                                                    <button
+                                                        key={option.value}
+                                                        onClick={() => {
+                                                            activeCategory?.onChange(option.value);
+                                                            const shouldClose =
+                                                                option.closeOnSelect ??
+                                                                activeCategory?.closeOnSelect ??
+                                                                true;
+                                                            if (shouldClose) {
+                                                                setIsOpen(false);
+                                                                setActiveCategoryId(null);
+                                                            }
+                                                        }}
+                                                        className={`w-full flex items-center justify-between px-4 py-3 text-sm ${selected
                                                                 ? 'bg-orange-500/10 text-orange-500'
                                                                 : 'text-gray-300 hover:bg-white/5 hover:text-white'
-                                                                }`}
-                                                        >
-                                                            {option.label}
-                                                            {selected && <Check className="w-4 h-4" />}
-                                                        </button>
-                                                    );
-                                                })}
-                                            </>
+                                                            }`}
+                                                    >
+                                                        {option.label}
+                                                        {selected && <Check className="w-4 h-4" />}
+                                                    </button>
+                                                );
+                                            })
                                         )}
                                     </motion.div>
                                 </AnimatePresence>

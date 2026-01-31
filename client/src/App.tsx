@@ -24,7 +24,7 @@ import { MobileBottomNav } from './components/mobile/MobileBottomNav';
 
 function App() {
   return (
-    <GoogleOAuthProvider clientId='1051348061346-0n56hv8e0t80a5m3sqsnta4dait4mvqf.apps.googleusercontent.com'>
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <AuthProvider>
         <Toaster position="top-center" toastOptions={{
           style: {
@@ -35,7 +35,7 @@ function App() {
         <BrowserRouter>
           <div className="min-h-screen bg-background text-foreground selection:bg-accent selection:text-white overflow-x-hidden pb-16 md:pb-0">
             {/* Global subtle grid background */}
-            <div className="fixed inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none z-50 mix-blend-overlay"></div>
+            <div className="fixed inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none z-40 mix-blend-overlay"></div>
 
             <MobileTopBar className="md:hidden" />
             <Header />

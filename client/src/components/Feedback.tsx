@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card } from './ui/Card';
 import { Button } from './ui/Button';
 import { Zap, Layout, MessageSquare, CheckCircle2, Loader2, Sparkles } from 'lucide-react';
-import { feedback as feedbackApi } from "../services/api";
+import { feedbackApi } from "../services/feedback.api";
 
 export const Feedback: React.FC = () => {
     const [submitted, setSubmitted] = useState(false);
