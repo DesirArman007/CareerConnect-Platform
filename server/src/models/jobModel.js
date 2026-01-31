@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
 import { JOB_TYPES, EMPLOYMENT_TYPES } from "../constants/jobEnums.js"
 import { jobConnection } from "../config/jobConnection.js";
+import { normalizeJSON } from "../plugins/normalizeJSON.plugin.js";
 
 const jobSchema = new mongoose.Schema(
     {
-        // ... (Your existing fields: job_id, title, etc. remain unchanged) ...
-        job_id: {
+        jobId: {
             type: String,
             required: true,
         },
@@ -18,7 +18,8 @@ const jobSchema = new mongoose.Schema(
         company: {
             type: String,
             required: true,
-            trim: true
+            trim: true,
+            index: true
         },
         location: {
             type: String,
@@ -37,7 +38,7 @@ const jobSchema = new mongoose.Schema(
         },
         employment_type: {
             type: String,
-            enum: EMPLOYMENT_TYPES,
+            enum: Object.values(EMPLOYMENT_TYPES),
             index: true
         },
         department: {
@@ -46,21 +47,18 @@ const jobSchema = new mongoose.Schema(
         },
         apply_url: {
             type: String,
-            required: true
+            required: true,
+            match: /^https?:\/\//
         },
         source: {
             type: String,
             default: "Unknown",
             index: true
         },
-
-        // --- NEW FIELDS START HERE ---
-
-        // 1. Experience: Made optional so old data doesn't break
         experience: {
-            type: String, // e.g., "2-5 years", "Senior", "Entry Level"
+            type: String,
             trim: true,
-            default: null // Explicitly setting default to null for clarity
+            default: null
         },
         experience_min_years: {
             type: Number,
@@ -72,19 +70,19 @@ const jobSchema = new mongoose.Schema(
             default: null,
             index: true
         },
-
-        // 2. JobLive: Boolean status flag
         joblive: {
             type: Boolean,
-            default: true, // IMPORTANT: New jobs are active by default
-            index: true    // You will likely filter by this (e.g., show only active jobs)
+            default: true,
+            index: true
         },
-
-        // --- NEW FIELDS END HERE ---
-
+        closedAt: {
+            type: Date,
+            default: null
+        },
         last_seen: {
             type: Date,
-            default: Date.now
+            default: null,
+            index: true
         }
     },
     {
@@ -96,14 +94,14 @@ const jobSchema = new mongoose.Schema(
 
 // INDEXES
 
-jobSchema.index({ company: 1, job_id: 1 }, { unique: true });
-jobSchema.index({ createdAt: -1 });
+jobSchema.index({ company: 1, jobId: 1 }, { unique: true });
 jobSchema.index({ company: 1, location: 1 });
+jobSchema.index({ joblive: 1, createdAt: -1 });
+jobSchema.index({ closedAt: 1 }, { expireAfterSeconds: 60 * 60 * 24 * 7 });
+jobSchema.index({ company: 1, joblive: 1, last_seen: 1 })
 jobSchema.index({ title: "text", description: "text" });
 
-// NEW INDEX RECOMMENDATION: 
-// If you plan to heavily query "Active jobs only", add this compound index:
-jobSchema.index({ joblive: 1, createdAt: -1 });
+jobSchema.plugin(normalizeJSON);
 
 const Job = jobConnection.model("Job", jobSchema);
 

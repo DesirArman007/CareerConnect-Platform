@@ -11,6 +11,7 @@ import {
   getJobStats,
   getCompanies
 } from "../controllers/jobController.js";
+import { verifyJWT } from "../middleware/auth.middleware.js";
 
 const router = Router();
 

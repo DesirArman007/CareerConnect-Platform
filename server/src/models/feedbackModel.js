@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import { searchExp, uiExp } from "../constants/feedbackEnums.js";
+import { normalizeJSON } from "../plugins/normalizeJSON.plugin.js";
 
 const feedbackSchema = new Schema(
   {
@@ -24,20 +25,6 @@ const feedbackSchema = new Schema(
       index: true,
     },
 
-    searchExperience: {
-      type: String,
-      enum: searchExp,
-      required: true,
-      index: true
-    },
-
-    clarityFeeling: {
-      type: String,
-      enum: uiExp,
-      required: true,
-      index: true
-    },
-
     message: {
       type: String,
       required: true
@@ -45,5 +32,8 @@ const feedbackSchema = new Schema(
   },
   { timestamps: true }
 );
+
+
+feedbackSchema.plugin(normalizeJSON);
 
 export const Feedback =  mongoose.model("Feedback", feedbackSchema);

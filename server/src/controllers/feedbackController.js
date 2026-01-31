@@ -12,11 +12,10 @@ const createFeedback = asyncHandler(async(req, res) =>{
     const feedback = await Feedback.create(req.body);
 
     return res.status(201).json(
-        new ApiResponse(201,{
-            success: true,
-            message:"Feedback submitted",
-            feedback: feedback
-            })
+        new ApiResponse(201,
+            "Feedback submitted",
+             {feedback: feedback.toJSON()}
+            )
     );
 
 });
@@ -29,21 +28,21 @@ const getAllFeedback = asyncHandler(async(req, res) => {
 
     const total = await Feedback.countDocuments();
 
-    const feedbackData = await Feedback.find()
-        .sort({createdAy: -1})
+    const feedbacks = await Feedback.find()
+        .sort({createdAt: -1})
         .skip(skip)
         .limit(limit)
-        .lean()
+        
 
     return res.status(200).json(
-        new ApiResponse(200, {
-                success: true,
+        new ApiResponse(200, 
+            "Feedback fetched successfully",{
+                feedbacks:feedbacks.map(f => f.toJSON()),
                 pagination: {
                     total, page, limit,
                     totalPages : Math.ceil(total/limit)
-                },
-                feedbacks: feedbackData
-        })
+                }
+            })
     );
 });
 
@@ -58,10 +57,11 @@ const getFeedbackById = asyncHandler(async(req,res) => {
     }
 
     return res.status(200).json(
-        new ApiResponse(200,{
-            success: true,
-            feedback: feedback
-        })
+        new ApiResponse(
+            200,
+            "Feedback fetched successfully",
+            {feedback: feedback.toJSON()}
+        )
     )
 })
 
@@ -76,10 +76,10 @@ const deleteFeedback = asyncHandler(async(req, res) => {
    }
 
    return res.status(200).json(
-        new ApiResponse(200,{
-            success: true,
-            message: "Feedback deleted Successfully"
-        })
+        new ApiResponse(200,
+             "Feedback deleted Successfully",
+             null
+        )
    )
 
 })

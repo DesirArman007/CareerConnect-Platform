@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-
+import helmet from "helmet";
 import userRouter from "./routes/user.routes.js";
 import uploadRouter from "./routes/upload.routes.js";
 import jobRouter from "./routes/job.routes.js";
@@ -19,21 +19,30 @@ app.use(cors({
   credentials: true
 }));
 
+app.use((req, res, next) => {
+  res.setHeader(
+    'Cross-Origin-Opener-Policy',
+    'same-origin-allow-popups'
+  );
+  next();
+});
+
+app.use(helmet());
 app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(express.static("public"));
 app.use(cookieParser());
 
 // Dev logger
-app.use((req, res, next) => {
-  console.log("--- New Request Received ---");
-  console.log("URL:", req.originalUrl);
-  console.log("METHOD:", req.method);
-  console.log("HEADERS:", req.headers);
-  console.log("BODY:", req.body);
-  console.log("--------------------------");
-  next();
-});
+// app.use((req, res, next) => {
+//   console.log("--- New Request Received ---");
+//   console.log("URL:", req.originalUrl);
+//   console.log("METHOD:", req.method);
+//   console.log("HEADERS:", req.headers);
+//   console.log("BODY:", req.body);
+//   console.log("--------------------------");
+//   next();
+// });
 
 // Mount routers
 

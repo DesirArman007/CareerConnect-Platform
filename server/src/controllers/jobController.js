@@ -3,8 +3,6 @@ import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { getFromCache, setInCache, deleteFromCache } from "../cache/cacheHelper.js";
-import { response } from "express";
-
 
 
 // Fetch a single job posting by ID
@@ -27,10 +25,11 @@ const getJobById = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Job not found");
   }
 
-  const response = new ApiResponse(200,
+  const response = new ApiResponse(
+    200,
+    "Job fetched successfully",
     {
-      success: true,
-      jobData: job,
+      job: job.toJSON()
     }
   );
 
@@ -94,16 +93,18 @@ const getAllJobs = asyncHandler(async (req, res) => {
 
   const totalJobs = await Job.countDocuments(filter);
 
-  const response = new ApiResponse(200, {
-    jobs,
-    pagination: {
-      success: true,
-      currentPage: numPage,
-      totalPages: Math.ceil(totalJobs / numLimit),
-      totalJobs,
-      limit: numLimit
-    }
-  });
+  const response = new ApiResponse(
+    200,
+    "Jobs fetched successfully",
+    {
+      jobs: jobs.map(j => j.toJSON()),
+      pagination: {
+        currentPage: numPage,
+        totalPages: Math.ceil(totalJobs / numLimit),
+        totalJobs,
+        limit: numLimit
+      }
+    });
 
   await setInCache(cacheKey, response, 300);
 
@@ -114,7 +115,6 @@ const getAllJobs = asyncHandler(async (req, res) => {
 // Search Jobs by keyword, Title, Companies, Skills
 const searchJobs = asyncHandler(async (req, res) => {
   const {
-    keyword,
     page = 1,
     limit = 10,
     job_type,
@@ -123,7 +123,7 @@ const searchJobs = asyncHandler(async (req, res) => {
     location,
     experience_level
   } = req.query;
-
+  const keyword = req.query.keyword?.toString();
   const numPage = parseInt(page);
   const numLimit = parseInt(limit);
   const skip = (numPage - 1) * numLimit;
@@ -142,13 +142,14 @@ const searchJobs = asyncHandler(async (req, res) => {
   }
 
   const searchFilter = {
+
+    joblive: true,
     $or: [
       { title: { $regex: keyword, $options: 'i' } },
       { company: { $regex: keyword, $options: 'i' } },
       { skill: { $regex: keyword, $options: 'i' } },
       { location: { $regex: keyword, $options: 'i' } }
-    ],
-    joblive: true
+    ]
   };
 
   if (job_type) searchFilter.job_type = job_type;
@@ -176,17 +177,19 @@ const searchJobs = asyncHandler(async (req, res) => {
 
   const totalJobs = await Job.countDocuments(searchFilter);
 
-  const response = new ApiResponse(200, {
-    jobs,
-    pagination: {
-      success: true,
-      currentPage: numPage,
-      totalPages: Math.ceil(totalJobs / numLimit),
-      totalJobs: totalJobs,
-      limit: numLimit,
-    },
-    searchQuery: keyword
-  });
+  const response = new ApiResponse(
+    200,
+    "Search results fetched successfully",
+    {
+      jobs: jobs.map(j => j.toJSON()),
+      pagination: {
+        currentPage: numPage,
+        totalPages: Math.ceil(totalJobs / numLimit),
+        totalJobs,
+        limit: numLimit,
+      },
+      searchQuery: keyword
+    });
 
   await setInCache(cacheKey, response, 300);
 
@@ -227,16 +230,19 @@ const getJobsByCompany = asyncHandler(async (req, res) => {
   });
 
 
-  const response = new ApiResponse(200, {
-    success: true,
-    jobs,
-    pagination: {
-      currentPage: Number(page),
-      totalPages: Math.ceil(totalJobs / Number(limit)),
-      totalJobs: totalJobs,
-      limit: Number(limit)
-    }
-  })
+  const response = new ApiResponse(
+    200,
+    "Company jobs fetched successfully",
+    {
+      jobs: jobs.map(j => j.toJSON()),
+      pagination: {
+        currentPage: Number(page),
+        totalPages: Math.ceil(totalJobs / Number(limit)),
+        totalJobs,
+        limit: Number(limit)
+      },
+
+    })
 
   await setInCache(cacheKey, response, 600);
 
@@ -308,17 +314,19 @@ const getNewJobs = asyncHandler(async (req, res) => {
     createdAt: { $gte: dateThreshold }
   });
 
-  const response = new ApiResponse(200, {
-    jobs,
-    pagination: {
-      success: true,
-      currentPage: Number(page),
-      totalPages: Math.ceil(totalJobs / Number(limit)),
-      totalJobs: totalJobs,
-      limit: Number(limit)
-    },
-    message: `Jobs added in the last ${days}`
-  }
+  const response = new ApiResponse(
+    200,
+    `Jobs added in the last ${days}`,
+    {
+      jobs: jobs.map(j => j.toJSON()),
+      pagination: {
+        currentPage: Number(page),
+        totalPages: Math.ceil(totalJobs / Number(limit)),
+        totalJobs: totalJobs,
+        limit: Number(limit)
+      },
+
+    }
   );
 
   await setInCache(cacheKey, response, process.env.REDIS_TTL)
@@ -458,17 +466,22 @@ const getSimilarJobs = asyncHandler(async (req, res) => {
 
 
   res.status(200).json(
-    new ApiResponse(200, {
-      similarJobs,
-      count: similarJobs.length,
-      originalJob: {
-        id: originalJob._id,
-        title: originalJob.title,
-        company: originalJob.company
-      },
-      matchedKeywords: keywords
-    })
+    new ApiResponse(
+      200,
+      "Similar jobs fetched successfully",
+      {
+        similarJobs,
+        count: similarJobs.length,
+        originalJob: {
+          id: originalJob._id,
+          title: originalJob.title,
+          company: originalJob.company
+        },
+        matchedKeywords: keywords
+      }
+    )
   );
+
 });
 
 
@@ -479,9 +492,10 @@ const getSmartSeachSuggestions = asyncHandler(async (req, res) => {
 
   if (!q || q.length < 2) {
     return res.status(200).json(
-      new ApiResponse(200, {
-        success: true,
-        data: {
+      new ApiResponse(
+        200,
+        "Search suggestions fetched successfully",
+        {
           jobs: [],
           quickSuggestions: {
             titles: [],
@@ -489,9 +503,10 @@ const getSmartSeachSuggestions = asyncHandler(async (req, res) => {
             locations: []
           }
         }
-      })
+      )
     );
   }
+
 
   const filter = {
     $or: [
@@ -517,18 +532,18 @@ const getSmartSeachSuggestions = asyncHandler(async (req, res) => {
   ]);
 
   res.status(200).json(
-    new ApiResponse(200, {
-      success: true,
-      data: {
-        jobs: jobs,
+    new ApiResponse(
+      200,
+      "Search suggestions fetched successfully",
+      {
+        jobs: jobs.map(j => j.toJSON()),
         quickSuggestions: {
           titles: titleSuggestions,
           companies: companySuggestions,
           locations: locationSuggestions
-        }
-      },
-      query: q
-    })
+        },
+        query: q
+      })
   );
 
 });
@@ -536,7 +551,7 @@ const getSmartSeachSuggestions = asyncHandler(async (req, res) => {
 const getFilterOptions = asyncHandler(async (req, res) => {
 
   const [departements, locations] = await Promise.all([
-    Job.distinct('departement'),
+    Job.distinct('department'),
     Job.distinct('location')
   ]);
 
@@ -618,7 +633,9 @@ const getJobStats = asyncHandler(async (req, res) => {
   }));
 
 
-  const response = new ApiResponse(200, {
+  const response = new ApiResponse(
+    200,
+    "Job statistics fetched successfully", {
     totalJobs,
     newJobsThisWeek: newJobsCount,
     jobTypes: {
@@ -652,12 +669,17 @@ const getCompanies = asyncHandler(async (req, res) => {
     { $sort: { jobCount: -1 } }
   ]);
 
-  const response = new ApiResponse(200, {
-    companies: companies.map(c => ({
-      name: c._id,
-      jobs: c.jobCount
-    }))
-  });
+  const response = new ApiResponse(
+    200,
+    "Companies fetched successfully",
+    {
+      companies: companies.map(c => ({
+        name: c._id,
+        jobs: c.jobCount
+      }))
+    }
+  );
+
 
   await setInCache(cacheKey, response, 600); // 10 min
   res.status(200).json(response);

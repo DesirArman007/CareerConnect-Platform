@@ -21,19 +21,7 @@ router.route('/getUser').get(verifyJWT, getUser);
 router.route('/updateUser').put(verifyJWT, updateUser);
 router.route('/deleteUser').delete(verifyJWT, deleteUser);
 router.route('/updatePassword').put(verifyJWT, updatePassword);
-router.route("/searchUser").get(verifyJWT,searchUsers)
+router.route("/searchUser").get(verifyJWT, authorizeRoles("admin", "recruiter"),searchUsers)
 router.route("/allUsers").get(verifyJWT,authorizeRoles("admin"), getAllUsers);
 
-
-router.get('/admin', verifyJWT, authorizeRoles('admin'), (req, res) => {
-    res.json({ message: "Welcome Admin" });
-});
-
-router.get('/recruiter', verifyJWT, authorizeRoles('recruiter','admin'), (req, res) => {
-    res.json({ message: "Welcome Recruiter" });
-});
-
-router.get('/applicant', verifyJWT, authorizeRoles('applicant','recruiter','admin'), (req, res) => {
-    res.json({ message: "Welcome Applicant" });
-});
 export default router
