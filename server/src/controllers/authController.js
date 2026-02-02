@@ -44,6 +44,7 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new ApiError(500, "User already registered");
     }
 
+    console.log(`Setting auth cookies on POST /auth/register`);
     // 6. Send a success response
     return res.status(201).json(
         new ApiResponse(201, "User registered successfully", { user: createdUser })
@@ -62,11 +63,13 @@ const loginUser = asyncHandler(async (req, res) => {
     }
 
     if (user.status !== statusEnums.ACTIVE) {
+        console.log(`Auth failure: Account not active for userId=${user._id} on POST /auth/login`);
         throw new ApiError(403, "Account is not active");
     }
 
     const isPasswordCorrect = await user.isPasswordCorrect(password);
     if (!isPasswordCorrect) {
+        console.log(`Auth failure: Invalid credentials for userId=${user._id} on POST /auth/login`);
         throw new ApiError(401, "Invalid user credentials");
     }
 
@@ -76,13 +79,16 @@ const loginUser = asyncHandler(async (req, res) => {
     user.refreshToken = hashToken(refreshToken);
 
     user.lastLoginAt = new Date();
-    user.lastActiveAt = new Date();
+    user.lastActiveAt = new Date(); // Update last active
 
     await user.save({ validateBeforeSave: false });
 
     const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
 
+    console.log(`Setting auth cookies on POST /auth/login`);
     setAuthCookies(res, accessToken, refreshToken);
+
+    console.log(`Auth success: userId=${user._id} for POST /auth/login`);
 
     return res
         .status(200)
@@ -141,7 +147,9 @@ const refreshTokenHandler = asyncHandler(async (req, res) => {
     user.lastActiveAt = new Date();
     await user.save({ validateBeforeSave: false });
 
+    console.log(`Setting auth cookies on POST /auth/refreshToken`);
     setAuthCookies(res, newAccessToken, newRefreshToken);
+    console.log(`Auth success: userId=${user._id} for POST /auth/refreshToken`);
 
     return res
         .status(200)
@@ -381,7 +389,9 @@ const googleAuth = asyncHandler(async (req, res) => {
 
     await user.save({ validateBeforeSave: false });
 
+    console.log(`Setting auth cookies on POST /auth/googleAuth`);
     setAuthCookies(res, accessToken, refreshToken);
+    console.log(`Auth success: userId=${user._id} for POST /auth/googleAuth`);
 
     res.status(200)
         .json(

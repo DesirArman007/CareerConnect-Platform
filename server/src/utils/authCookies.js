@@ -18,6 +18,7 @@ const refreshTokenCookieOptions = {
 };
 
 export const setAuthCookies = (res, accessToken, refreshToken) => {
+    console.log("Cookies set: [accessToken, refreshToken]");
     res.cookie("accessToken", accessToken, accessTokenCookieOptions);
     res.cookie("refreshToken", refreshToken, refreshTokenCookieOptions);
 };
