@@ -79,7 +79,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!response.success) throw new Error(response.message || "Login failed");
 
     localStorage.setItem("hasSession", "true");
-    await fetchUserData();
+    const sessionActive = await fetchUserData();
+    if (!sessionActive) {
+      throw new Error("Login succeeded but session failed to establish. Please check your cookies.");
+    }
   };
 
   const register = async (data: { name: string; email: string; password: string }) => {
@@ -102,7 +105,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!response.success) throw new Error(response.message || "Google login failed");
 
     localStorage.setItem("hasSession", "true");
-    await fetchUserData();
+    const sessionActive = await fetchUserData();
+    if (!sessionActive) {
+      throw new Error("Google login succeeded but session failed to establish.");
+    }
   };
 
   /* ---------- PROFILE ---------- */

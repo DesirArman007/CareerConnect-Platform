@@ -16,10 +16,8 @@ const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Cookie expired / invalid → force re-login
-      window.location.href = "/login";
-    }
+    // Return the error so the calling function can handle it
+    // Removed automatic redirect to /login on 401 to prevent login loops
     return Promise.reject(error);
   }
 );
