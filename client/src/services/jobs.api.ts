@@ -1,6 +1,16 @@
 import api, { ApiResponse } from './api';
 import { Job } from '../types';
 
+export interface CreateJobData {
+    title: string;
+    description: string;
+    location: string;
+    employment_type: string;
+    department: string;
+    experience_min_years: number;
+    experience_max_years: number;
+}
+
 export const jobApi = {
     getAll: (params: any) =>
         api
@@ -40,5 +50,11 @@ export const jobApi = {
     getNew: (params: { page?: number; limit?: number; days?: number }) =>
         api
             .get<ApiResponse<{ jobs: Job[]; pagination: any }>>('/job/new/recent', { params })
+            .then(r => r.data),
+
+    // Employer job creation
+    createJob: (data: CreateJobData) =>
+        api
+            .post<ApiResponse<{ job: Job }>>('/job/employer/createJob', data)
             .then(r => r.data),
 };

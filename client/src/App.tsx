@@ -16,6 +16,8 @@ import { DashboardPage } from './components/pages/DashboardPage';
 import { AboutPage } from './components/pages/AboutPage'; // Removed LandingPage import if unused, or keep
 import { LoginPage } from './components/pages/LoginPage';
 import { SignupPage } from './components/pages/SignupPage';
+import { EmployerSignupPage } from './components/pages/EmployerSignupPage';
+import { CreateJobPage } from './components/pages/CreateJobPage';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
 
@@ -52,6 +54,10 @@ function App() {
 
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
+
+              {/* Employer Routes */}
+              <Route path="/employer/signup" element={<EmployerSignupPage />} />
+              <Route path="/employer/post-job" element={<CreateJobPage />} />
             </Routes>
 
             <footer className="py-8 border-t border-white/5 text-center text-sm text-gray-600">

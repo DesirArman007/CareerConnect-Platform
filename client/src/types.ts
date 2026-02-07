@@ -5,7 +5,6 @@ export interface Job {
   company: string;
   location: string;
 
-  job_type?: "job" | "internship" | string;
   employment_type?: string;
 
   salary?: string;

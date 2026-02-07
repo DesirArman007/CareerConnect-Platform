@@ -7,6 +7,20 @@ export const authApi = {
             .post<ApiResponse<User>>("/users/register", data)
             .then((r) => r.data),
 
+    registerEmployer: (data: {
+        name: string;
+        email: string;
+        password: string;
+        companyName: string;
+        website: string;
+        industry: string;
+        size: string;
+        location: string;
+    }) =>
+        api
+            .post<ApiResponse<{ user: User; company: any }>>("/users/employer/register", data)
+            .then((r) => r.data),
+
     login: (data: any) =>
         api
             .post<ApiResponse<{ user: User }>>("/users/login", data)

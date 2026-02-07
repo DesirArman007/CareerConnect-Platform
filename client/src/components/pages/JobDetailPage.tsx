@@ -13,12 +13,10 @@ import {
     ArrowUpRight,
     Heart,
     Globe,
-    Calendar,
-    Tag
+    Calendar
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { jobApi } from '../../services/jobs.api';
-import { getCompanyIcon } from '../CompanyLogos';
 import { formatDescription } from '../../utils/formatJobDescription';
 import { openExternalLink } from '../../utils/security';
 
@@ -197,11 +195,6 @@ export const JobDetailPage: React.FC = () => {
                             <div className="badge">
                                 <Briefcase className="w-4 h-4" /> {employmentType}
                             </div>
-                            {job.job_type && (
-                                <div className="badge">
-                                    <Tag className="w-4 h-4" /> {job.job_type}
-                                </div>
-                            )}
                             {job.source && (
                                 <div className="badge">
                                     <Globe className="w-4 h-4" /> {job.source}
@@ -248,14 +241,23 @@ export const JobDetailPage: React.FC = () => {
                     <div className="md:sticky md:top-32">
                         <Card className="p-6 space-y-6">
                             <div className="flex gap-4 items-center">
-                                {getCompanyIcon(job.company, 64) ?? (
-                                    <div className="w-16 h-16 bg-accent rounded-xl flex items-center justify-center text-xl font-bold">
-                                        {job.company?.[0]}
+                                {!imgError && import.meta.env.VITE_LOGO_DEV_PUBLIC_KEY ? (
+                                    <img
+                                        src={`https://img.logo.dev/name/${encodeURIComponent(job.company)}?token=${import.meta.env.VITE_LOGO_DEV_PUBLIC_KEY}&format=png`}
+                                        alt={job.company}
+                                        className="w-12 h-12 object-contain flex-shrink-0 rounded-lg"
+                                        onError={() => setImgError(true)}
+                                    />
+                                ) : (
+                                    <div className="w-12 h-12 flex-shrink-0 rounded-lg bg-accent flex items-center justify-center">
+                                        <span className="text-lg font-bold text-white">
+                                            {job.company?.[0]}
+                                        </span>
                                     </div>
                                 )}
-                                <div>
-                                    <h3 className="font-bold">{job.company}</h3>
-                                    <p className="text-sm text-gray-400">{job.location}</p>
+                                <div className="min-w-0">
+                                    <h3 className="font-bold truncate">{job.company}</h3>
+                                    <p className="text-sm text-gray-400 truncate">{job.location}</p>
                                 </div>
                             </div>
 

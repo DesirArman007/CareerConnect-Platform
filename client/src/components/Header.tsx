@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Menu, X, LogIn, Home, Search, Building2, Info, User as UserIcon, Settings, Briefcase, LogOut, ChevronDown, ChevronRight } from 'lucide-react';
+import { Menu, X, LogIn, Home, Search, Building2, Info, User as UserIcon, Settings, Briefcase, LogOut, ChevronDown, ChevronRight, PlusCircle } from 'lucide-react';
 import { Button } from './ui/Button';
 
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -101,6 +101,17 @@ export const Header: React.FC = () => {
                 </button>
               );
             })}
+
+            {/* Post Job - Employer Only */}
+            {user?.role === 'employer' && (
+              <button
+                onClick={() => handleNavigation('/employer/post-job')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all bg-orange-500/20 text-orange-400 hover:bg-orange-500/30 border border-orange-500/30 ${location.pathname === '/employer/post-job' ? 'ring-2 ring-orange-500/50' : ''}`}
+              >
+                <PlusCircle className="w-4 h-4" />
+                Post Job
+              </button>
+            )}
           </nav>
 
           {/* Desktop Auth / Hamburger */}
@@ -242,6 +253,17 @@ export const Header: React.FC = () => {
                 </button>
               );
             })}
+
+            {/* Post Job - Employer Only (Mobile) */}
+            {user?.role === 'employer' && (
+              <button
+                onClick={() => handleNavigation('/employer/post-job')}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium bg-orange-500/20 text-orange-400 hover:bg-orange-500/30 border border-orange-500/30"
+              >
+                <PlusCircle className="w-5 h-5" />
+                Post Job
+              </button>
+            )}
           </nav>
 
           {/* Divider */}
