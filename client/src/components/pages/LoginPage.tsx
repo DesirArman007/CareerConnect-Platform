@@ -163,7 +163,24 @@ export const LoginPage: React.FC = () => {
                     {/* EMAIL STEP */}
                     {step === 'email' && (
                         <div className="space-y-5">
+
+                            <div ref={googleButtonWrapper} className="w-full flex justify-center">
+                                <GoogleLogin
+                                    onSuccess={c => c.credential && handleGoogleSuccess(c.credential)}
+                                    onError={() => setError('Google login failed')}
+                                    width={googleBtnWidth}
+                                    theme="filled_blue"
+                                    shape="pill"
+                                    text="signin_with"
+                                />
+                            </div>
                             {error && <div className="text-red-400 text-sm text-center bg-red-500/10 p-2 rounded">{error}</div>}
+
+                            <div className="relative flex items-center py-2">
+                                <div className="flex-grow border-t border-white/10"></div>
+                                <span className="flex-shrink-0 mx-4 text-gray-500 text-sm">Or continue with</span>
+                                <div className="flex-grow border-t border-white/10"></div>
+                            </div>
 
                             <Input
                                 label="Email address"
@@ -193,22 +210,9 @@ export const LoginPage: React.FC = () => {
                                 </Button>
                             </div>
 
-                            <div className="relative flex items-center py-2">
-                                <div className="flex-grow border-t border-white/10"></div>
-                                <span className="flex-shrink-0 mx-4 text-gray-500 text-sm">Or continue with</span>
-                                <div className="flex-grow border-t border-white/10"></div>
-                            </div>
 
-                            <div ref={googleButtonWrapper} className="w-full flex justify-center">
-                                <GoogleLogin
-                                    onSuccess={c => c.credential && handleGoogleSuccess(c.credential)}
-                                    onError={() => setError('Google login failed')}
-                                    width={googleBtnWidth}
-                                    theme="filled_blue"
-                                    shape="pill"
-                                    text="signin_with"
-                                />
-                            </div>
+
+
                         </div>
                     )}
 
