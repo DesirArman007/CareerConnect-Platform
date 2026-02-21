@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { JOB_TYPES, EMPLOYMENT_TYPES } from "../constants/jobEnums.js"
+import { EMPLOYMENT_TYPES } from "../constants/jobEnums.js"
 import { jobConnection } from "../config/jobConnection.js";
 import { normalizeJSON } from "../plugins/normalizeJSON.plugin.js";
 
@@ -30,12 +30,6 @@ const jobSchema = new mongoose.Schema(
             type: String,
             required: true
         },
-        job_type: {
-            type: String,
-            enum: Object.values(JOB_TYPES),
-            default: JOB_TYPES.JOB,
-            index: true
-        },
         employment_type: {
             type: String,
             enum: Object.values(EMPLOYMENT_TYPES),
@@ -45,9 +39,18 @@ const jobSchema = new mongoose.Schema(
             type: String,
             trim: true
         },
+        apply_type: {
+            type: String,
+            enum: ["INTERNAL", "EXTERNAL"],
+            default: "INTERNAL",
+            index: true
+        },
+
         apply_url: {
             type: String,
-            required: true,
+            required: function () {
+                return this.apply_type === "EXTERNAL";
+            },
             match: /^https?:\/\//
         },
         source: {
@@ -105,4 +108,4 @@ jobSchema.plugin(normalizeJSON);
 
 const Job = jobConnection.model("Job", jobSchema);
 
-export default Job;
+export { Job };

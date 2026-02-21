@@ -9,14 +9,18 @@ import {
   getSmartSeachSuggestions,
   getFilterOptions,
   getJobStats,
-  getCompanies
+  getCompanies,
+  createJob
 } from "../controllers/jobController.js";
 import { verifyJWT } from "../middleware/auth.middleware.js";
+import { Roles } from "../constants/roles.js";
+import { authorizeRoles } from "../middleware/role.middleware.js";
 
 const router = Router();
 
 
 // Static/Specific Routes 
+router.post("/employer/createJob", verifyJWT, authorizeRoles(Roles.EMPLOYER), createJob )
 router.get("/stats", getJobStats);
 router.get("/new/recent", getNewJobs);          
 router.get("/search/query", searchJobs);       

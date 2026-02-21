@@ -6,6 +6,7 @@ import userRouter from "./routes/user.routes.js";
 import uploadRouter from "./routes/upload.routes.js";
 import jobRouter from "./routes/job.routes.js";
 import feedbackRouter from "./routes/feedback.routes.js";
+import userActionsRouter from "./routes/user.actions.routes.js";
 
 const app = express();
 
@@ -38,6 +39,8 @@ app.use((req, res, next) => {
 });
 
 app.use(helmet());
+
+
 app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(express.static("public"));
@@ -52,7 +55,9 @@ app.get("/", (req, res) => {
 app.use("/api/users", userRouter);
 app.use("/api/uploads", uploadRouter);
 app.use("/api/job", jobRouter);
-app.use("/api/feedback", feedbackRouter)
+app.use("/api/feedback", feedbackRouter);
+app.use("/api/user-actions", userActionsRouter);
+
 // Health
 app.get("/health", (_req, res) => res.json({ ok: true }));
 

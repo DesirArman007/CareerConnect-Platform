@@ -1,8 +1,69 @@
-import Job from "../models/jobModel.js";
+import { Job } from "../models/jobModel.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { getFromCache, setInCache, deleteFromCache } from "../cache/cacheHelper.js";
+import { Roles } from "../constants/roles.js";
+
+
+// creating a job
+const createJob = asyncHandler(async (req, res) => {
+
+  const { title, description, location, employment_type, department, experience_min_years, experience_max_years } = req.body;
+
+  if ([title, description, location, employment_type, department].some((field) => !field || field.toString().trim() === "")) {
+    throw new ApiError(400, "All fields are required");
+  }
+
+  if (
+    experience_min_years < 0 ||
+    experience_max_years < 0 ||
+    experience_min_years > experience_max_years
+  ) {
+    throw new ApiError(400, "Invalid experience range");
+  }
+
+  // Get company name from user's companyId
+  const { Company } = await import("../models/companyModel.js");
+  const companyDoc = await Company.findById(req.user.companyId);
+
+  if (!companyDoc) {
+    throw new ApiError(400, "Company not found. Please complete your employer profile.");
+  }
+
+  // Generate unique jobId
+  const jobId = `EMP-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+  const job = await Job.create({
+    jobId,
+    title,
+    description,
+    location,
+    employment_type,
+    department,
+    experience_min_years,
+    experience_max_years,
+    company: companyDoc.companyName,
+    source: Roles.EMPLOYER,
+    joblive: true,
+    last_seen: new Date()
+  });
+
+  if (!job) {
+    throw new ApiError(500, "Job not created");
+  }
+
+  const response = new ApiResponse(
+    201,
+    "Job Created successfully",
+    {
+      job: job.toJSON()
+    }
+  );
+
+  res.status(201).json(response);
+
+});
 
 
 // Fetch a single job posting by ID
@@ -43,7 +104,6 @@ const getAllJobs = asyncHandler(async (req, res) => {
   const {
     page = 1,
     limit = 30,
-    job_type,
     location,
     company,
     employment_type,
@@ -56,7 +116,7 @@ const getAllJobs = asyncHandler(async (req, res) => {
   const numLimit = parseInt(limit);
   const skip = (numPage - 1) * numLimit;
 
-  const cacheKey = `jobs:page=${numPage}:limit=${numLimit}:job_type=${job_type || "any"}:location=${location || "any"}:company=${company || "any"}:employment_type=${employment_type || "any"}:department=${department || "any"}:experience_level=${experience_level || "any"}`;
+  const cacheKey = `jobs:page=${numPage}:limit=${numLimit}:location=${location || "any"}:company=${company || "any"}:employment_type=${employment_type || "any"}:department=${department || "any"}:experience_level=${experience_level || "any"}`;
 
   const cached = await getFromCache(cacheKey);
   if (cached) {
@@ -65,7 +125,7 @@ const getAllJobs = asyncHandler(async (req, res) => {
 
   const filter = { joblive: true };
 
-  if (job_type) filter.job_type = job_type;
+
   if (location?.trim()) filter.location = { $regex: location, $options: 'i' };
   if (company?.trim()) filter.company = { $regex: company, $options: 'i' };
   if (employment_type) filter.employment_type = employment_type;
@@ -117,7 +177,6 @@ const searchJobs = asyncHandler(async (req, res) => {
   const {
     page = 1,
     limit = 10,
-    job_type,
     employment_type,
     department,
     location,
@@ -128,7 +187,7 @@ const searchJobs = asyncHandler(async (req, res) => {
   const numLimit = parseInt(limit);
   const skip = (numPage - 1) * numLimit;
 
-  const cacheKey = `job_search:${keyword}:${numPage}:${numLimit}:${job_type || "any"}:${employment_type || "any"}:${department || "any"}:${location || "any"}:${experience_level || "any"}`;
+  const cacheKey = `job_search:${keyword}:${numPage}:${numLimit}:${employment_type || "any"}:${department || "any"}:${location || "any"}:${experience_level || "any"}`;
 
   try {
     const cached = await getFromCache(cacheKey);
@@ -152,7 +211,7 @@ const searchJobs = asyncHandler(async (req, res) => {
     ]
   };
 
-  if (job_type) searchFilter.job_type = job_type;
+
   if (employment_type) searchFilter.employment_type = employment_type;
   if (department?.trim()) searchFilter.department = { $regex: department, $options: 'i' };
   if (location?.trim()) searchFilter.location = { $regex: location, $options: 'i' };
@@ -365,7 +424,7 @@ const getSimilarJobs = asyncHandler(async (req, res) => {
       _id: { $ne: originalJob._id },
       $or: [
         { company: originalJob.company },
-        { job_type: originalJob.job_type },
+        { employment_type: originalJob.employment_type },
         ...(keywords.length > 0
           ? [{ title: { $regex: keywords.join("|"), $options: "i" } }]
           : [])
@@ -399,23 +458,16 @@ const getSimilarJobs = asyncHandler(async (req, res) => {
               }
             },
 
-            // Same job type (job / internship)
+            // Same employment type (full-time, part-time, etc.)
             {
               $cond: {
-                if: { $eq: ["$job_type", originalJob.job_type] },
+                if: { $eq: ["$employment_type", originalJob.employment_type] },
                 then: 3,
                 else: 0
               }
             },
 
-            // Same employment type (full-time, part-time, etc.)
-            {
-              $cond: {
-                if: { $eq: ["$employment_type", originalJob.employment_type] },
-                then: 2,
-                else: 0
-              }
-            },
+
 
             // Title keyword similarity
             ...keywords.map(keyword => ({
@@ -455,7 +507,6 @@ const getSimilarJobs = asyncHandler(async (req, res) => {
         title: 1,
         company: 1,
         location: 1,
-        job_type: 1,
         employment_type: 1,
         apply_url: 1,
         createdAt: 1,
@@ -520,7 +571,7 @@ const getSmartSeachSuggestions = asyncHandler(async (req, res) => {
 
   const jobs = await Job.find(filter)
     .limit(parseInt(limit))
-    .select('title company location job_type employment_type createdAt')
+    .select('title company location employment_type createdAt')
     .sort({ createdAt: -1 });
 
   // Get unique values for quick suggestions(max 3 each)
@@ -597,7 +648,7 @@ const getJobStats = asyncHandler(async (req, res) => {
       { $match: { joblive: true } },
       {
         $group: {
-          _id: '$job_type',
+          _id: '$employment_type',
           count: { $sum: 1 }
         }
       }
@@ -617,12 +668,12 @@ const getJobStats = asyncHandler(async (req, res) => {
     ]),
 
 
-    // Gets the 5 monst recent ACTIVE jobs
-    Job.find({ joblive: true }).sort({ createdAt: -1 }).limit(5).select('title company location job_type createdAt')
+    // Gets the 5 most recent ACTIVE jobs
+    Job.find({ joblive: true }).sort({ createdAt: -1 }).limit(5).select('title company location employment_type createdAt')
 
   ]);
 
-  const jobTypeStats = jobsByType.reduce((acc, item) => {
+  const employmentTypeStats = jobsByType.reduce((acc, item) => {
     acc[item._id || 'other'] = item.count;
     return acc;
   }, {});
@@ -638,10 +689,7 @@ const getJobStats = asyncHandler(async (req, res) => {
     "Job statistics fetched successfully", {
     totalJobs,
     newJobsThisWeek: newJobsCount,
-    jobTypes: {
-      jobs: jobTypeStats.job || 0,
-      internships: jobTypeStats.internship || 0
-    },
+    employmentTypes: employmentTypeStats,
     topLocations,
     recentJobs
   });
@@ -696,5 +744,6 @@ export {
   getSmartSeachSuggestions,
   getFilterOptions,
   getJobStats,
-  getCompanies
+  getCompanies,
+  createJob
 }

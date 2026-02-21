@@ -7,6 +7,12 @@ export function normalizeJSON(schema) {
       }
 
       delete ret.__v;
+
+      // Remove appliedJobs for employers
+      if (ret.role === "employer") {
+        delete ret.appliedJobs;
+      }
+
       return ret;
     }
   });

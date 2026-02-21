@@ -7,7 +7,7 @@ import { normalizeJSON } from "../plugins/normalizeJSON.plugin.js";
 
 const userSchema = new Schema(
   {
-   
+
     name: {
       type: String,
       required: true,
@@ -17,7 +17,6 @@ const userSchema = new Schema(
     email: {
       type: String,
       required: true,
-      unique: true,
       lowercase: true,
       trim: true,
       index: true
@@ -33,6 +32,16 @@ const userSchema = new Schema(
       },
       select: false
     },
+
+    companyId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Company",
+      required: function () {
+        return this.role === Roles.EMPLOYER;
+      },
+      default: null
+    },
+
     role: {
       type: String,
       enum: Object.values(Roles),
@@ -72,7 +81,8 @@ const userSchema = new Schema(
         jobId: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "Job",
-          index: true
+          index: true,
+          required: true
         },
         appliedAt: {
           type: Date,
@@ -105,14 +115,7 @@ const userSchema = new Schema(
 
 userSchema.index({ email: 1, authProvider: 1 });
 
-userSchema.index(
-  { _id: 1, "appliedJobs.jobId": 1 },
-  { unique: true, sparse: true }
-);
-
-
 userSchema.plugin(normalizeJSON);
-
 
 // Hooks 
 
@@ -135,7 +138,7 @@ userSchema.methods.isPasswordCorrect = function (password) {
 
 userSchema.methods.generateAccessToken = function () {
   return jwt.sign(
-    { _id: this._id, role: this.role },
+    { _id: this._id, role: this.role, companyId: this.companyId },
     process.env.ACCESS_TOKEN_SECRET,
     { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
   );

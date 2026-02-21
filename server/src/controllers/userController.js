@@ -166,4 +166,11 @@ const getAllUsers = asyncHandler(async (req, res) => {
 });
 
 
-export { getUser, updateUser, deleteUser, updatePassword, searchUsers, getAllUsers };
+export {
+    getUser,
+    updateUser,
+    deleteUser,
+    updatePassword,
+    searchUsers,
+    getAllUsers
+};

@@ -84,4 +84,9 @@ const deleteFeedback = asyncHandler(async(req, res) => {
 
 })
 
-export {createFeedback, getAllFeedback, getFeedbackById, deleteFeedback};
+export {
+    createFeedback, 
+    getAllFeedback, 
+    getFeedbackById, 
+    deleteFeedback
+};

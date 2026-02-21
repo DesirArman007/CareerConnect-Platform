@@ -10,6 +10,8 @@ import { OAuth2Client } from "google-auth-library";
 import { statusEnums } from "../constants/statusEnums.js";
 import { setAuthCookies, clearAuthCookies } from "../utils/authCookies.js";
 import { hashToken } from "../utils/hashToken.js";
+import { Company } from "../models/companyModel.js";
+
 
 const registerUser = asyncHandler(async (req, res) => {
 
@@ -48,6 +50,48 @@ const registerUser = asyncHandler(async (req, res) => {
     // 6. Send a success response
     return res.status(201).json(
         new ApiResponse(201, "User registered successfully", { user: createdUser })
+    );
+});
+
+const registerEmployer = asyncHandler(async (req, res) => {
+    const { name, email, password, companyName, website, industry, size, location } = req.body;
+
+    if ([name, email, password, companyName, website, industry, size, location].some((field) => !field || field.toString().trim() === "")) {
+        throw new ApiError(400, "All fields are required");
+    }
+
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+        throw new ApiError(409, "User exist with this email");
+    }
+    const company = await Company.create({
+        companyName,
+        website,
+        industry,
+        size,
+        location
+    });
+
+    const user = await User.create({
+        name,
+        email,
+        password,
+        role: Roles.EMPLOYER,
+        authProvider: "email",
+        companyId: company._id
+    });
+
+    const createdUser = user.toJSON();
+
+    if (!createdUser) {
+        throw new ApiError(500, "User already registered");
+    }
+
+    console.log(`Setting auth cookies on POST /auth/register`);
+    // 6. Send a success response
+    return res.status(201).json(
+        new ApiResponse(201, "User registered successfully", { user: createdUser, company })
     );
 });
 
@@ -96,7 +140,7 @@ const loginUser = asyncHandler(async (req, res) => {
             new ApiResponse(
                 200,
                 "User logged in successfully",
-                { user: loggedInUser }
+                { user: loggedInUser, accessToken }
             )
         );
 });
@@ -318,6 +362,7 @@ const resetPassword = asyncHandler(async (req, res) => {
 });
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
 const googleAuth = asyncHandler(async (req, res) => {
     const { idToken } = req.body;
 
@@ -402,4 +447,14 @@ const googleAuth = asyncHandler(async (req, res) => {
 
 })
 
-export { registerUser, loginUser, logoutUser, refreshTokenHandler, changePassword, forgotPassword, resetPassword, googleAuth };
+export {
+    registerUser,
+    registerEmployer,
+    loginUser,
+    logoutUser,
+    refreshTokenHandler,
+    changePassword,
+    forgotPassword,
+    resetPassword,
+    googleAuth
+};
