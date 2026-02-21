@@ -14,59 +14,64 @@ const applyJob = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Invalid Job ID");
     }
 
-    const jobExists = await Job.findById(jobId);
+    const jobExists = await Job.exists({ _id: jobId });
     if (!jobExists) {
         throw new ApiError(404, "Job not found");
     }
 
-    // Check if already applied
-    const existingApplication = await AppliedJobs.findOne({ userId, jobId });
-    if (existingApplication) {
-        throw new ApiError(409, "You have already applied for this job");
-    }
+    try {
+        const application = await AppliedJobs.create({
+            userId,
+            jobId,
+            status: "applied"
+        });
 
-    // Create Application
-    const application = await AppliedJobs.create({
-        userId,
-        jobId,
-        status: "applied"
-    });
-
-    // Update User's appliedJobs array
-    await User.findByIdAndUpdate(userId, {
-        $push: {
-            appliedJobs: {
-                jobId: jobId,
-                appliedAt: new Date()
-            }
+        return res.status(201).json(
+            new ApiResponse(201, application, "Job applied successfully")
+        );
+    } catch (error) {
+        if (error.code === 11000) {
+            throw new ApiError(409, "You have already applied for this job");
         }
-    });
-
-    return res.status(201).json(
-        new ApiResponse(201, "Job applied successfully", { application })
-    );
+        throw new ApiError(500, "Failed to apply for job");
+    }
 });
+
 
 const getAppliedJobs = asyncHandler(async (req, res) => {
     const userId = req.user._id;
 
-    const appliedJobs = await AppliedJobs.find({ userId })
-        .populate({
-            path: "jobId",
-            select: "title company location salary type",
-            populate: {
-                path: "company", // Assuming Job model has a 'company' field referencing Company or it's a string. 
-                // However, based on savedJobsController, it seems Job might have a company ref.
-                // Let's check jobModel if possible, but for now follow savedJobsController pattern.
-                select: "name logo"
-            }
-        })
-        .sort({ createdAt: -1 });
+    const applied = await AppliedJobs.find({ userId })
+        .select("jobId status createdAt")
+        .sort({ createdAt: -1 })
+        .lean();
+
+    if (!applied.length) {
+        return res.status(200).json(
+            new ApiResponse(200, [], "No applied jobs found")
+        );
+    }
+
+    const jobIds = applied.map(a => a.jobId);
+
+    const jobs = await Job.find({ _id: { $in: jobIds } })
+        .select("_id title company location salary apply_type apply_url")
+        .lean();
+
+    const jobsMap = new Map(
+        jobs.map(job => [job._id.toString(), job])
+    );
+
+    const enriched = applied.map(a => ({
+        ...a,
+        job: jobsMap.get(a.jobId.toString()) || null
+    }));
 
     return res.status(200).json(
-        new ApiResponse(200, "Applied jobs fetched successfully", appliedJobs)
+        new ApiResponse(200, enriched, "Applied jobs fetched successfully")
     );
 });
+
 
 export {
     applyJob,

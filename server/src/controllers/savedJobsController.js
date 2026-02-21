@@ -15,7 +15,7 @@ const saveJob = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Invalid Job ID");
     }
 
-    const jobExists = await Job.findById(jobId);
+    const jobExists = await Job.exists({ _id: jobId });
     if (!jobExists) {
         throw new ApiError(404, "Job not found");
     }
@@ -78,8 +78,10 @@ const getSavedJobs = asyncHandler(async (req, res) => {
 
     // 1️⃣ Get saved job references from career_jacked DB
     const savedJobs = await SavedJobs.find({ userId })
+        .select("jobId createdAt")
         .sort({ createdAt: -1 })
         .lean();
+
 
     if (!savedJobs.length) {
         return res.status(200).json(
@@ -92,7 +94,7 @@ const getSavedJobs = asyncHandler(async (req, res) => {
 
     // 3️⃣ Fetch actual jobs from jobs_db (Job model uses jobConnection)
     const jobs = await Job.find({ _id: { $in: jobIds } })
-        .select("title company location salary apply_type apply_url")
+        .select("_id title company location salary apply_type apply_url")
         .lean();
 
     // 4️⃣ Create lookup map for fast matching
