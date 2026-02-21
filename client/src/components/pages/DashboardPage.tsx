@@ -4,6 +4,7 @@ import { Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Card } from '../ui/Card';
+import { JobCard } from '../JobCard';
 import {
     User,
     LogOut,
@@ -45,21 +46,30 @@ export const DashboardPage: React.FC = () => {
 
     useEffect(() => {
         if (activeTab !== 'saved') return;
-        if (!savedJobs.length) {
-            setSavedJobsData([]);
-            return;
-        }
 
         setLoadingSaved(true);
-        Promise.all(savedJobs.map(id => jobApi.getOne(id).catch(() => null)))
-            .then(res => {
-                const jobs = res
-                    .map(r => r && r.success ? r.data?.job : null)
-                    .filter(Boolean) as Job[];
-                setSavedJobsData(jobs);
+
+        jobApi.getSavedJobs()
+            .then(async res => {
+                if (res.success && Array.isArray(res.data)) {
+
+                    const jobs = await Promise.all(
+                        res.data.map(async (item: any) => {
+                            const jobRes = await jobApi.getOne(item.jobId);
+                            return jobRes.success ? jobRes.data.job : null;
+                        })
+                    );
+
+                    setSavedJobsData(jobs.filter(Boolean));
+                }
             })
             .finally(() => setLoadingSaved(false));
-    }, [savedJobs, activeTab]);
+
+    }, [activeTab]);
+
+
+
+
 
     /* ---------- APPLIED JOBS ---------- */
     const [appliedJobsData, setAppliedJobsData] = useState<
@@ -90,6 +100,25 @@ export const DashboardPage: React.FC = () => {
             setAppliedJobsData(res.filter(Boolean) as any)
         );
     }, [user?.appliedJobs, activeTab]);
+
+    const handleRemoveJob = async (jobId: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        try {
+            // Optimistic update
+            setSavedJobsData(prev => prev.filter(j => (j._id || j.id) !== jobId));
+            await jobApi.removeSavedJob(jobId);
+            // Also update context if needed, but context savedJobs might be separate from full Job objects
+            // The AuthContext sync might happen on refresh or if we specifically expose a method to update it.
+            // For now, let's assume we just want to remove it from this view.
+            // But ideally we should call toggleSaveJob to keep context in sync?
+            // "toggleSaveJob" toggles. If we know we are removing, we can check if it's there.
+            // Or just manually call remove functionality.
+            // Let's rely on dashboard state for this view.
+        } catch (error) {
+            console.error("Failed to remove job", error);
+            // Revert on error would be nice but let's keep it simple
+        }
+    };
 
     /* ---------- AUTH GUARDS ---------- */
 
@@ -320,6 +349,7 @@ export const DashboardPage: React.FC = () => {
                             jobs={savedJobsData}
                             loading={loadingSaved}
                             navigate={navigate}
+                            onRemove={handleRemoveJob}
                         />
                     )}
 
@@ -344,7 +374,8 @@ const JobSection = ({
     jobs,
     loading,
     navigate,
-    showDate
+    showDate,
+    onRemove
 }: any) => (
     <section>
         <h1 className="text-3xl font-bold mb-6">{title}</h1>
@@ -355,25 +386,13 @@ const JobSection = ({
         ) : (
             <div className="grid gap-4">
                 {jobs.map((job: any) => (
-                    <Card
-                        key={job.id}
-                        className="p-6 cursor-pointer hover:border-white/20 transition-colors"
-                        onClick={() => navigate(`/jobs/${job.id}`)}
-                    >
-                        <div className="flex justify-between items-start">
-                            <div>
-                                <h3 className="font-bold text-lg mb-1">{job.title}</h3>
-                                <p className="text-gray-400 text-sm">
-                                    {job.company} • {job.location}
-                                </p>
-                            </div>
-                            {showDate && (
-                                <span className="text-xs bg-green-500/10 text-green-400 px-2 py-1 rounded">
-                                    Applied {new Date(job.appliedDate).toLocaleDateString()}
-                                </span>
-                            )}
-                        </div>
-                    </Card>
+                    <JobCard
+                        key={job._id || job.id}
+                        job={job}
+                        variant={showDate ? 'applied' : (onRemove ? 'saved' : 'default')}
+                        appliedDate={showDate ? job.appliedDate : undefined}
+                        onRemove={onRemove ? (e) => onRemove(job._id || job.id, e) : undefined}
+                    />
                 ))}
             </div>
         )}

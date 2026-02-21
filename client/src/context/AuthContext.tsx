@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { authApi } from "../services/auth.api";
 import { userApi } from "../services/users.api";
+import { jobApi } from "../services/jobs.api";
 import { ApiResponse } from "../services/api";
-import { User } from "../types";
+import { User, Job } from "../types";
 
 type UpdateProfilePayload = {
   name?: string;
@@ -34,6 +35,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [savedJobs, setSavedJobs] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  /* ---------- FETCH USER ---------- */
 
   /* ---------- FETCH USER ---------- */
 
@@ -122,32 +125,50 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  /* ---------- SAVED JOBS (CLIENT-SIDE STATE) ---------- */
+  /* ---------- SAVED JOBS (API INTEGRATION) ---------- */
 
   const toggleSaveJob = async (jobId: string) => {
     if (!user) return;
 
-    setSavedJobs(prev =>
-      prev.includes(jobId)
-        ? prev.filter(id => id !== jobId)
-        : [...prev, jobId]
-    );
+    const isSaved = savedJobs.includes(jobId);
+
+    try {
+      if (isSaved) {
+        await jobApi.removeSavedJob(jobId);
+        setSavedJobs(prev => prev.filter(id => id !== jobId));
+      } else {
+        await jobApi.saveJob(jobId);
+        setSavedJobs(prev => [...prev, jobId]);
+      }
+    } catch (error) {
+      console.error("Failed to toggle save job", error);
+      // Optional: Show toast error here
+    }
   };
 
   const isJobSaved = (jobId: string) => savedJobs.includes(jobId);
 
-  /* ---------- APPLIED JOBS (CLIENT-SIDE STATE) ---------- */
+  /* ---------- APPLIED JOBS (API INTEGRATION) ---------- */
 
   const markJobAsApplied = async (jobId: string) => {
     if (!user) return;
 
+    // Optimistic check to avoid duplicate calls
     const applied = user.appliedJobs ?? [];
     if (applied.some(j => j.jobId === jobId)) return;
 
-    setUser({
-      ...user,
-      appliedJobs: [...applied, { jobId, appliedAt: new Date().toISOString() }]
-    });
+    try {
+      await jobApi.applyJob(jobId);
+
+      // Update local state after successful API call
+      setUser({
+        ...user,
+        appliedJobs: [...applied, { jobId, appliedAt: new Date().toISOString() }]
+      });
+    } catch (error) {
+      console.error("Failed to mark job as applied", error);
+      // Optional: Show toast error here
+    }
   };
 
   /* ---------- CONTEXT ---------- */

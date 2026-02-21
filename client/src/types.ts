@@ -1,4 +1,5 @@
 export interface Job {
+  _id?: string;
   id: string;
 
   title: string;
@@ -6,12 +7,14 @@ export interface Job {
   location: string;
 
   employment_type?: string;
+  type?: string;
 
   salary?: string;
   logo?: string;
   tags?: string[];
 
   createdAt?: string;
+  postedAt?: string;
   description?: string;
   department?: string;
 

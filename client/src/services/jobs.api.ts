@@ -52,9 +52,29 @@ export const jobApi = {
             .get<ApiResponse<{ jobs: Job[]; pagination: any }>>('/job/new/recent', { params })
             .then(r => r.data),
 
-    // Employer job creation
-    createJob: (data: CreateJobData) =>
+    // User Actions
+    saveJob: (jobId: string) =>
         api
-            .post<ApiResponse<{ job: Job }>>('/job/employer/createJob', data)
+            .post<ApiResponse<any>>(`/user-actions/save-jobs/${jobId}`)
+            .then((r) => r.data),
+
+    removeSavedJob: (jobId: string) =>
+        api
+            .delete<ApiResponse<null>>(`/user-actions/remove-saved-jobs/${jobId}`)
+            .then((r) => r.data),
+
+    getSavedJobs: () =>
+        api
+            .get<ApiResponse<Job[]>>('/user-actions/get-saved-jobs')
+            .then(r => r.data),
+
+    applyJob: (jobId: string) =>
+        api
+            .post<ApiResponse<any>>(`/user-actions/apply-job/${jobId}`)
+            .then((r) => r.data),
+
+    getAppliedJobs: () =>
+        api
+            .get<ApiResponse<Job[]>>('/user-actions/get-applied-jobs')
             .then(r => r.data),
 };

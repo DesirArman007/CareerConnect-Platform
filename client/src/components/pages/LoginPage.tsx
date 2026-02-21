@@ -164,7 +164,7 @@ export const LoginPage: React.FC = () => {
                     {step === 'email' && (
                         <div className="space-y-5">
 
-                            <div ref={googleButtonWrapper} className="w-full flex justify-center">
+                            <div ref={googleButtonWrapper} className="w-full flex flex-col items-center justify-center">
                                 <GoogleLogin
                                     onSuccess={c => c.credential && handleGoogleSuccess(c.credential)}
                                     onError={() => setError('Google login failed')}
