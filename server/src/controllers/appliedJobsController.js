@@ -27,7 +27,7 @@ const applyJob = asyncHandler(async (req, res) => {
         });
 
         return res.status(201).json(
-            new ApiResponse(201, application, "Job applied successfully")
+            new ApiResponse(201, "Job applied successfully", application)
         );
     } catch (error) {
         if (error.code === 11000) {
@@ -38,42 +38,42 @@ const applyJob = asyncHandler(async (req, res) => {
 });
 
 
-const getAppliedJobs = asyncHandler(async (req, res) => {
+const getMyAppliedJobs = asyncHandler(async (req, res) => {
     const userId = req.user._id;
 
-    const applied = await AppliedJobs.find({ userId })
-        .select("jobId status createdAt")
+    const appliedJobs = await AppliedJobs.find({ userId })
         .sort({ createdAt: -1 })
         .lean();
 
-    if (!applied.length) {
+    if (!appliedJobs.length) {
         return res.status(200).json(
-            new ApiResponse(200, [], "No applied jobs found")
+            new ApiResponse(200, "No applied jobs found", [])
         );
     }
 
-    const jobIds = applied.map(a => a.jobId);
+    const jobIds = appliedJobs.map(a => a.jobId);
 
     const jobs = await Job.find({ _id: { $in: jobIds } })
-        .select("_id title company location salary apply_type apply_url")
+        .select("title company location employment_type salary apply_url")
         .lean();
 
     const jobsMap = new Map(
-        jobs.map(job => [job._id.toString(), job])
+        jobs.map(job => [job._id.toString(), { ...job, id: job._id.toString(), _id: undefined }])
     );
 
-    const enriched = applied.map(a => ({
-        ...a,
-        job: jobsMap.get(a.jobId.toString()) || null
+    const response = appliedJobs.map(app => ({
+        applicationId: app._id.toString(),
+        status: app.status,
+        appliedAt: app.createdAt,
+        job: jobsMap.get(app.jobId.toString()) || null
     }));
 
     return res.status(200).json(
-        new ApiResponse(200, enriched, "Applied jobs fetched successfully")
+        new ApiResponse(200, "Applied jobs fetched successfully", response)
     );
 });
 
-
 export {
     applyJob,
-    getAppliedJobs
+    getMyAppliedJobs
 };

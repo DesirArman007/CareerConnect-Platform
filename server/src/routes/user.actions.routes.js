@@ -7,7 +7,7 @@ import {
 
 import {
     applyJob,
-    getAppliedJobs
+    getMyAppliedJobs
 } from "../controllers/appliedJobsController.js";
 
 import { verifyJWT } from "../middleware/auth.middleware.js";
@@ -25,6 +25,6 @@ router.get("/get-saved-jobs", getSavedJobs);
 
 
 router.post("/apply-job/:jobId", applyJob);
-router.get("/get-applied-jobs", getAppliedJobs);
+router.get("/get-applied-jobs", getMyAppliedJobs);
 
 export default router;

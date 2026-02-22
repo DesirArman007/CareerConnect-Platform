@@ -40,8 +40,8 @@ const saveJob = asyncHandler(async (req, res) => {
     return res.status(201)
         .json(
             new ApiResponse(201,
-                savedJob,
-                "Job saved successfully"
+                "Job saved successfully",
+                savedJob
             )
         );
 });
@@ -67,8 +67,8 @@ const removeSavedJob = asyncHandler(async (req, res) => {
     return res.status(200)
         .json(
             new ApiResponse(200,
-                null,
-                "Saved job removed successfully"
+                "Saved job removed successfully",
+                null
             )
         )
 });
@@ -76,49 +76,41 @@ const removeSavedJob = asyncHandler(async (req, res) => {
 const getSavedJobs = asyncHandler(async (req, res) => {
     const userId = req.user._id;
 
-    // 1️⃣ Get saved job references from career_jacked DB
     const savedJobs = await SavedJobs.find({ userId })
-        .select("jobId createdAt")
         .sort({ createdAt: -1 })
         .lean();
 
+    console.log('[getSavedJobs] userId:', userId, '| count:', savedJobs.length);
 
     if (!savedJobs.length) {
         return res.status(200).json(
-            new ApiResponse(200, [], "No saved jobs found")
+            new ApiResponse(200, "No saved jobs found", [])
         );
     }
 
-    // 2️⃣ Extract jobIds
     const jobIds = savedJobs.map(s => s.jobId);
+    console.log('[getSavedJobs] jobIds:', jobIds);
 
-    // 3️⃣ Fetch actual jobs from jobs_db (Job model uses jobConnection)
     const jobs = await Job.find({ _id: { $in: jobIds } })
-        .select("_id title company location salary apply_type apply_url")
+        .select("title company location employment_type salary apply_type apply_url")
         .lean();
 
-    // 4️⃣ Create lookup map for fast matching
+    console.log('[getSavedJobs] matched jobs:', jobs.length);
+
     const jobsMap = new Map(
-        jobs.map(job => [job._id.toString(), job])
+        jobs.map(job => [job._id.toString(), { ...job, id: job._id.toString(), _id: undefined }])
     );
 
-    // 5️⃣ Merge savedJobs with actual job data
-    const enrichedSavedJobs = savedJobs.map(s => ({
-        ...s,
+    const response = savedJobs.map(s => ({
+        savedId: s._id.toString(),
+        savedAt: s.createdAt,
         job: jobsMap.get(s.jobId.toString()) || null
     }));
 
     return res.status(200).json(
-        new ApiResponse(
-            200,
-            "Saved jobs fetched successfully",
-            enrichedSavedJobs
-        )
+        new ApiResponse(200, "Saved jobs fetched successfully", response)
     );
 });
-
-
-
 
 export {
     saveJob,

@@ -23,6 +23,7 @@ const appliedJobsSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 appliedJobsSchema.index({ userId: 1, jobId: 1 }, { unique: true });
+appliedJobsSchema.index({ userId: 1, createdAt: -1 });
 
 appliedJobsSchema.plugin(normalizeJSON);
 

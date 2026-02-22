@@ -1,22 +1,26 @@
 import mongoose from "mongoose";
-import { DB_NAME } from "../constansts.js"
 
 const connectDB = async () => {
-    try {
-        await mongoose.connect(
-            `${process.env.MONGODB_URL}/${DB_NAME}`,
-            {
-                serverSelectionTimeoutMS: 30000,
-                socketTimeoutMS: 45000,
-                maxPoolSize: 10,
-            }
-        );
+  try {
+    await mongoose.connect(
+      process.env.MONGODB_URL,
+      {
+        serverSelectionTimeoutMS: 60000,
+        connectTimeoutMS: 60000,
+        socketTimeoutMS: 60000,
+        maxPoolSize: 10,
+        minPoolSize: 2,
+        retryWrites: true,
+        retryReads: true,
+      }
+    );
 
-        console.log("Main MongoDB Connected:", mongoose.connection.host);
-    } catch (error) {
-        console.error("Main DB connection error:", error);
-        process.exit(1);
-    }
+    console.log("MongoDB Connected:", mongoose.connection.host);
+
+  } catch (error) {
+    console.error("MongoDB connection error:", error.message);
+    process.exit(1);
+  }
 };
 
 export default connectDB;
