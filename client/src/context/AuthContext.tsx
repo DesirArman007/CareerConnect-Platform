@@ -1,9 +1,16 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+} from "react";
+
 import { authApi } from "../services/auth.api";
 import { userApi } from "../services/users.api";
 import { jobApi } from "../services/jobs.api";
-import { ApiResponse } from "../services/api";
-import { User, Job } from "../types";
+import { User, SavedJobEntry, AppliedJobEntry } from "../types";
 
 type UpdateProfilePayload = {
   name?: string;
@@ -15,8 +22,16 @@ interface AuthContextType {
   savedJobs: string[];
   isLoading: boolean;
 
+  savedJobsData: SavedJobEntry[];
+  appliedJobsData: AppliedJobEntry[];
+  jobsDataLoading: boolean;
+
   login: (credentials: { email: string; password: string }) => Promise<void>;
-  register: (data: { name: string; email: string; password: string }) => Promise<void>;
+  register: (data: {
+    name: string;
+    email: string;
+    password: string;
+  }) => Promise<void>;
   logout: () => Promise<void>;
   googleLogin: (idToken: string) => Promise<void>;
 
@@ -25,24 +40,34 @@ interface AuthContextType {
   toggleSaveJob: (jobId: string) => Promise<void>;
   isJobSaved: (jobId: string) => boolean;
   markJobAsApplied: (jobId: string) => Promise<void>;
+
+  fetchJobsData: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-/* ---------- PROVIDER ---------- */
+/* ===================================================== */
+/* ==================== PROVIDER ======================= */
+/* ===================================================== */
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<User | null>(null);
   const [savedJobs, setSavedJobs] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  /* ---------- FETCH USER ---------- */
+  const [savedJobsData, setSavedJobsData] = useState<SavedJobEntry[]>([]);
+  const [appliedJobsData, setAppliedJobsData] = useState<AppliedJobEntry[]>([]);
+  const [jobsDataLoading, setJobsDataLoading] = useState(false);
 
-  /* ---------- FETCH USER ---------- */
+  const jobsDataLoadedRef = useRef(false);
+
+  /* ================= FETCH USER ================= */
 
   const fetchUserData = async (): Promise<boolean> => {
     try {
-      const response = (await userApi.getUser()) as ApiResponse<User>;
+      const response = await userApi.getUser();
 
       if (response.success && response.data) {
         setUser(response.data);
@@ -58,7 +83,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  /* ---------- INIT AUTH ---------- */
+  /* ================= FETCH JOBS DATA ================= */
+
+  const extractJobIds = (entries: SavedJobEntry[]): string[] =>
+    entries
+      .map(entry => entry.job?.id ?? entry.job?._id ?? entry.jobId)
+      .filter((id): id is string => Boolean(id));
+
+  const fetchJobsData = useCallback(async () => {
+    if (jobsDataLoadedRef.current) return;
+
+    setJobsDataLoading(true);
+
+    try {
+      const [savedRes, appliedRes] = await Promise.all([
+        jobApi.getSavedJobs(),
+        jobApi.getAppliedJobs(),
+      ]);
+
+      if (savedRes.success) {
+        const savedEntries = savedRes.data;
+        setSavedJobsData(savedEntries);
+        setSavedJobs(extractJobIds(savedEntries));
+      }
+
+      if (appliedRes.success) {
+        setAppliedJobsData(appliedRes.data);
+      }
+
+      jobsDataLoadedRef.current = true;
+    } catch (error) {
+      console.error("Failed to fetch jobs data", error);
+    } finally {
+      setJobsDataLoading(false);
+    }
+  }, []);
+
+  /* ================= INIT AUTH ================= */
 
   useEffect(() => {
     const initAuth = async () => {
@@ -75,22 +136,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     initAuth();
   }, []);
 
-  /* ---------- AUTH ACTIONS ---------- */
+  /* ================= AUTH ACTIONS ================= */
 
-  const login = async (credentials: { email: string; password: string }) => {
+  const login = async (credentials: {
+    email: string;
+    password: string;
+  }) => {
     const response = await authApi.login(credentials);
-    if (!response.success) throw new Error(response.message || "Login failed");
+
+    if (!response.success)
+      throw new Error(response.message || "Login failed");
 
     localStorage.setItem("hasSession", "true");
+
     const sessionActive = await fetchUserData();
     if (!sessionActive) {
-      throw new Error("Login succeeded but session failed to establish. Please check your cookies.");
+      throw new Error(
+        "Login succeeded but session failed to establish."
+      );
     }
   };
 
-  const register = async (data: { name: string; email: string; password: string }) => {
+  const register = async (data: {
+    name: string;
+    email: string;
+    password: string;
+  }) => {
     const response = await authApi.register(data);
-    if (!response.success) throw new Error(response.message || "Registration failed");
+    if (!response.success)
+      throw new Error(response.message || "Registration failed");
   };
 
   const logout = async () => {
@@ -100,32 +174,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.removeItem("hasSession");
       setUser(null);
       setSavedJobs([]);
+      setSavedJobsData([]);
+      setAppliedJobsData([]);
+      jobsDataLoadedRef.current = false;
     }
   };
 
   const googleLogin = async (idToken: string) => {
     const response = await authApi.googleAuth(idToken);
-    if (!response.success) throw new Error(response.message || "Google login failed");
+
+    if (!response.success)
+      throw new Error(response.message || "Google login failed");
 
     localStorage.setItem("hasSession", "true");
+
     const sessionActive = await fetchUserData();
     if (!sessionActive) {
-      throw new Error("Google login succeeded but session failed to establish.");
+      throw new Error(
+        "Google login succeeded but session failed to establish."
+      );
     }
   };
 
-  /* ---------- PROFILE ---------- */
+  /* ================= PROFILE ================= */
 
   const updateProfile = async (data: UpdateProfilePayload) => {
     if (!user) return;
 
-    const response = (await userApi.updateUser(data)) as ApiResponse<User>;
+    const response = await userApi.updateUser(data);
+
     if (response.success && response.data) {
       setUser(response.data);
     }
   };
 
-  /* ---------- SAVED JOBS (API INTEGRATION) ---------- */
+  /* ================= SAVED JOBS ================= */
 
   const toggleSaveJob = async (jobId: string) => {
     if (!user) return;
@@ -134,44 +217,61 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     try {
       if (isSaved) {
-        await jobApi.removeSavedJob(jobId);
         setSavedJobs(prev => prev.filter(id => id !== jobId));
+        setSavedJobsData(prev =>
+          prev.filter(
+            entry =>
+              entry.job?._id !== jobId &&
+              entry.jobId !== jobId
+          )
+        );
+
+        await jobApi.removeSavedJob(jobId);
       } else {
         await jobApi.saveJob(jobId);
         setSavedJobs(prev => [...prev, jobId]);
+        jobsDataLoadedRef.current = false;
       }
     } catch (error) {
       console.error("Failed to toggle save job", error);
-      // Optional: Show toast error here
+
+      if (isSaved) {
+        setSavedJobs(prev => [...prev, jobId]);
+        jobsDataLoadedRef.current = false;
+      } else {
+        setSavedJobs(prev => prev.filter(id => id !== jobId));
+      }
     }
   };
 
   const isJobSaved = (jobId: string) => savedJobs.includes(jobId);
 
-  /* ---------- APPLIED JOBS (API INTEGRATION) ---------- */
+  /* ================= APPLIED JOBS ================= */
 
   const markJobAsApplied = async (jobId: string) => {
     if (!user) return;
 
-    // Optimistic check to avoid duplicate calls
     const applied = user.appliedJobs ?? [];
     if (applied.some(j => j.jobId === jobId)) return;
 
     try {
       await jobApi.applyJob(jobId);
 
-      // Update local state after successful API call
       setUser({
         ...user,
-        appliedJobs: [...applied, { jobId, appliedAt: new Date().toISOString() }]
+        appliedJobs: [
+          ...applied,
+          { jobId, appliedAt: new Date().toISOString() },
+        ],
       });
+
+      jobsDataLoadedRef.current = false;
     } catch (error) {
       console.error("Failed to mark job as applied", error);
-      // Optional: Show toast error here
     }
   };
 
-  /* ---------- CONTEXT ---------- */
+  /* ================= CONTEXT ================= */
 
   return (
     <AuthContext.Provider
@@ -179,6 +279,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user,
         savedJobs,
         isLoading,
+        savedJobsData,
+        appliedJobsData,
+        jobsDataLoading,
         login,
         register,
         logout,
@@ -186,7 +289,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateProfile,
         toggleSaveJob,
         isJobSaved,
-        markJobAsApplied
+        markJobAsApplied,
+        fetchJobsData,
       }}
     >
       {children}
@@ -194,10 +298,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 };
 
-/* ---------- HOOK ---------- */
+/* ================= HOOK ================= */
 
 export const useAuth = () => {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
+  if (!ctx)
+    throw new Error("useAuth must be used within AuthProvider");
   return ctx;
 };

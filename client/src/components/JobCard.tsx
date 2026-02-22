@@ -63,7 +63,7 @@ export const JobCard: React.FC<JobCardProps> = ({
     const navigate = useNavigate();
 
     const handleClick = (e: React.MouseEvent) => {
-        const jobUrl = `/jobs/${job._id || job.id}`;
+        const jobUrl = `/jobs/${job.id}`;
         if (e.ctrlKey || e.metaKey) {
             openExternalLink(jobUrl);
         } else {

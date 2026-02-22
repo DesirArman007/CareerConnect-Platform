@@ -110,8 +110,8 @@ export const JobDetailPage: React.FC = () => {
     const postedDate = formatDate(job.createdAt);
 
     const isSaved = jobId ? isJobSaved(jobId) : false;
-    const isApplied =
-        jobId && user?.appliedJobs?.some(a => a.jobId === jobId);
+    const appliedEntry = user?.appliedJobs?.find(a => a.jobId === jobId);
+    const isApplied = !!appliedEntry;
 
     /* ---------- ACTIONS ---------- */
 
@@ -190,6 +190,23 @@ export const JobDetailPage: React.FC = () => {
                                 </span>
                             </div>
                         </div>
+
+                        {/* APPLIED BANNER */}
+                        {isApplied && (
+                            <div className="flex items-center gap-3 bg-green-500/10 border border-green-500/20 rounded-xl px-4 py-3">
+                                <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
+                                    <span className="text-green-400 text-lg">✓</span>
+                                </div>
+                                <div>
+                                    <p className="text-green-400 font-semibold text-sm">You applied for this job</p>
+                                    {appliedEntry?.appliedAt && (
+                                        <p className="text-green-400/70 text-xs">
+                                            Applied on {formatDate(appliedEntry.appliedAt)}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        )}
 
                         <div className="flex flex-wrap gap-3">
                             <div className="badge">

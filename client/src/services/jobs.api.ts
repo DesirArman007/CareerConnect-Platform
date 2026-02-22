@@ -1,6 +1,5 @@
-import api, { ApiResponse } from './api';
-import { Job } from '../types';
-
+import api from './api';
+import { Job, SavedJobEntry, AppliedJobEntry, ApiResponse } from '../types';
 export interface CreateJobData {
     title: string;
     description: string;
@@ -65,8 +64,9 @@ export const jobApi = {
 
     getSavedJobs: () =>
         api
-            .get<ApiResponse<Job[]>>('/user-actions/get-saved-jobs')
+            .get<ApiResponse<SavedJobEntry[]>>('/user-actions/get-saved-jobs')
             .then(r => r.data),
+
 
     applyJob: (jobId: string) =>
         api
@@ -75,6 +75,6 @@ export const jobApi = {
 
     getAppliedJobs: () =>
         api
-            .get<ApiResponse<Job[]>>('/user-actions/get-applied-jobs')
+            .get<ApiResponse<AppliedJobEntry[]>>('/user-actions/get-applied-jobs')
             .then(r => r.data),
 };

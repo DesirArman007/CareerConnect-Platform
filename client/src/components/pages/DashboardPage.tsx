@@ -15,16 +15,26 @@ import {
     ArrowUpRight,
     ExternalLink
 } from 'lucide-react';
-import { jobApi } from '../../services/jobs.api';
 import { Job } from '../../types';
 
 export const DashboardPage: React.FC = () => {
-    const { user, savedJobs, logout, updateProfile, isLoading } = useAuth();
+    const {
+        user,
+        savedJobs,
+        logout,
+        updateProfile,
+        isLoading,
+        savedJobsData,
+        appliedJobsData,
+        jobsDataLoading,
+        fetchJobsData,
+        toggleSaveJob,
+    } = useAuth();
+
     const navigate = useNavigate();
     const location = useLocation();
 
     /* ---------- STATE ---------- */
-    // Initialize with empty strings, sync with user in useEffect
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [editing, setEditing] = useState(false);
@@ -40,84 +50,18 @@ export const DashboardPage: React.FC = () => {
         }
     }, [user]);
 
-    /* ---------- SAVED JOBS ---------- */
-    const [savedJobsData, setSavedJobsData] = useState<Job[]>([]);
-    const [loadingSaved, setLoadingSaved] = useState(false);
-
+    /* ---------- LAZY FETCH JOBS DATA (once per session) ---------- */
     useEffect(() => {
-        if (activeTab !== 'saved') return;
-
-        setLoadingSaved(true);
-
-        jobApi.getSavedJobs()
-            .then(async res => {
-                if (res.success && Array.isArray(res.data)) {
-
-                    const jobs = await Promise.all(
-                        res.data.map(async (item: any) => {
-                            const jobRes = await jobApi.getOne(item.jobId);
-                            return jobRes.success ? jobRes.data.job : null;
-                        })
-                    );
-
-                    setSavedJobsData(jobs.filter(Boolean));
-                }
-            })
-            .finally(() => setLoadingSaved(false));
-
-    }, [activeTab]);
-
-
-
-
-
-    /* ---------- APPLIED JOBS ---------- */
-    const [appliedJobsData, setAppliedJobsData] = useState<
-        (Job & { appliedDate: string })[]
-    >([]);
-
-    useEffect(() => {
-        if (!user) return;
-        if (activeTab !== 'applied') return;
-        if (!user.appliedJobs?.length) {
-            setAppliedJobsData([]);
-            return;
+        if (user) {
+            fetchJobsData();
         }
+    }, [user, fetchJobsData]);
 
-        Promise.all(
-            user.appliedJobs.map(async a => {
-                try {
-                    const response = await jobApi.getOne(a.jobId);
-                    if (response.success && response.data?.job) {
-                        return { ...response.data.job, appliedDate: a.appliedAt };
-                    }
-                    return null;
-                } catch {
-                    return null;
-                }
-            })
-        ).then(res =>
-            setAppliedJobsData(res.filter(Boolean) as any)
-        );
-    }, [user?.appliedJobs, activeTab]);
+    /* ---------- HANDLERS ---------- */
 
     const handleRemoveJob = async (jobId: string, e: React.MouseEvent) => {
         e.stopPropagation();
-        try {
-            // Optimistic update
-            setSavedJobsData(prev => prev.filter(j => (j._id || j.id) !== jobId));
-            await jobApi.removeSavedJob(jobId);
-            // Also update context if needed, but context savedJobs might be separate from full Job objects
-            // The AuthContext sync might happen on refresh or if we specifically expose a method to update it.
-            // For now, let's assume we just want to remove it from this view.
-            // But ideally we should call toggleSaveJob to keep context in sync?
-            // "toggleSaveJob" toggles. If we know we are removing, we can check if it's there.
-            // Or just manually call remove functionality.
-            // Let's rely on dashboard state for this view.
-        } catch (error) {
-            console.error("Failed to remove job", error);
-            // Revert on error would be nice but let's keep it simple
-        }
+        await toggleSaveJob(jobId);
     };
 
     /* ---------- AUTH GUARDS ---------- */
@@ -169,6 +113,31 @@ export const DashboardPage: React.FC = () => {
             setSaving(false);
         }
     };
+
+    /* ---------- MAP ENRICHED DATA → JobCard-compatible shape ---------- */
+
+    const savedJobsForCards: Job[] = savedJobsData
+        .filter(entry => entry.job !== null)
+        .map(entry => ({
+            id: (entry.job!.id || entry.job!._id) as string,
+            title: entry.job!.title || '',
+            company: entry.job!.company || '',
+            location: entry.job!.location || '',
+            salary: entry.job!.salary,
+            apply_url: entry.job!.apply_url,
+        }));
+
+    const appliedJobsForCards: (Job & { appliedDate: string })[] = appliedJobsData
+        .filter(entry => entry.job !== null)
+        .map(entry => ({
+            id: (entry.job!.id || entry.job!._id) as string,
+            title: entry.job!.title || '',
+            company: entry.job!.company || '',
+            location: entry.job!.location || '',
+            salary: entry.job!.salary,
+            apply_url: entry.job!.apply_url,
+            appliedDate: (entry as any).appliedAt || entry.createdAt || '',
+        }));
 
     /* ---------- UI ---------- */
 
@@ -346,8 +315,8 @@ export const DashboardPage: React.FC = () => {
                     {activeTab === 'saved' && (
                         <JobSection
                             title="Saved Jobs"
-                            jobs={savedJobsData}
-                            loading={loadingSaved}
+                            jobs={savedJobsForCards}
+                            loading={jobsDataLoading}
                             navigate={navigate}
                             onRemove={handleRemoveJob}
                         />
@@ -356,7 +325,8 @@ export const DashboardPage: React.FC = () => {
                     {activeTab === 'applied' && (
                         <JobSection
                             title="Applied Jobs"
-                            jobs={appliedJobsData}
+                            jobs={appliedJobsForCards}
+                            loading={jobsDataLoading}
                             navigate={navigate}
                             showDate
                         />
@@ -387,11 +357,11 @@ const JobSection = ({
             <div className="grid gap-4">
                 {jobs.map((job: any) => (
                     <JobCard
-                        key={job._id || job.id}
+                        key={job.id}
                         job={job}
                         variant={showDate ? 'applied' : (onRemove ? 'saved' : 'default')}
                         appliedDate={showDate ? job.appliedDate : undefined}
-                        onRemove={onRemove ? (e) => onRemove(job._id || job.id, e) : undefined}
+                        onRemove={onRemove ? (e) => onRemove(job.id, e) : undefined}
                     />
                 ))}
             </div>

@@ -1,6 +1,10 @@
+/* ============================= */
+/* --------- JOB TYPES --------- */
+/* ============================= */
+
 export interface Job {
-  _id?: string;
-  id: string;
+  _id?: string;        // Mongo ID
+  id?: string;         // Optional alternative ID
 
   title: string;
   company: string;
@@ -18,7 +22,7 @@ export interface Job {
   description?: string;
   department?: string;
 
-  apply_url?: string;   // backend field
+  apply_url?: string;
   source?: string;
 
   experience?: string;
@@ -26,6 +30,36 @@ export interface Job {
 }
 
 
+/* =================================== */
+/* --------- USER ACTION TYPES ------- */
+/* =================================== */
+
+export interface SavedJobEntry {
+  savedId?: string;
+  savedAt?: string;
+
+  jobId?: string;       // legacy fallback
+  createdAt?: string;   // legacy fallback
+
+  job: Partial<Job> | null;
+}
+
+export interface AppliedJobEntry {
+  applicationId?: string;
+
+  jobId?: string;       // legacy fallback
+  status: string;
+
+  appliedAt?: string;
+  createdAt?: string;   // legacy fallback
+
+  job: Partial<Job> | null;
+}
+
+
+/* ============================= */
+/* --------- USER TYPE --------- */
+/* ============================= */
 
 export interface User {
   id: string;
@@ -37,11 +71,17 @@ export interface User {
   avatar?: string;
 
   savedJobs?: string[];
+
   appliedJobs?: {
     jobId: string;
     appliedAt: string;
   }[];
 }
+
+
+/* ============================= */
+/* ------- AUTH RESPONSE ------- */
+/* ============================= */
 
 export interface AuthResponse {
   user: User;
@@ -49,11 +89,20 @@ export interface AuthResponse {
 }
 
 
+/* ============================= */
+/* -------- CHAT TYPES --------- */
+/* ============================= */
+
 export interface ChatMessage {
-  role: 'user' | 'model';
+  role: "user" | "model";
   text: string;
   isThinking?: boolean;
 }
+
+
+/* ============================= */
+/* ------- FEEDBACK TYPE ------- */
+/* ============================= */
 
 export interface Feedback {
   id: string;
@@ -64,4 +113,16 @@ export interface Feedback {
 
   message?: string;
   createdAt?: string;
+}
+
+
+/* ============================= */
+/* -------- API WRAPPER -------- */
+/* ============================= */
+
+export interface ApiResponse<T> {
+  statusCode: number;
+  message: string;
+  data: T;
+  success: boolean;
 }

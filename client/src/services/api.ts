@@ -12,12 +12,51 @@ const api = axios.create({
   },
 });
 
-/* ---------- GLOBAL RESPONSE HANDLER ---------- */
+/* ---------- AUTO TOKEN REFRESH ---------- */
+let isRefreshing = false;
+let failedQueue: { resolve: (v?: unknown) => void; reject: (e?: unknown) => void }[] = [];
+
+const processQueue = (error: any = null) => {
+  failedQueue.forEach(p => (error ? p.reject(error) : p.resolve()));
+  failedQueue = [];
+};
+
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    // Return the error so the calling function can handle it
-    // Removed automatic redirect to /login on 401 to prevent login loops
+  async (error) => {
+    const originalRequest = error.config;
+
+    // Only attempt refresh on 401, and not on the refresh endpoint itself
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !originalRequest.url?.includes('/auth/refreshToken') &&
+      !originalRequest.url?.includes('/auth/login')
+    ) {
+      if (isRefreshing) {
+        // Queue this request until the refresh completes
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        }).then(() => api(originalRequest));
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        await api.post('/auth/refreshToken');
+        processQueue();
+        return api(originalRequest);
+      } catch (refreshError) {
+        processQueue(refreshError);
+        // Refresh failed — clear session
+        localStorage.removeItem("hasSession");
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
     return Promise.reject(error);
   }
 );
