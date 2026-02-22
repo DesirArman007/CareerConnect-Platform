@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import { EMPLOYMENT_TYPES } from "../constants/jobEnums.js"
-import { jobConnection } from "../config/jobConnection.js";
 import { normalizeJSON } from "../plugins/normalizeJSON.plugin.js";
 
 const jobSchema = new mongoose.Schema(
@@ -106,6 +105,7 @@ jobSchema.index({ title: "text", description: "text" });
 
 jobSchema.plugin(normalizeJSON);
 
-const Job = jobConnection.model("Job", jobSchema);
+const jobsDB = mongoose.connection.useDb("job_aggregator");
 
-export { Job };
+export const Job =
+  jobsDB.models.Job || jobsDB.model("Job", jobSchema);
