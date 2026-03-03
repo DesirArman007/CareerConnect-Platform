@@ -47,7 +47,7 @@ export const LoginPage: React.FC = () => {
     /* ---------- REDIRECT ---------- */
     useEffect(() => {
         if (!authLoading && user) {
-            navigate(location.state?.returnUrl || '/dashboard', { replace: true });
+            navigate(location.state?.returnUrl || '/', { replace: true });
         }
     }, [user, authLoading, navigate, location.state]);
 
