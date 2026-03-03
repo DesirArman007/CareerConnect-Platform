@@ -1,8 +1,9 @@
 import { Redis } from "ioredis";
+import { logger } from "../config/logger.js";
 
 
 const redisUrl = process.env.REDIS_URL;
-console.log(redisUrl);
+logger.info({ redisUrl }, "TokenBucket Redis URL");
 const redis = new Redis(redisUrl);
 
 export class TokenBucket {

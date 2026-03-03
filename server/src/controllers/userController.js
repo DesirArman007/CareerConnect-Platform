@@ -3,9 +3,10 @@ import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import { User } from "../models/userModel.js";
 import { clearAuthCookies } from "../utils/authCookies.js";
+import { logger } from "../config/logger.js";
 
 const getUser = asyncHandler(async (req, res) => {
-    console.log(`Protected controller entered: GET /api/users/getUser`);
+    logger.info({ route: "GET /api/users/getUser" }, "Protected controller entered");
     const userId = req.user._id;
 
     const user = await User.findById(userId).select("-password -refreshToken ");
@@ -20,7 +21,7 @@ const getUser = asyncHandler(async (req, res) => {
 });
 
 const updateUser = asyncHandler(async (req, res) => {
-    console.log(`Protected controller entered: PUT /api/users/updateUser`);
+    logger.info({ route: "PUT /api/users/updateUser" }, "Protected controller entered");
     const userId = req.user._id;
     const { name, email } = req.body;
 

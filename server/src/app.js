@@ -7,18 +7,14 @@ import uploadRouter from "./routes/upload.routes.js";
 import jobRouter from "./routes/job.routes.js";
 import feedbackRouter from "./routes/feedback.routes.js";
 import userActionsRouter from "./routes/user.actions.routes.js";
+import { logger, pinoHttp } from "./config/logger.js";
 
 const app = express();
 
 app.set('trust proxy', 1);
 
 // 2. Global Request Logger (First Middleware)
-app.use((req, res, next) => {
-  console.log(`Incoming request: ${req.method} ${req.originalUrl}`);
-  console.log(`Origin: ${req.headers.origin}`);
-  console.log(`Cookie header present: ${!!req.headers.cookie}`);
-  next();
-});
+app.use(pinoHttp);
 
 app.use(cors({
   origin: [
@@ -71,8 +67,7 @@ app.use((req, res) => {
 
 // 7. Global Error Handler Logging
 app.use((err, req, res, next) => {
-  console.log(`Error caught: ${err.name} ${err.message}`);
-  console.log(`Route: ${req.method} ${req.originalUrl}`);
+  logger.error({ err, route: `${req.method} ${req.originalUrl}` }, "Error caught");
 
   // Pass to existing error handler logic or send response
   // Assuming ApiError structure or generic error

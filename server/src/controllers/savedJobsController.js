@@ -6,6 +6,7 @@ import { SavedJobs } from "../models/savedJobsModel.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
+import { logger } from "../config/logger.js";
 
 const saveJob = asyncHandler(async (req, res) => {
     const { jobId } = req.params;
@@ -80,7 +81,7 @@ const getSavedJobs = asyncHandler(async (req, res) => {
         .sort({ createdAt: -1 })
         .lean();
 
-    console.log('[getSavedJobs] userId:', userId, '| count:', savedJobs.length);
+    logger.info({ userId, count: savedJobs.length }, "getSavedJobs");
 
     if (!savedJobs.length) {
         return res.status(200).json(
@@ -89,13 +90,13 @@ const getSavedJobs = asyncHandler(async (req, res) => {
     }
 
     const jobIds = savedJobs.map(s => s.jobId);
-    console.log('[getSavedJobs] jobIds:', jobIds);
+    logger.info({ jobIds }, "getSavedJobs jobIds");
 
     const jobs = await Job.find({ _id: { $in: jobIds } })
         .select("title company location employment_type salary apply_type apply_url")
         .lean();
 
-    console.log('[getSavedJobs] matched jobs:', jobs.length);
+    logger.info({ matchedCount: jobs.length }, "getSavedJobs matched jobs");
 
     const jobsMap = new Map(
         jobs.map(job => [job._id.toString(), { ...job, id: job._id.toString(), _id: undefined }])

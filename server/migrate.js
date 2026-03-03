@@ -1,10 +1,11 @@
 import "dotenv/config";
 import { jobConnection } from "./src/config/jobConnection.js";
 import Job from "./src/models/jobModel.js";
+import { logger } from "./src/config/logger.js";
 
 const migrateData = async () => {
   try {
-    console.log("⏳ Connecting to database...");
+    logger.info("Connecting to database...");
 
     if (jobConnection.readyState !== 1) {
       await new Promise((resolve, reject) => {
@@ -13,7 +14,7 @@ const migrateData = async () => {
       });
     }
 
-    console.log("✅ Connected! Starting migration...");
+    logger.info("Connected! Starting migration...");
 
     // 1️⃣ Rename job_id → jobId (aggregation pipeline REQUIRED)
     const renameResult = await Job.updateMany(
@@ -30,7 +31,7 @@ const migrateData = async () => {
       ]
     );
 
-    console.log(` job_id → jobId migrated: ${renameResult.modifiedCount}`);
+    logger.info({ migratedCount: renameResult.modifiedCount }, "job_id → jobId migrated");
 
     const jobliveResult = await Job.updateMany(
       { joblive: { $exists: false } },
@@ -47,12 +48,13 @@ const migrateData = async () => {
       { $set: { last_seen: null } }
     );
 
-    console.log("✅ Backfill complete:");
-    console.log(`- joblive set: ${jobliveResult.modifiedCount}`);
-    console.log(`- closedAt set: ${closedAtResult.modifiedCount}`);
-    console.log(`- last_seen set: ${lastSeenResult.modifiedCount}`);
+    logger.info({
+      jobliveSet: jobliveResult.modifiedCount,
+      closedAtSet: closedAtResult.modifiedCount,
+      lastSeenSet: lastSeenResult.modifiedCount,
+    }, "Backfill complete");
 
-     const userResult = await User.updateMany(
+    const userResult = await User.updateMany(
       {},
       {
         $set: {
@@ -63,17 +65,16 @@ const migrateData = async () => {
       }
     );
 
-    console.log("✅ Users backfill complete:");
-    console.log(`- users normalized: ${userResult.modifiedCount}`);
+    logger.info({ usersNormalized: userResult.modifiedCount }, "Users backfill complete");
 
-    console.log("🎉 Migration completed successfully!");
+    logger.info("Migration completed successfully!");
 
-    console.log("🎉 Migration completed successfully!");
+    logger.info("Migration completed successfully!");
 
   } catch (error) {
-    console.error("❌ Migration Error:", error);
+    logger.error({ err: error }, "Migration Error");
   } finally {
-    console.log("👋 Closing connection...");
+    logger.info("Closing connection...");
     await jobConnection.close();
     process.exit(0);
   }

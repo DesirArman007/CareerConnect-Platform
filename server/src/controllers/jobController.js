@@ -2,8 +2,9 @@ import { Job } from "../models/jobModel.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { getFromCache, setInCache, deleteFromCache } from "../cache/cacheHelper.js";
+import { getFromCache, setInCache, deleteFromCache, getOrSetCache, deleteCachePattern } from "../cache/cacheHelper.js";
 import { Roles } from "../constants/roles.js";
+import { logger } from "../config/logger.js";
 
 
 // creating a job
@@ -61,6 +62,11 @@ const createJob = asyncHandler(async (req, res) => {
     }
   );
 
+  await deleteCachePattern("jobs:*");
+  await deleteCachePattern("new_jobs:*");
+  await deleteFromCache("job_stats");
+  await deleteFromCache("companies:list");
+
   res.status(201).json(response);
 
 });
@@ -75,14 +81,14 @@ const getJobById = asyncHandler(async (req, res) => {
     const cached = await getFromCache(cacheKey);
     if (cached) return res.status(200).json(cached);
   } catch (err) {
-    console.error("Cache retrieval failed, fetching from DB:", err);
+    logger.error({ err }, "Cache retrieval failed, fetching from DB");
   }
 
 
   const job = await Job.findById(jobId);
 
   if (!job) {
-    console.log("Job does not exist with id:", jobId);
+    logger.warn({ jobId }, "Job does not exist");
     throw new ApiError(404, "Job not found");
   }
 
@@ -99,7 +105,8 @@ const getJobById = asyncHandler(async (req, res) => {
   res.status(200).json(response);
 });
 
-// Fetch All Jobs (Paginated)
+// get all JOBS
+
 const getAllJobs = asyncHandler(async (req, res) => {
   const {
     page = 1,
@@ -111,64 +118,63 @@ const getAllJobs = asyncHandler(async (req, res) => {
     experience_level
   } = req.query;
 
-  // ✅ Parse numbers early
   const numPage = parseInt(page);
   const numLimit = parseInt(limit);
   const skip = (numPage - 1) * numLimit;
 
   const cacheKey = `jobs:page=${numPage}:limit=${numLimit}:location=${location || "any"}:company=${company || "any"}:employment_type=${employment_type || "any"}:department=${department || "any"}:experience_level=${experience_level || "any"}`;
 
-  const cached = await getFromCache(cacheKey);
-  if (cached) {
-    return res.status(200).json(cached);
-  }
+  const data = await getOrSetCache(cacheKey, async () => {
 
-  const filter = { joblive: true };
+    const filter = { joblive: true };
 
+    if (location?.trim()) filter.location = { $regex: location, $options: "i" };
+    if (company?.trim()) filter.company = { $regex: company, $options: "i" };
+    if (employment_type) filter.employment_type = employment_type;
+    if (department?.trim()) filter.department = { $regex: department, $options: "i" };
 
-  if (location?.trim()) filter.location = { $regex: location, $options: 'i' };
-  if (company?.trim()) filter.company = { $regex: company, $options: 'i' };
-  if (employment_type) filter.employment_type = employment_type;
-  if (department?.trim()) filter.department = { $regex: department, $options: 'i' };
+    if (experience_level) {
+      const expLevels = {
+        entry: { $lte: 2 },
+        mid: { $gt: 2, $lte: 5 },
+        senior: { $gt: 5 },
+        director: { $gt: 8 }
+      };
 
-  // ✅ Experience logic with validation
-  if (experience_level) {
-    const expLevels = {
-      entry: { $lte: 2 },
-      mid: { $gt: 2, $lte: 5 },
-      senior: { $gt: 5 },
-      director: { $gt: 8 }
-    };
-
-    if (expLevels[experience_level]) {
-      filter.experience_min_years = expLevels[experience_level];
-    }
-  }
-
-  const jobs = await Job.find(filter)
-    .sort({ createdAt: -1 })
-    .limit(numLimit)
-    .skip(skip)
-    .select('-__v');
-
-  const totalJobs = await Job.countDocuments(filter);
-
-  const response = new ApiResponse(
-    200,
-    "Jobs fetched successfully",
-    {
-      jobs: jobs.map(j => j.toJSON()),
-      pagination: {
-        currentPage: numPage,
-        totalPages: Math.ceil(totalJobs / numLimit),
-        totalJobs,
-        limit: numLimit
+      if (expLevels[experience_level]) {
+        filter.experience_min_years = expLevels[experience_level];
       }
-    });
+    }
 
-  await setInCache(cacheKey, response, 300);
+    const [jobs, totalJobs] = await Promise.all([
+      Job.find(filter)
+        .sort({ createdAt: -1 })
+        .limit(numLimit)
+        .skip(skip)
+        .select("-__v"),
 
-  res.status(200).json(response);
+      Job.countDocuments(filter)
+    ]);
+
+    const respone = new ApiResponse(
+      200,
+      "Jobs fetched successfully",
+      {
+        jobs: jobs.map(j => j.toJSON()),
+        pagination: {
+          currentPage: numPage,
+          totalPages: Math.ceil(totalJobs / numLimit),
+          totalJobs,
+          limit: numLimit
+        }
+      }
+    );
+
+    return respone;
+
+  });
+
+  return res.status(200).json(data);
 });
 
 
@@ -182,77 +188,74 @@ const searchJobs = asyncHandler(async (req, res) => {
     location,
     experience_level
   } = req.query;
+
   const keyword = req.query.keyword?.toString();
+
+  if (!keyword) {
+    throw new ApiError(400, "Search term/keyword is required");
+  }
+
   const numPage = parseInt(page);
   const numLimit = parseInt(limit);
   const skip = (numPage - 1) * numLimit;
 
   const cacheKey = `job_search:${keyword}:${numPage}:${numLimit}:${employment_type || "any"}:${department || "any"}:${location || "any"}:${experience_level || "any"}`;
 
-  try {
-    const cached = await getFromCache(cacheKey);
-    if (cached) return res.status(200).json(cached);
-  } catch (err) {
-    console.error("Cache retrieval failed, fetching from DB:", err);
-  }
+  const data = await getOrSetCache(cacheKey, async () => {
 
-  if (!keyword?.trim()) {
-    throw new ApiError(400, "Search term/keyword is required");
-  }
-
-  const searchFilter = {
-
-    joblive: true,
-    $or: [
-      { title: { $regex: keyword, $options: 'i' } },
+    const searchFilter = {
+      joblive: true,
+      $or: [{ title: { $regex: keyword, $options: 'i' } },
       { company: { $regex: keyword, $options: 'i' } },
-      { skill: { $regex: keyword, $options: 'i' } },
-      { location: { $regex: keyword, $options: 'i' } }
-    ]
-  };
-
-
-  if (employment_type) searchFilter.employment_type = employment_type;
-  if (department?.trim()) searchFilter.department = { $regex: department, $options: 'i' };
-  if (location?.trim()) searchFilter.location = { $regex: location, $options: 'i' };
-
-  if (experience_level) {
-    const expLevels = {
-      entry: { $lte: 2 },
-      mid: { $gt: 2, $lte: 5 },
-      senior: { $gt: 5 },
-      director: { $gt: 8 }
+      { skill: { $regex: keyword, $options: 'i' } },  // remove later if u dont add skill in job schema
+      { location: { $regex: keyword, $options: 'i' } }]
     };
-    if (expLevels[experience_level]) {
-      searchFilter.experience_min_years = expLevels[experience_level];
-    }
-  }
 
-  const jobs = await Job.find(searchFilter)
-    .sort({ createdAt: -1 })
-    .limit(numLimit)
-    .skip(skip)
-    .select('-__v');
+    if (employment_type) searchFilter.employment_type = employment_type;
+    if (department?.trim()) searchFilter.department = { $regex: department, $options: 'i' };
+    if (location?.trim()) searchFilter.location = { $regex: location, $options: 'i' };
+    if (experience_level) {
+      const expLevels = {
+        entry: { $lte: 2 },
+        mid: { $gt: 2, $lte: 5 },
+        senior: { $gt: 5 },
+        director: { $gt: 8 }
+      };
 
-  const totalJobs = await Job.countDocuments(searchFilter);
+      if (expLevels[experience_level]) {
+        searchFilter.experience_min_years = expLevels[experience_level];
+      }
+    };
 
-  const response = new ApiResponse(
-    200,
-    "Search results fetched successfully",
-    {
-      jobs: jobs.map(j => j.toJSON()),
-      pagination: {
-        currentPage: numPage,
-        totalPages: Math.ceil(totalJobs / numLimit),
-        totalJobs,
-        limit: numLimit,
-      },
-      searchQuery: keyword
-    });
+    const [jobs, totalJobs] = await Promise.all([
+      Job.find(searchFilter)
+        .sort({ createdAt: -1 })
+        .limit(numLimit)
+        .skip(skip)
+        .select("-__v"),
 
-  await setInCache(cacheKey, response, 300);
+      Job.countDocuments(searchFilter)
+    ]);
 
-  res.status(200).json(response);
+    const response = new ApiResponse(
+      200,
+      "Search results fetched successfully",
+      {
+        jobs: jobs.map(j => j.toJSON()),
+        pagination: {
+          currentPage: numPage,
+          totalPages: Math.ceil(totalJobs / numLimit),
+          totalJobs,
+          limit: numLimit
+        },
+        searchQuery: keyword
+      }
+    );
+
+    return response;
+  });
+
+  return res.status(200).json(data);
 });
 
 
@@ -261,137 +264,107 @@ const searchJobs = asyncHandler(async (req, res) => {
 const getJobsByCompany = asyncHandler(async (req, res) => {
 
   const { company } = req.params;
-
   const { page = 1, limit = 10 } = req.query;
 
-  const cacheKey = `jobs_company:${company}:${page}:${limit}`;
+  const numPage = parseInt(page);
+  const numLimit = parseInt(limit);
+  const skip = (numPage - 1) * numLimit;
 
-  try {
-    const cached = await getFromCache(cacheKey);
-    if (cached) return res.status(200).json(cached);
-  } catch (err) {
-    console.error("Cache retrieval failed, fetching from DB:", err);
-  }
+  const cacheKey = `jobs_company:${company}:${numPage}:${numLimit}`;
 
-  const skip = (page - 1) * limit;
+  const data = await getOrSetCache(cacheKey, async () => {
 
-  const jobs = await Job.find({
-    company: { $regex: company, $options: 'i' }
-  })
-    .sort({ createdAt: -1 })
-    .limit(parseInt(limit))
-    .skip(skip)
-    .select('-__v');
+    const filter = {
+      company: { $regex: company, $options: 'i' },
+      joblive: true
+    };
 
+    const [jobs, totalJobs] = await Promise.all([
+      Job.find(filter)
+        .sort({ createdAt: -1 })
+        .limit(numLimit)
+        .skip(skip)
+        .select("-__v"),
 
-  const totalJobs = await Job.countDocuments({
-    company: { $regex: company, $options: 'i' }
-  });
+      Job.countDocuments(filter)
+    ]);
 
+    return new ApiResponse(
+      200,
+      "Company jobs fetched successfully",
+      {
+        jobs: jobs.map(j => j.toJSON()),
+        pagination: {
+          currentPage: numPage,
+          totalPages: Math.ceil(totalJobs / numLimit),
+          totalJobs,
+          limit: numLimit
+        }
+      }
+    );
 
-  const response = new ApiResponse(
-    200,
-    "Company jobs fetched successfully",
-    {
-      jobs: jobs.map(j => j.toJSON()),
-      pagination: {
-        currentPage: Number(page),
-        totalPages: Math.ceil(totalJobs / Number(limit)),
-        totalJobs,
-        limit: Number(limit)
-      },
+  }, 600);
 
-    })
-
-  await setInCache(cacheKey, response, 600);
-
-  res.status(200).json(response);
-
+  return res.status(200).json(data);
 });
 
 
 // Fetch New Jobs
 // Recently added 
 const getNewJobs = asyncHandler(async (req, res) => {
-
   const {
     page = 1,
     limit = 10,
     days = 7
   } = req.query;
 
-  const cacheKey = `new_jobs:${page}:${limit}:${days}`;
+  const numPage = parseInt(page);
+  const numLimit = parseInt(limit);
+  const numDays = parseInt(days);
 
-  try {
-    const cached = await getFromCache(cacheKey);
-    if (cached) return res.status(200).json(cached);
-  } catch (err) {
-    console.error("Cache retrieval failed, fetching from DB:", err);
-  }
+  const skip = (numPage - 1) * numLimit;
 
+  const cacheKey = `new_jobs:${numPage}:${numLimit}:${numDays}`;
 
-  const skip = (page - 1) * limit;
+  const data = await getOrSetCache(cacheKey, async () => {
 
-  // --------------------------------------------
-  // Calculate date threshold for "new jobs"
-  //
-  // Example:
-  //   Today = 20 Feb 2026
-  //   days = 7
-  //
-  // Step 1: Create a Date object with today's date
-  //   new Date() → 20 Feb 2026
-  //
-  // Step 2: Subtract `days` from today's date
-  //   20 - 7 = 13
-  //
-  // Result:
-  //   dateThreshold = 13 Feb 2026
-  //
-  // MongoDB condition:
-  //   createdAt >= dateThreshold
-  //
-  // Meaning:
-  //   "Fetch jobs created from 13 Feb 2026 up to today"
-  //   → jobs added in the last 7 days
-  //
-  // No per-job calculation happens.
-  // Only ONE cutoff date is calculated.
-  const dateThreshold = new Date();
-  dateThreshold.setDate(dateThreshold.getDate() - Number(days));
+    const dateThreshold = new Date();
+    dateThreshold.setDate(dateThreshold.getDate() - numDays);
 
-  const jobs = await Job.find({
-    createdAt: { $gte: dateThreshold },
-    joblive: true
-  })
-    .sort({ createdAt: -1 })
-    .limit(parseInt(limit))
-    .skip(skip)
-    .select('-__v');
+    const filter = {
+      createdAt: { $gte: dateThreshold },
+      joblive: true
+    };
 
-  const totalJobs = await Job.countDocuments({
-    createdAt: { $gte: dateThreshold }
+    const [jobs, totalJobs] = await Promise.all([
+      Job.find(filter)
+        .sort({ createdAt: -1 })
+        .limit(numLimit)
+        .skip(skip)
+        .select("-__v"),
+
+      Job.countDocuments(filter)
+    ]);
+
+    const respone = new ApiResponse(
+      200,
+      `Jobs added in the last ${numDays} days`,
+      {
+        jobs: jobs.map(j => j.toJSON()),
+        pagination: {
+          currentPage: numPage,
+          totalPages: Math.ceil(totalJobs / numLimit),
+          totalJobs,
+          limit: numLimit
+        }
+      }
+    );
+
+    return respone;
   });
 
-  const response = new ApiResponse(
-    200,
-    `Jobs added in the last ${days}`,
-    {
-      jobs: jobs.map(j => j.toJSON()),
-      pagination: {
-        currentPage: Number(page),
-        totalPages: Math.ceil(totalJobs / Number(limit)),
-        totalJobs: totalJobs,
-        limit: Number(limit)
-      },
-
-    }
-  );
-
-  await setInCache(cacheKey, response, process.env.REDIS_TTL)
-
-  res.status(200).json(response);
-})
+  return res.status(200).json(data);
+});
 
 
 // Get Similar Jobs (Rule-based Recommendations)
@@ -607,132 +580,124 @@ const getFilterOptions = asyncHandler(async (req, res) => {
   ]);
 
   res.status(200).json(
-    new ApiResponse(200, {
-      departements: departements.filter(Boolean),
-      locations: locations.filter(Boolean)
+    new ApiResponse(200,
+      "Filter options fetched successfully",
+      {
+        departements: departements.filter(Boolean),
+        locations: locations.filter(Boolean)
 
-    })
+      })
   );
 });
+
 
 const getJobStats = asyncHandler(async (req, res) => {
 
   const cacheKey = 'job_stats';
-  try {
-    const cached = await getFromCache(cacheKey);
-    if (cached) return res.status(200).json(cached);
-  } catch (err) {
-    console.error("Cache retrieval failed, fetching from DB:", err);
-  }
 
-  const [
-    totalJobs,
-    newJobsCount,
-    jobsByType,
-    jobsByLocation,
-    recentJobs
-  ] = await Promise.all([
-    Job.countDocuments({ joblive: true }),
+  const data = await getOrSetCache(cacheKey, async () => {
 
+    const [
+      totalJobs,
+      newJobsCount,
+      jobsByType,
+      jobsByLocation,
+      recentJobs
+    ] = await Promise.all([
+      Job.countDocuments({ joblive: true }),
 
-    // Finds the job that are added in last 7 days
-    Job.countDocuments({
-      createdAt: {
-        $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-      },
-      joblive: true
-    }),
+      Job.countDocuments({
+        createdAt: {
+          $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+        },
+        joblive: true
+      }),
 
-
-    Job.aggregate([
-      { $match: { joblive: true } },
-      {
-        $group: {
-          _id: '$employment_type',
-          count: { $sum: 1 }
+      Job.aggregate([
+        { $match: { joblive: true } },
+        {
+          $group: {
+            _id: '$employment_type',
+            count: { $sum: 1 }
+          }
         }
+      ]),
+
+      Job.aggregate([
+        { $match: { joblive: true } },
+        {
+          $group: {
+            _id: '$location',
+            count: { $sum: 1 }
+          }
+        },
+        { $sort: { count: -1 } },
+        { $limit: 5 }
+      ]),
+
+      Job.find({ joblive: true })
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .select('title company location employment_type createdAt')
+    ]);
+
+    const employmentTypeStats = jobsByType.reduce((acc, item) => {
+      acc[item._id || 'other'] = item.count;
+      return acc;
+    }, {});
+
+    const topLocations = jobsByLocation.map(loc => ({
+      location: loc._id,
+      count: loc.count
+    }));
+
+    return new ApiResponse(
+      200,
+      "Job statistics fetched successfully",
+      {
+        totalJobs,
+        newJobsThisWeek: newJobsCount,
+        employmentTypes: employmentTypeStats,
+        topLocations,
+        recentJobs: recentJobs.map(j => j.toJSON())
       }
-    ]),
-
-    // Finds the  top 5 locations with most jobs
-    Job.aggregate([
-      { $match: { joblive: true } },
-      {
-        $group: {
-          _id: '$location',
-          count: { $sum: 1 }
-        }
-      },
-      { $sort: { count: -1 } },
-      { $limit: 5 }
-    ]),
-
-
-    // Gets the 5 most recent ACTIVE jobs
-    Job.find({ joblive: true }).sort({ createdAt: -1 }).limit(5).select('title company location employment_type createdAt')
-
-  ]);
-
-  const employmentTypeStats = jobsByType.reduce((acc, item) => {
-    acc[item._id || 'other'] = item.count;
-    return acc;
-  }, {});
-
-  const topLocations = jobsByLocation.map(loc => ({
-    location: loc._id,
-    count: loc.count
-  }));
-
-
-  const response = new ApiResponse(
-    200,
-    "Job statistics fetched successfully", {
-    totalJobs,
-    newJobsThisWeek: newJobsCount,
-    employmentTypes: employmentTypeStats,
-    topLocations,
-    recentJobs
+    );
   });
 
-  await setInCache(cacheKey, response, process.env.REDIS_TTL);
-
-  res.status(200).json(response);
-
+  return res.status(200).json(data);
 });
 
 const getCompanies = asyncHandler(async (req, res) => {
   const cacheKey = "companies:list";
 
-  const cached = await getFromCache(cacheKey);
-  if (cached) return res.status(200).json(cached);
+  const data = await getOrSetCache(cacheKey, async () => {
 
-  const companies = await Job.aggregate([
-    { $match: { company: { $exists: true, $ne: "" } } },
-    {
-      $group: {
-        _id: "$company",
-        jobCount: { $sum: 1 }
+    const companies = await Job.aggregate([
+      { $match: { company: { $exists: true, $ne: "" } } },
+      {
+        $group: {
+          _id: "$company",
+          jobCount: { $sum: 1 }
+        }
+      },
+      { $sort: { jobCount: -1 } }
+    ]);
+
+    return new ApiResponse(
+      200,
+      "Companies fetched successfully",
+      {
+        companies: companies.map(c => ({
+          name: c._id,
+          jobs: c.jobCount
+        }))
       }
-    },
-    { $sort: { jobCount: -1 } }
-  ]);
+    );
 
-  const response = new ApiResponse(
-    200,
-    "Companies fetched successfully",
-    {
-      companies: companies.map(c => ({
-        name: c._id,
-        jobs: c.jobCount
-      }))
-    }
-  );
+  }, 600); // 10 minutes TTL
 
-
-  await setInCache(cacheKey, response, 600); // 10 min
-  res.status(200).json(response);
+  return res.status(200).json(data);
 });
-
 
 export {
   getJobById,

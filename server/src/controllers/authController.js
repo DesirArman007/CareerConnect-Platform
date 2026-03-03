@@ -11,6 +11,7 @@ import { statusEnums } from "../constants/statusEnums.js";
 import { setAuthCookies, clearAuthCookies } from "../utils/authCookies.js";
 import { hashToken } from "../utils/hashToken.js";
 import { Company } from "../models/companyModel.js";
+import { logger } from "../config/logger.js";
 
 
 const registerUser = asyncHandler(async (req, res) => {
@@ -46,7 +47,7 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new ApiError(500, "User already registered");
     }
 
-    console.log(`Setting auth cookies on POST /auth/register`);
+    logger.info({ route: "POST /auth/register" }, "Setting auth cookies");
     // 6. Send a success response
     return res.status(201).json(
         new ApiResponse(201, "User registered successfully", { user: createdUser })
@@ -88,7 +89,7 @@ const registerEmployer = asyncHandler(async (req, res) => {
         throw new ApiError(500, "User already registered");
     }
 
-    console.log(`Setting auth cookies on POST /auth/register`);
+    logger.info({ route: "POST /auth/register" }, "Setting auth cookies");
     // 6. Send a success response
     return res.status(201).json(
         new ApiResponse(201, "User registered successfully", { user: createdUser, company })
@@ -107,13 +108,13 @@ const loginUser = asyncHandler(async (req, res) => {
     }
 
     if (user.status !== statusEnums.ACTIVE) {
-        console.log(`Auth failure: Account not active for userId=${user._id} on POST /auth/login`);
+        logger.warn({ userId: user._id, route: "POST /auth/login" }, "Auth failure: Account not active");
         throw new ApiError(403, "Account is not active");
     }
 
     const isPasswordCorrect = await user.isPasswordCorrect(password);
     if (!isPasswordCorrect) {
-        console.log(`Auth failure: Invalid credentials for userId=${user._id} on POST /auth/login`);
+        logger.warn({ userId: user._id, route: "POST /auth/login" }, "Auth failure: Invalid credentials");
         throw new ApiError(401, "Invalid user credentials");
     }
 
@@ -129,10 +130,10 @@ const loginUser = asyncHandler(async (req, res) => {
 
     const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
 
-    console.log(`Setting auth cookies on POST /auth/login`);
+    logger.info({ route: "POST /auth/login" }, "Setting auth cookies");
     setAuthCookies(res, accessToken, refreshToken);
 
-    console.log(`Auth success: userId=${user._id} for POST /auth/login`);
+    logger.info({ userId: user._id, route: "POST /auth/login" }, "Auth success");
 
     return res
         .status(200)
@@ -191,9 +192,9 @@ const refreshTokenHandler = asyncHandler(async (req, res) => {
     user.lastActiveAt = new Date();
     await user.save({ validateBeforeSave: false });
 
-    console.log(`Setting auth cookies on POST /auth/refreshToken`);
+    logger.info({ route: "POST /auth/refreshToken" }, "Setting auth cookies");
     setAuthCookies(res, newAccessToken, newRefreshToken);
-    console.log(`Auth success: userId=${user._id} for POST /auth/refreshToken`);
+    logger.info({ userId: user._id, route: "POST /auth/refreshToken" }, "Auth success");
 
     return res
         .status(200)
@@ -287,7 +288,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
     const resetURL = `${process.env.FRONTEND_URL || "http://localhost:8000"}/resetPassword?token=${resetToken}&id=${user._id}`;
 
     if (process.env.NODE_ENV !== "production") {
-        console.log("Password reset URL:", resetURL);
+        logger.info({ resetURL }, "Password reset URL");
     }
 
     await sendEmail({
@@ -434,9 +435,9 @@ const googleAuth = asyncHandler(async (req, res) => {
 
     await user.save({ validateBeforeSave: false });
 
-    console.log(`Setting auth cookies on POST /auth/googleAuth`);
+    logger.info({ route: "POST /auth/googleAuth" }, "Setting auth cookies");
     setAuthCookies(res, accessToken, refreshToken);
-    console.log(`Auth success: userId=${user._id} for POST /auth/googleAuth`);
+    logger.info({ userId: user._id, route: "POST /auth/googleAuth" }, "Auth success");
 
     res.status(200)
         .json(

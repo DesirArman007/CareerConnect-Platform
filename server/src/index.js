@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import { app } from "./app.js";
+import { logger } from "./config/logger.js";
 
 dotenv.config();
 
@@ -10,15 +11,20 @@ const startServer = async () => {
 
     app.listen(process.env.PORT || 8000, () => {
       const isProduction = process.env.NODE_ENV === "production";
-      console.log("Server started");
-      console.log(`Environment: ${process.env.NODE_ENV}`);
-      console.log(`Port: ${process.env.PORT || 8000}`);
-      console.log(`HTTPS assumed: ${isProduction}`);
-      console.log(`Cookie config: secure=${isProduction}, sameSite=${isProduction ? 'none' : 'lax'}, partitioned=${isProduction}`);
+      logger.info({
+        env: process.env.NODE_ENV,
+        port: process.env.PORT || 8000,
+        httpsAssumed: isProduction,
+        cookieConfig: {
+          secure: isProduction,
+          sameSite: isProduction ? "none" : "lax",
+          partitioned: isProduction,
+        },
+      }, "Server started");
     });
 
   } catch (err) {
-    console.error("Server startup failed:", err.message);
+    logger.error({ err }, "Server startup failed");
     process.exit(1);
   }
 };
