@@ -1,5 +1,37 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import client from "./client.js";
+import { logger } from "../config/logger.js";
+
+const pendingRequests = new Map();
+
+export const getOrSetCache = async (key, fetchFunction, ttl = process.env.REDIS_TTL) => {
+
+    const cached = await client.get(key);
+    if (cached) {
+        logger.info({ key }, "Cache HIT");
+        return JSON.parse(cached);
+    }
+
+    // 🔒 Deduplication layer
+    if (pendingRequests.has(key)) {
+        return pendingRequests.get(key);
+    }
+
+    const promise = (async () => {
+        try {
+            const data = await fetchFunction();
+            await client.setex(key, ttl, JSON.stringify(data));
+            logger.info({ key, ttl }, "Cache SET");
+            return data;
+        } finally {
+            pendingRequests.delete(key);
+        }
+    })();
+
+    pendingRequests.set(key, promise);
+    return promise;
+};
+
 
 
 export const getFromCache = asyncHandler(async (key) => {
@@ -13,7 +45,7 @@ export const getFromCache = asyncHandler(async (key) => {
         return null;
     }
 
-    console.log(`Cache HIT: ${key}`);
+    logger.info({ key }, "Cache HIT");
     return JSON.parse(data);
 
 })
@@ -29,7 +61,7 @@ export const setInCache = asyncHandler(async (key, data, ttl = process.env.REDIS
     }
 
     await client.setex(key, ttl, JSON.stringify(data));
-    console.log(`Cache SET: ${key} (TTL: ${ttl})`);
+    logger.info({ key, ttl }, "Cache SET");
     return true;
 
 })
@@ -40,7 +72,7 @@ export const deleteFromCache = asyncHandler(async (key) => {
         return false;
     }
     await client.del(key);
-    console.log(`Cache DELETED: ${key}`);
+    logger.info({ key }, "Cache DELETED");
 
 })
 
@@ -53,7 +85,7 @@ export const deleteCachePattern = asyncHandler(async (pattern) => {
     const keys = await client.keys(pattern);
     if (keys.length > 0) {
         await client.del(...keys);
-        console.log(`🗑️ Cache DELETED: ${keys.length} keys matching ${pattern}`);
+        logger.info({ pattern, count: keys.length }, "Cache DELETED by pattern");
     }
 })
 
@@ -64,6 +96,6 @@ export const clearAllCache = asyncHandler(async () => {
     }
 
     await client.flushall();
-    console.log('All cache cleared');
+    logger.info("All cache cleared");
 
 })
