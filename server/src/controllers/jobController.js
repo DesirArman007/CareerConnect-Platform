@@ -336,7 +336,7 @@ const getNewJobs = asyncHandler(async (req, res) => {
       joblive: true
     };
 
-    const [jobs, totalJobs] = await Promise.all([
+    let [jobs, totalJobs] = await Promise.all([
       Job.find(filter)
         .sort({ createdAt: -1 })
         .limit(numLimit)
@@ -353,6 +353,7 @@ const getNewJobs = asyncHandler(async (req, res) => {
         Job.find(fallbackFilter)
           .sort({ createdAt: -1 })
           .limit(numLimit)
+          .skip(skip)
           .select("-__v"),
         Job.countDocuments(fallbackFilter)
       ]);
