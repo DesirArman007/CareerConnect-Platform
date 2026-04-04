@@ -20,17 +20,17 @@ const router = Router();
 
 
 // Static/Specific Routes 
-router.post("/employer/createJob", verifyJWT, authorizeRoles(Roles.EMPLOYER), createJob )
+router.post("/employer/createJob", verifyJWT, authorizeRoles(Roles.EMPLOYER), createJob)
 router.get("/stats", getJobStats);
-router.get("/new/recent", getNewJobs);          
-router.get("/search/query", searchJobs);       
-router.get("/search/suggestions", getSmartSeachSuggestions); 
-router.get("/filter-options",getFilterOptions);
+router.get("/new/recent", getNewJobs);
+router.get("/search/query", searchJobs);
+router.get("/search/suggestions", getSmartSeachSuggestions);
+router.get("/filter-options", getFilterOptions);
 router.get("/companies", getCompanies);
 
 // Dynamic Routes with specific prefixes SECOND
 router.get("/company/:company", getJobsByCompany);
-router.get("/:jobId/similar", getSimilarJobs);    
+router.get("/:jobId/similar", getSimilarJobs);
 
 //  Dynamic Route 
 router.get("/:jobId", getJobById);

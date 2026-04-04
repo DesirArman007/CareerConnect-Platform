@@ -148,6 +148,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       throw new Error(response.message || "Login failed");
 
     localStorage.setItem("hasSession", "true");
+    if (response.data?.accessToken) {
+      localStorage.setItem("accessToken", response.data.accessToken);
+    }
 
     const sessionActive = await fetchUserData();
     if (!sessionActive) {
@@ -172,6 +175,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       await authApi.logout();
     } finally {
       localStorage.removeItem("hasSession");
+      localStorage.removeItem("accessToken");
       setUser(null);
       setSavedJobs([]);
       setSavedJobsData([]);
@@ -187,6 +191,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       throw new Error(response.message || "Google login failed");
 
     localStorage.setItem("hasSession", "true");
+    if (response.data?.accessToken) {
+      localStorage.setItem("accessToken", response.data.accessToken);
+    }
 
     const sessionActive = await fetchUserData();
     if (!sessionActive) {

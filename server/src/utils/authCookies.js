@@ -2,9 +2,9 @@ const isProduction = process.env.NODE_ENV === "production";
 
 const baseCookieOptions = {
     httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? "none" : "lax",
-    partitioned: isProduction // Required for CHIPS (Cross-site cookies in modern browsers)
+    secure: true,
+    sameSite: "none",
+    partitioned: true // Required for CHIPS (Cross-site cookies in modern browsers)
 };
 
 const accessTokenCookieOptions = {

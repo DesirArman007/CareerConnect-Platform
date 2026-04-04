@@ -23,7 +23,7 @@ export const authApi = {
 
     login: (data: any) =>
         api
-            .post<ApiResponse<{ user: User }>>("/users/login", data)
+            .post<ApiResponse<{ user: User; accessToken: string }>>("/users/login", data)
             .then((r) => r.data),
 
     logout: () =>
@@ -33,6 +33,6 @@ export const authApi = {
 
     googleAuth: (idToken: string) =>
         api
-            .post<ApiResponse<{ user: User }>>("/users/googleAuth", { idToken })
+            .post<ApiResponse<{ user: User; accessToken: string }>>("/users/googleAuth", { idToken })
             .then((r) => r.data),
 };

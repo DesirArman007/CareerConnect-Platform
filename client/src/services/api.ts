@@ -21,6 +21,14 @@ const processQueue = (error: any = null) => {
   failedQueue = [];
 };
 
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("accessToken");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -30,8 +38,8 @@ api.interceptors.response.use(
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
-      !originalRequest.url?.includes('/auth/refreshToken') &&
-      !originalRequest.url?.includes('/auth/login')
+      !originalRequest.url?.includes('/users/refreshToken') &&
+      !originalRequest.url?.includes('/users/login')
     ) {
       if (isRefreshing) {
         // Queue this request until the refresh completes
@@ -44,7 +52,7 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        await api.post('/auth/refreshToken');
+        await api.post('/users/refreshToken');
         processQueue();
         return api(originalRequest);
       } catch (refreshError) {

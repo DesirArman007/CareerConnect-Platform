@@ -49,6 +49,7 @@ app.get("/", (req, res) => {
 })
 
 app.use("/api/users", userRouter);
+app.use("/api/auth", userRouter);
 app.use("/api/uploads", uploadRouter);
 app.use("/api/job", jobRouter);
 app.use("/api/feedback", feedbackRouter);

@@ -346,6 +346,18 @@ const getNewJobs = asyncHandler(async (req, res) => {
       Job.countDocuments(filter)
     ]);
 
+    // Fallback: if no recent jobs found, show the latest jobs regardless of date
+    if (jobs.length === 0 && numPage === 1) {
+      const fallbackFilter = { joblive: true };
+      [jobs, totalJobs] = await Promise.all([
+        Job.find(fallbackFilter)
+          .sort({ createdAt: -1 })
+          .limit(numLimit)
+          .select("-__v"),
+        Job.countDocuments(fallbackFilter)
+      ]);
+    }
+
     const respone = new ApiResponse(
       200,
       `Jobs added in the last ${numDays} days`,
