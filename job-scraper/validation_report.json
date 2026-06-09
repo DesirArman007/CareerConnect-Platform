@@ -1,0 +1,44 @@
+[
+  {
+    "company": "Amazon",
+    "jobs_found": 61,
+    "sample": {
+      "title": "Ops Support Expert, NACF-PPT , North America Customer Fulfillment (NACF)",
+      "location": "Bengaluru, KA",
+      "experience": null,
+      "job_type": "job",
+      "description_preview": "Amazon is a global leader in e-commerce and cloud computing, headquartered in Seattle, Washington. Since its inception in 1995, Amazon has strived to be the world's most customer-centric company, cate",
+      "description_formatted": true
+    },
+    "status": "success",
+    "error": null
+  },
+  {
+    "company": "Postman",
+    "jobs_found": 34,
+    "sample": {
+      "title": "Account Development Representative, Bangalore",
+      "location": "Bengaluru, Karnataka, India",
+      "experience": null,
+      "job_type": "job",
+      "description_preview": "Who Are We? Postman is the world\u2019s leading API platform, used by more than 45 million+ developers and 500,000 organizations, including 98% of the Fortune 500. Postman is helping developers and profess",
+      "description_formatted": false
+    },
+    "status": "success",
+    "error": null
+  },
+  {
+    "company": "Coinbase",
+    "jobs_found": 296,
+    "sample": {
+      "title": "Accountant, Prime Financing",
+      "location": "Remote",
+      "experience": "3-5 years",
+      "job_type": "job",
+      "description_preview": "Ready to be pushed beyond what you think you\u2019re capable of? At Coinbase, our mission is to increase economic freedom in the world. It\u2019s a massive, ambitious opportunity that demands the best of us, ev",
+      "description_formatted": false
+    },
+    "status": "success",
+    "error": null
+  }
+]

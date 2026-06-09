@@ -10,12 +10,90 @@
       "note": "AngelList/Wellfound - Indian Startup Jobs"
     },
     {
-      "name": "Indian Startups Aggregator",
-      "scraper": "IndianStartupsScraper",
-      "url": "https://www.instahyre.com/jobs/",
+      "name": "Microsoft",
+      "scraper": "MicrosoftScraper",
+      "url": "https://apply.careers.microsoft.com/careers?query=Software",
       "enabled": true,
       "priority": 1,
-      "note": "Aggregates from Instahyre, Cutshort, YCombinator India"
+      "note": "Custom API-based scraper"
+    },
+    {
+      "name": "Revolut",
+      "scraper": "RevolutScraper",
+      "url": "https://www.revolut.com/careers/",
+      "enabled": true,
+      "priority": 1,
+      "limit": 30,
+      "note": "Custom scraper using valid attributes"
+    },
+    {
+      "name": "YCombinator",
+      "scraper": "IndianStartupsScraper",
+      "url": "https://www.workatastartup.com/companies?locations=India",
+      "enabled": true,
+      "priority": 1,
+      "note": "YCombinator companies hiring in India"
+    },
+    {
+      "name": "Instahyre",
+      "scraper": "InstahyreScraper",
+      "url": "https://www.instahyre.com/search-jobs/?years=0-1&years=1-3",
+      "enabled": false,
+      "priority": 1
+    },
+    {
+      "name": "Cutshort",
+      "scraper": "CutshortScraper",
+      "url": "https://cutshort.io/jobs",
+      "enabled": false,
+      "priority": 1
+    },
+    {
+      "name": "Naukri",
+      "scraper": "NaukriScraper",
+      "url": "https://www.naukri.com/software-engineer-jobs?k=software%20engineer&experience=0",
+      "enabled": false,
+      "priority": 1
+    },
+    {
+      "name": "Hirist",
+      "scraper": "HiristScraper",
+      "url": "https://www.hirist.tech/c/backend-development-jobs.html?exp=0",
+      "enabled": false,
+      "priority": 1
+    },
+    {
+      "name": "Foundit",
+      "scraper": "FounditScraper",
+      "url": "https://www.foundit.in/srp/results?query=software%20engineer&exp=0-3",
+      "enabled": false,
+      "priority": 1
+    },
+    {
+      "name": "Google",
+      "scraper": "GoogleScraper",
+      "url": "https://www.google.com/about/careers/applications/jobs/results/?location=India&q=software%20engineering",
+      "enabled": true,
+      "requires_supervision": true,
+      "priority": 1,
+      "note": "Big Tech - Manual Scraper"
+    },
+    {
+      "name": "Meta",
+      "scraper": "MetaScraper",
+      "url": "https://www.metacareers.com/jobs/",
+      "enabled": true,
+      "requires_supervision": true,
+      "priority": 1,
+      "note": "Manual CAPTCHA bypass required"
+    },
+    {
+      "name": "Netflix",
+      "scraper": "NetflixScraper",
+      "url": "https://jobs.netflix.com/search",
+      "enabled": true,
+      "requires_supervision": true,
+      "priority": 1
     },
     {
       "name": "Amazon",
@@ -36,12 +114,13 @@
       "scraper": "WorkdayScraper",
       "url": "https://nvidia.wd5.myworkdayjobs.com/wday/cxs/nvidia/NVIDIAExternalCareerSite/jobs",
       "enabled": true,
-      "priority": 1
+      "priority": 1,
+      "limit": 200
     },
     {
       "name": "Salesforce",
       "scraper": "WorkdayScraper",
-      "url": "https://salesforce.wd1.myworkdayjobs.com/wday/cxs/salesforce/External_Career_Site/jobs",
+      "url": "https://salesforce.wd12.myworkdayjobs.com/wday/cxs/salesforce/External_Career_Site/jobs",
       "enabled": true,
       "priority": 1
     },
@@ -49,49 +128,42 @@
       "name": "Citi",
       "scraper": "WorkdayScraper",
       "url": "https://citi.wd5.myworkdayjobs.com/wday/cxs/citi/Citi_External/jobs",
-      "enabled": true,
+      "enabled": false,
       "priority": 1
     },
     {
       "name": "Morgan Stanley",
       "scraper": "WorkdayScraper",
-      "url": "https://ms.wd1.myworkdayjobs.com/wday/cxs/ms/External/jobs",
-      "enabled": true,
+      "url": "https://ms.wd12.myworkdayjobs.com/wday/cxs/ms/External/jobs",
+      "enabled": false,
       "priority": 1
     },
     {
       "name": "Wells Fargo",
       "scraper": "WorkdayScraper",
       "url": "https://wellsfargo.wd5.myworkdayjobs.com/wday/cxs/wellsfargo/Wells_Fargo_Jobs/jobs",
-      "enabled": true,
-      "priority": 1
-    },
-    {
-      "name": "Walmart",
-      "scraper": "WorkdayScraper",
-      "url": "https://walmart.wd5.myworkdayjobs.com/wday/cxs/walmart/WalmartExternal/jobs",
-      "enabled": true,
+      "enabled": false,
       "priority": 1
     },
     {
       "name": "Pfizer",
       "scraper": "WorkdayScraper",
-      "url": "https://pfizer.wd1.myworkdayjobs.com/wday/cxs/pfizer/Pfizer_Careers/jobs",
-      "enabled": true,
+      "url": "https://pfizer.wd5.myworkdayjobs.com/wday/cxs/pfizer/Pfizer_Careers/jobs",
+      "enabled": false,
       "priority": 2
     },
     {
       "name": "eBay",
       "scraper": "WorkdayScraper",
       "url": "https://ebay.wd5.myworkdayjobs.com/wday/cxs/ebay/ebay_careers/jobs",
-      "enabled": true,
+      "enabled": false,
       "priority": 2
     },
     {
       "name": "FedEx",
       "scraper": "WorkdayScraper",
-      "url": "https://fedex.wd1.myworkdayjobs.com/wday/cxs/fedex/External/jobs",
-      "enabled": true,
+      "url": "https://fedex.wd3.myworkdayjobs.com/wday/cxs/fedex/External/jobs",
+      "enabled": false,
       "priority": 2
     },
     {
@@ -104,29 +176,29 @@
     {
       "name": "Caterpillar",
       "scraper": "WorkdayScraper",
-      "url": "https://caterpillar.wd5.myworkdayjobs.com/wday/cxs/caterpillar/CaterpillarCareers/jobs",
+      "url": "https://cat.wd5.myworkdayjobs.com/wday/cxs/cat/CaterpillarCareers/jobs",
       "enabled": true,
       "priority": 2
     },
     {
       "name": "3M",
       "scraper": "WorkdayScraper",
-      "url": "https://3m.wd1.myworkdayjobs.com/wday/cxs/mmm/External/jobs",
-      "enabled": true,
+      "url": "https://3m.wd12.myworkdayjobs.com/wday/cxs/mmm/External/jobs",
+      "enabled": false,
       "priority": 2
     },
     {
       "name": "Visa",
-      "scraper": "WorkdayScraper",
-      "url": "https://visa.wd1.myworkdayjobs.com/wday/cxs/visa/Visa_Inc_External_Career_Site/jobs",
+      "scraper": "SmartRecruitersScraper",
+      "url": "https://jobs.smartrecruiters.com/visa",
       "enabled": true,
       "priority": 2
     },
     {
       "name": "Mastercard",
       "scraper": "WorkdayScraper",
-      "url": "https://mastercard.wd1.myworkdayjobs.com/wday/cxs/mastercard/Mastercard_External/jobs",
-      "enabled": true,
+      "url": "https://mastercard.wd3.myworkdayjobs.com/wday/cxs/mastercard/Mastercard_External/jobs",
+      "enabled": false,
       "priority": 2
     },
     {
@@ -139,15 +211,15 @@
     {
       "name": "Intel",
       "scraper": "WorkdayScraper",
-      "url": "https://intel.wd1.myworkdayjobs.com/wday/cxs/intel/External/jobs",
-      "enabled": true,
+      "url": "https://intel.wd3.myworkdayjobs.com/wday/cxs/intel/External/jobs",
+      "enabled": false,
       "priority": 2
     },
     {
       "name": "Dell",
       "scraper": "WorkdayScraper",
-      "url": "https://dell.wd1.myworkdayjobs.com/wday/cxs/dell/External/jobs",
-      "enabled": true,
+      "url": "https://dell.wd5.myworkdayjobs.com/wday/cxs/dell/External/jobs",
+      "enabled": false,
       "priority": 2
     },
     {
@@ -160,36 +232,36 @@
     {
       "name": "Autodesk",
       "scraper": "WorkdayScraper",
-      "url": "https://autodesk.wd1.myworkdayjobs.com/wday/cxs/autodesk/Ext/jobs",
-      "enabled": true,
+      "url": "https://autodesk.wd5.myworkdayjobs.com/wday/cxs/autodesk/Ext/jobs",
+      "enabled": false,
       "priority": 2
     },
     {
       "name": "Intuit",
       "scraper": "WorkdayScraper",
-      "url": "https://intuit.wd1.myworkdayjobs.com/wday/cxs/intuit/Ijobs/jobs",
-      "enabled": true,
+      "url": "https://intuit.wd3.myworkdayjobs.com/wday/cxs/intuit/Ijobs/jobs",
+      "enabled": false,
       "priority": 2
     },
     {
       "name": "Target",
       "scraper": "WorkdayScraper",
       "url": "https://target.wd5.myworkdayjobs.com/wday/cxs/target/target_careers/jobs",
-      "enabled": true,
+      "enabled": false,
       "priority": 2
     },
     {
       "name": "Razorpay",
       "scraper": "GreenhouseScraper",
       "url": "https://boards.greenhouse.io/razorpay",
-      "enabled": true,
+      "enabled": false,
       "priority": 1
     },
     {
       "name": "Cred",
       "scraper": "GreenhouseScraper",
       "url": "https://boards.greenhouse.io/cred",
-      "enabled": true,
+      "enabled": false,
       "priority": 1
     },
     {
@@ -203,14 +275,14 @@
       "name": "Meesho",
       "scraper": "GreenhouseScraper",
       "url": "https://boards.greenhouse.io/meesho",
-      "enabled": true,
+      "enabled": false,
       "priority": 1
     },
     {
       "name": "Zepto",
       "scraper": "GreenhouseScraper",
       "url": "https://boards.greenhouse.io/zepto",
-      "enabled": true,
+      "enabled": false,
       "priority": 1
     },
     {
@@ -231,7 +303,7 @@
       "name": "BrowserStack",
       "scraper": "GreenhouseScraper",
       "url": "https://boards.greenhouse.io/browserstack",
-      "enabled": true,
+      "enabled": false,
       "priority": 1
     },
     {
@@ -273,7 +345,7 @@
       "name": "Nutanix",
       "scraper": "GreenhouseScraper",
       "url": "https://boards.greenhouse.io/nutanix",
-      "enabled": true,
+      "enabled": false,
       "priority": 2
     },
     {
@@ -294,7 +366,7 @@
       "name": "DoorDash",
       "scraper": "GreenhouseScraper",
       "url": "https://boards.greenhouse.io/doordash",
-      "enabled": true,
+      "enabled": false,
       "priority": 2
     },
     {
@@ -329,21 +401,21 @@
       "name": "HashiCorp",
       "scraper": "GreenhouseScraper",
       "url": "https://boards.greenhouse.io/hashicorp",
-      "enabled": true,
+      "enabled": false,
       "priority": 2
     },
     {
       "name": "Lenskart",
       "scraper": "GreenhouseScraper",
       "url": "https://boards.greenhouse.io/lenskart",
-      "enabled": true,
+      "enabled": false,
       "priority": 2
     },
     {
       "name": "Chargebee",
       "scraper": "GreenhouseScraper",
       "url": "https://boards.greenhouse.io/chargebee",
-      "enabled": true,
+      "enabled": false,
       "priority": 2
     },
     {
@@ -357,14 +429,14 @@
       "name": "Acko",
       "scraper": "GreenhouseScraper",
       "url": "https://boards.greenhouse.io/acko",
-      "enabled": true,
+      "enabled": false,
       "priority": 2
     },
     {
       "name": "ShareChat",
       "scraper": "GreenhouseScraper",
       "url": "https://boards.greenhouse.io/sharechat",
-      "enabled": true,
+      "enabled": false,
       "priority": 2
     },
     {
@@ -399,84 +471,77 @@
       "name": "Accenture",
       "scraper": "WorkdayScraper",
       "url": "https://accenture.wd3.myworkdayjobs.com/wday/cxs/accenture/AccentureCareers/jobs",
-      "enabled": true,
+      "enabled": false,
       "priority": 1
     },
     {
       "name": "Siemens",
       "scraper": "WorkdayScraper",
       "url": "https://siemens.wd3.myworkdayjobs.com/wday/cxs/siemens/Jobs/jobs",
-      "enabled": true,
+      "enabled": false,
       "priority": 1
     },
     {
       "name": "Genpact",
       "scraper": "WorkdayScraper",
-      "url": "https://genpact.wd1.myworkdayjobs.com/wday/cxs/genpact/Genpact/jobs",
-      "enabled": true,
+      "url": "https://genpact.wd3.myworkdayjobs.com/wday/cxs/genpact/Genpact/jobs",
+      "enabled": false,
       "priority": 2
     },
     {
       "name": "Qualcomm",
       "scraper": "WorkdayScraper",
-      "url": "https://qualcomm.wd1.myworkdayjobs.com/wday/cxs/qualcomm/External/jobs",
-      "enabled": true,
+      "url": "https://qualcomm.wd10.myworkdayjobs.com/wday/cxs/qualcomm/External/jobs",
+      "enabled": false,
       "priority": 2
     },
     {
       "name": "American Express",
       "scraper": "WorkdayScraper",
-      "url": "https://aexp.wd1.myworkdayjobs.com/wday/cxs/aexp/aexp_external/jobs",
-      "enabled": true,
+      "url": "https://aexp.wd3.myworkdayjobs.com/wday/cxs/aexp/aexp_external/jobs",
+      "enabled": false,
       "priority": 2
     },
     {
       "name": "Honeywell",
       "scraper": "WorkdayScraper",
-      "url": "https://honeywell.wd1.myworkdayjobs.com/wday/cxs/honeywell/Careers/jobs",
-      "enabled": true,
+      "url": "https://honeywell.wd3.myworkdayjobs.com/wday/cxs/honeywell/Careers/jobs",
+      "enabled": false,
       "priority": 2
     },
     {
       "name": "Broadcom",
       "scraper": "WorkdayScraper",
-      "url": "https://broadcom.wd1.myworkdayjobs.com/wday/cxs/broadcom/External_Career_Site/jobs",
-      "enabled": true,
+      "url": "https://broadcom.wd12.myworkdayjobs.com/wday/cxs/broadcom/External_Career_Site/jobs",
+      "enabled": false,
       "priority": 2
     },
     {
       "name": "Western Digital",
       "scraper": "WorkdayScraper",
-      "url": "https://wdc.wd1.myworkdayjobs.com/wday/cxs/wdc/External/jobs",
-      "enabled": true,
+      "url": "https://wdc.wd12.myworkdayjobs.com/wday/cxs/wdc/External/jobs",
+      "enabled": false,
       "priority": 2
     },
     {
       "name": "Eaton",
       "scraper": "WorkdayScraper",
-      "url": "https://eaton.wd1.myworkdayjobs.com/wday/cxs/eaton/External/jobs",
-      "enabled": true,
+      "url": "https://eaton.wd5.myworkdayjobs.com/wday/cxs/eaton/External/jobs",
+      "enabled": false,
       "priority": 2
     },
     {
       "name": "Thermo Fisher Scientific",
       "scraper": "WorkdayScraper",
-      "url": "https://thermofisher.wd1.myworkdayjobs.com/wday/cxs/thermofisher/External/jobs",
-      "enabled": true,
+      "url": "https://thermofisher.wd12.myworkdayjobs.com/wday/cxs/thermofisher/External/jobs",
+      "enabled": false,
       "priority": 2
     },
     {
       "name": "Puma",
       "scraper": "WorkdayScraper",
       "url": "https://puma.wd3.myworkdayjobs.com/wday/cxs/puma/PUMA_Careers/jobs",
-      "enabled": true,
-      "priority": 2
-    },
-    {
-      "name": "Sony",
-      "scraper": "WorkdayScraper",
-      "url": "https://sonyglobal.wd1.myworkdayjobs.com/wday/cxs/sonyglobal/SonyGlobalCareers/jobs",
-      "enabled": true,
+      "enabled": false,
       "priority": 2
     },
     {
@@ -519,7 +584,7 @@
       "name": "Capgemini",
       "scraper": "SmartRecruitersScraper",
       "url": "https://jobs.smartrecruiters.com/Capgemini",
-      "enabled": true,
+      "enabled": false,
       "priority": 1,
       "note": "Major IT services company with large India presence"
     },
@@ -534,7 +599,7 @@
       "name": "Cognizant",
       "scraper": "SmartRecruitersScraper",
       "url": "https://jobs.smartrecruiters.com/Cognizant",
-      "enabled": true,
+      "enabled": false,
       "priority": 1,
       "note": "Major Indian IT services company"
     },
@@ -604,7 +669,7 @@
       "name": "Wipro",
       "scraper": "iCIMSScraper",
       "url": "https://careers.wipro.com/search",
-      "enabled": true,
+      "enabled": false,
       "priority": 1,
       "note": "Major Indian IT services company"
     },
@@ -612,7 +677,7 @@
       "name": "HCL Technologies",
       "scraper": "iCIMSScraper",
       "url": "https://hcltech.icims.com/jobs/search",
-      "enabled": true,
+      "enabled": false,
       "priority": 1,
       "note": "Major Indian IT company"
     },
@@ -620,7 +685,7 @@
       "name": "Tech Mahindra",
       "scraper": "iCIMSScraper",
       "url": "https://techmahindra.icims.com/jobs/search",
-      "enabled": true,
+      "enabled": false,
       "priority": 1,
       "note": "Major Indian IT company"
     },
@@ -628,7 +693,7 @@
       "name": "LTIMindtree",
       "scraper": "iCIMSScraper",
       "url": "https://ltimindtree.icims.com/jobs/search",
-      "enabled": true,
+      "enabled": false,
       "priority": 1,
       "note": "Major Indian IT services"
     },
@@ -636,7 +701,7 @@
       "name": "Mphasis",
       "scraper": "iCIMSScraper",
       "url": "https://mphasis.icims.com/jobs/search",
-      "enabled": true,
+      "enabled": false,
       "priority": 1,
       "note": "Indian IT services company"
     },
@@ -644,7 +709,7 @@
       "name": "L&T Infotech",
       "scraper": "iCIMSScraper",
       "url": "https://lti.icims.com/jobs/search",
-      "enabled": true,
+      "enabled": false,
       "priority": 1,
       "note": "Larsen & Toubro IT"
     },
@@ -652,7 +717,7 @@
       "name": "Persistent Systems",
       "scraper": "iCIMSScraper",
       "url": "https://persistent.icims.com/jobs/search",
-      "enabled": true,
+      "enabled": false,
       "priority": 2,
       "note": "Indian software company"
     },
@@ -660,7 +725,7 @@
       "name": "Hexaware",
       "scraper": "iCIMSScraper",
       "url": "https://hexaware.icims.com/jobs/search",
-      "enabled": true,
+      "enabled": false,
       "priority": 2,
       "note": "Indian IT services"
     },
@@ -668,14 +733,14 @@
       "name": "Mindtree",
       "scraper": "iCIMSScraper",
       "url": "https://mindtree.icims.com/jobs/search",
-      "enabled": true,
+      "enabled": false,
       "priority": 2
     },
     {
       "name": "Cyient",
       "scraper": "iCIMSScraper",
       "url": "https://cyient.icims.com/jobs/search",
-      "enabled": true,
+      "enabled": false,
       "priority": 2,
       "note": "Indian engineering services"
     },
@@ -683,14 +748,14 @@
       "name": "NIIT Technologies",
       "scraper": "iCIMSScraper",
       "url": "https://niit.icims.com/jobs/search",
-      "enabled": true,
+      "enabled": false,
       "priority": 2
     },
     {
       "name": "Birlasoft",
       "scraper": "iCIMSScraper",
       "url": "https://birlasoft.icims.com/jobs/search",
-      "enabled": true,
+      "enabled": false,
       "priority": 2,
       "note": "Indian IT company"
     },
@@ -764,7 +829,126 @@
       "url": "https://jobs.lever.co/nykaa",
       "enabled": true,
       "priority": 1,
-      "note": "Indian beauty e-commerce"
+      "note": "Indian e-commerce unicorn"
+    },
+    {
+      "name": "PayPal",
+      "scraper": "WorkdayScraper",
+      "url": "https://paypal.wd1.myworkdayjobs.com/wday/cxs/paypal/jobs/jobs",
+      "enabled": false,
+      "priority": 1
+    },
+    {
+      "name": "Boston Scientific",
+      "scraper": "WorkdayScraper",
+      "url": "https://bostonscientific.wd1.myworkdayjobs.com/wday/cxs/bostonscientific/careers/jobs",
+      "enabled": false,
+      "priority": 2
+    },
+    {
+      "name": "Elevance Health",
+      "scraper": "WorkdayScraper",
+      "url": "https://elevancehealth.wd1.myworkdayjobs.com/wday/cxs/elevancehealth/Careers/jobs",
+      "enabled": false,
+      "priority": 2
+    },
+    {
+      "name": "Lockheed Martin",
+      "scraper": "WorkdayScraper",
+      "url": "https://lmc.wd1.myworkdayjobs.com/wday/cxs/lmc/LMC_Careers/jobs",
+      "enabled": false,
+      "priority": 2
+    },
+    {
+      "name": "General Motors",
+      "scraper": "WorkdayScraper",
+      "url": "https://gm.wd5.myworkdayjobs.com/wday/cxs/gm/Careers_GM/jobs",
+      "enabled": false,
+      "priority": 2
+    },
+    {
+      "name": "NBCUniversal",
+      "scraper": "WorkdayScraper",
+      "url": "https://nbcuni.wd1.myworkdayjobs.com/wday/cxs/nbcuni/Careers/jobs",
+      "enabled": false,
+      "priority": 2
+    },
+    {
+      "name": "Transcom",
+      "scraper": "WorkdayScraper",
+      "url": "https://transcom.wd3.myworkdayjobs.com/wday/cxs/transcom/Transcom_Careers/jobs",
+      "enabled": false,
+      "priority": 2
+    },
+    {
+      "name": "U.S. Bank",
+      "scraper": "WorkdayScraper",
+      "url": "https://usbank.wd1.myworkdayjobs.com/wday/cxs/usbank/US_Bank_Careers/jobs",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Medtronic",
+      "scraper": "WorkdayScraper",
+      "url": "https://medtronic.wd1.myworkdayjobs.com/wday/cxs/medtronic/MedtronicCareers/jobs",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "TELUS",
+      "scraper": "WorkdayScraper",
+      "url": "https://telus.wd3.myworkdayjobs.com/wday/cxs/telus/TELUS_International_Careers/jobs",
+      "enabled": false,
+      "priority": 2
+    },
+    {
+      "name": "Stride, Inc.",
+      "scraper": "WorkdayScraper",
+      "url": "https://stride.wd1.myworkdayjobs.com/wday/cxs/stride/Careers/jobs",
+      "enabled": false,
+      "priority": 2
+    },
+    {
+      "name": "JLL",
+      "scraper": "WorkdayScraper",
+      "url": "https://jll.wd1.myworkdayjobs.com/wday/cxs/jll/jllcareers/jobs",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Concentrix",
+      "scraper": "WorkdayScraper",
+      "url": "https://concentrix.wd5.myworkdayjobs.com/wday/cxs/concentrix/Concentrix/jobs",
+      "enabled": false,
+      "priority": 2
+    },
+    {
+      "name": "Samsung",
+      "scraper": "WorkdayScraper",
+      "url": "https://sec.wd3.myworkdayjobs.com/wday/cxs/sec/Samsung_Careers/jobs",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Bain & Company",
+      "scraper": "WorkdayScraper",
+      "url": "https://bain.wd1.myworkdayjobs.com/wday/cxs/bain/Bain_External/jobs",
+      "enabled": false,
+      "priority": 1
+    },
+    {
+      "name": "S&P Global",
+      "scraper": "WorkdayScraper",
+      "url": "https://spglobal.wd5.myworkdayjobs.com/wday/cxs/spglobal/spglobal_careers/jobs",
+      "enabled": false,
+      "priority": 2
+    },
+    {
+      "name": "BP",
+      "scraper": "WorkdayScraper",
+      "url": "https://bp.wd3.myworkdayjobs.com/wday/cxs/bp/BP_Careers/jobs",
+      "enabled": false,
+      "priority": 2
     },
     {
       "name": "PolicyBazaar",
@@ -928,7 +1112,7 @@
       "name": "Paytm",
       "scraper": "GreenhouseScraper",
       "url": "https://boards.greenhouse.io/paytm",
-      "enabled": true,
+      "enabled": false,
       "priority": 1,
       "note": "Indian fintech giant"
     },
@@ -936,7 +1120,7 @@
       "name": "Swiggy",
       "scraper": "GreenhouseScraper",
       "url": "https://boards.greenhouse.io/swiggy",
-      "enabled": true,
+      "enabled": false,
       "priority": 1,
       "note": "Indian food delivery unicorn - moved to Greenhouse"
     },
@@ -944,7 +1128,7 @@
       "name": "OYO",
       "scraper": "GreenhouseScraper",
       "url": "https://boards.greenhouse.io/oyorooms",
-      "enabled": true,
+      "enabled": false,
       "priority": 1,
       "note": "Indian hospitality unicorn"
     },
@@ -952,7 +1136,7 @@
       "name": "Byju's",
       "scraper": "GreenhouseScraper",
       "url": "https://boards.greenhouse.io/byjus",
-      "enabled": true,
+      "enabled": false,
       "priority": 1,
       "note": "Indian edtech giant"
     },
@@ -960,7 +1144,7 @@
       "name": "Vedantu",
       "scraper": "GreenhouseScraper",
       "url": "https://boards.greenhouse.io/vedantu",
-      "enabled": true,
+      "enabled": false,
       "priority": 1,
       "note": "Indian edtech"
     },
@@ -968,7 +1152,7 @@
       "name": "Dailyhunt",
       "scraper": "GreenhouseScraper",
       "url": "https://boards.greenhouse.io/dailyhunt",
-      "enabled": true,
+      "enabled": false,
       "priority": 2,
       "note": "Indian news aggregator"
     },
@@ -976,7 +1160,7 @@
       "name": "BigBasket",
       "scraper": "GreenhouseScraper",
       "url": "https://boards.greenhouse.io/bigbasket",
-      "enabled": true,
+      "enabled": false,
       "priority": 1,
       "note": "Indian grocery delivery"
     },
@@ -984,7 +1168,7 @@
       "name": "Udaan",
       "scraper": "GreenhouseScraper",
       "url": "https://boards.greenhouse.io/udaan",
-      "enabled": true,
+      "enabled": false,
       "priority": 1,
       "note": "Indian B2B e-commerce unicorn"
     },
@@ -992,7 +1176,7 @@
       "name": "Pine Labs",
       "scraper": "GreenhouseScraper",
       "url": "https://boards.greenhouse.io/pinelabs",
-      "enabled": true,
+      "enabled": false,
       "priority": 1,
       "note": "Indian fintech - payments"
     },
@@ -1000,7 +1184,7 @@
       "name": "PharmEasy",
       "scraper": "GreenhouseScraper",
       "url": "https://boards.greenhouse.io/pharmeasy",
-      "enabled": true,
+      "enabled": false,
       "priority": 1,
       "note": "Indian healthtech unicorn"
     },
@@ -1008,7 +1192,7 @@
       "name": "Quikr",
       "scraper": "GreenhouseScraper",
       "url": "https://boards.greenhouse.io/quikr",
-      "enabled": true,
+      "enabled": false,
       "priority": 2,
       "note": "Indian classifieds"
     },
@@ -1016,7 +1200,7 @@
       "name": "Dunzo",
       "scraper": "GreenhouseScraper",
       "url": "https://boards.greenhouse.io/dunzo",
-      "enabled": true,
+      "enabled": false,
       "priority": 2,
       "note": "Indian hyperlocal delivery"
     },
@@ -1024,7 +1208,7 @@
       "name": "Rapido",
       "scraper": "GreenhouseScraper",
       "url": "https://boards.greenhouse.io/rapido",
-      "enabled": true,
+      "enabled": false,
       "priority": 1,
       "note": "Indian bike taxi"
     },
@@ -1032,7 +1216,7 @@
       "name": "Park+",
       "scraper": "GreenhouseScraper",
       "url": "https://boards.greenhouse.io/parkplus",
-      "enabled": true,
+      "enabled": false,
       "priority": 2,
       "note": "Indian parking tech"
     },
@@ -1040,7 +1224,7 @@
       "name": "Spinny",
       "scraper": "GreenhouseScraper",
       "url": "https://boards.greenhouse.io/spinny",
-      "enabled": true,
+      "enabled": false,
       "priority": 2,
       "note": "Indian used car platform"
     },
@@ -1048,7 +1232,7 @@
       "name": "LEAD School",
       "scraper": "GreenhouseScraper",
       "url": "https://boards.greenhouse.io/leadschool",
-      "enabled": true,
+      "enabled": false,
       "priority": 2,
       "note": "Indian edtech"
     },
@@ -1056,7 +1240,7 @@
       "name": "Stanza Living",
       "scraper": "GreenhouseScraper",
       "url": "https://boards.greenhouse.io/stanzaliving",
-      "enabled": true,
+      "enabled": false,
       "priority": 2,
       "note": "Indian co-living"
     },
@@ -1064,7 +1248,7 @@
       "name": "Zetwerk",
       "scraper": "GreenhouseScraper",
       "url": "https://boards.greenhouse.io/zetwerk",
-      "enabled": true,
+      "enabled": false,
       "priority": 1,
       "note": "Indian manufacturing unicorn"
     },
@@ -1072,7 +1256,7 @@
       "name": "OfBusiness",
       "scraper": "GreenhouseScraper",
       "url": "https://boards.greenhouse.io/ofbusiness",
-      "enabled": true,
+      "enabled": false,
       "priority": 1,
       "note": "Indian B2B commerce unicorn"
     },
@@ -1080,190 +1264,190 @@
       "name": "Elastic Run",
       "scraper": "GreenhouseScraper",
       "url": "https://boards.greenhouse.io/elasticrun",
-      "enabled": true,
+      "enabled": false,
       "priority": 2,
       "note": "Indian logistics"
     },
     {
       "name": "Mahindra & Mahindra",
       "scraper": "WorkdayScraper",
-      "url": "https://mahindra.wd1.myworkdayjobs.com/wday/cxs/mahindra/Careers/jobs",
-      "enabled": true,
+      "url": "https://mahindra.wd5.myworkdayjobs.com/wday/cxs/mahindra/Careers/jobs",
+      "enabled": false,
       "priority": 1,
       "note": "Major Indian conglomerate"
     },
     {
       "name": "Reliance Industries",
       "scraper": "WorkdayScraper",
-      "url": "https://ril.wd1.myworkdayjobs.com/wday/cxs/ril/RILCareers/jobs",
-      "enabled": true,
+      "url": "https://ril.wd3.myworkdayjobs.com/wday/cxs/ril/RILCareers/jobs",
+      "enabled": false,
       "priority": 1,
       "note": "India's largest company - Jio, Retail"
     },
     {
       "name": "Tata Motors",
       "scraper": "WorkdayScraper",
-      "url": "https://tatamotors.wd1.myworkdayjobs.com/wday/cxs/tatamotors/External/jobs",
-      "enabled": true,
+      "url": "https://tatamotors.wd3.myworkdayjobs.com/wday/cxs/tatamotors/External/jobs",
+      "enabled": false,
       "priority": 1,
       "note": "Major Indian auto company"
     },
     {
       "name": "Tata Steel",
       "scraper": "WorkdayScraper",
-      "url": "https://tatasteel.wd1.myworkdayjobs.com/wday/cxs/tatasteel/External/jobs",
-      "enabled": true,
+      "url": "https://tatasteel.wd3.myworkdayjobs.com/wday/cxs/tatasteel/External/jobs",
+      "enabled": false,
       "priority": 2
     },
     {
       "name": "Larsen & Toubro",
       "scraper": "WorkdayScraper",
-      "url": "https://lnt.wd1.myworkdayjobs.com/wday/cxs/lnt/Careers/jobs",
-      "enabled": true,
+      "url": "https://lnt.wd3.myworkdayjobs.com/wday/cxs/lnt/Careers/jobs",
+      "enabled": false,
       "priority": 1,
       "note": "Major Indian engineering conglomerate"
     },
     {
       "name": "HDFC Bank",
       "scraper": "WorkdayScraper",
-      "url": "https://hdfcbank.wd1.myworkdayjobs.com/wday/cxs/hdfcbank/HDFCBank/jobs",
-      "enabled": true,
+      "url": "https://hdfcbank.wd3.myworkdayjobs.com/wday/cxs/hdfcbank/HDFCBank/jobs",
+      "enabled": false,
       "priority": 1,
       "note": "India's largest private bank"
     },
     {
       "name": "ICICI Bank",
       "scraper": "WorkdayScraper",
-      "url": "https://icicibank.wd1.myworkdayjobs.com/wday/cxs/icicibank/Careers/jobs",
-      "enabled": true,
+      "url": "https://icicibank.wd5.myworkdayjobs.com/wday/cxs/icicibank/Careers/jobs",
+      "enabled": false,
       "priority": 1,
       "note": "Major Indian private bank"
     },
     {
       "name": "Kotak Mahindra Bank",
       "scraper": "WorkdayScraper",
-      "url": "https://kotak.wd1.myworkdayjobs.com/wday/cxs/kotak/Careers/jobs",
-      "enabled": true,
+      "url": "https://kotak.wd3.myworkdayjobs.com/wday/cxs/kotak/Careers/jobs",
+      "enabled": false,
       "priority": 1,
       "note": "Indian private bank"
     },
     {
       "name": "Axis Bank",
       "scraper": "WorkdayScraper",
-      "url": "https://axisbank.wd1.myworkdayjobs.com/wday/cxs/axisbank/Careers/jobs",
-      "enabled": true,
+      "url": "https://axisbank.wd5.myworkdayjobs.com/wday/cxs/axisbank/Careers/jobs",
+      "enabled": false,
       "priority": 1,
       "note": "Major Indian private bank"
     },
     {
       "name": "Bajaj Finserv",
       "scraper": "WorkdayScraper",
-      "url": "https://bajaj.wd1.myworkdayjobs.com/wday/cxs/bajaj/BajajFinserv/jobs",
-      "enabled": true,
+      "url": "https://bajaj.wd3.myworkdayjobs.com/wday/cxs/bajaj/BajajFinserv/jobs",
+      "enabled": false,
       "priority": 1,
       "note": "Indian financial services"
     },
     {
       "name": "Sun Pharma",
       "scraper": "WorkdayScraper",
-      "url": "https://sunpharma.wd1.myworkdayjobs.com/wday/cxs/sunpharma/External/jobs",
-      "enabled": true,
+      "url": "https://sunpharma.wd3.myworkdayjobs.com/wday/cxs/sunpharma/External/jobs",
+      "enabled": false,
       "priority": 2,
       "note": "India's largest pharma company"
     },
     {
       "name": "Dr. Reddy's",
       "scraper": "WorkdayScraper",
-      "url": "https://drreddys.wd1.myworkdayjobs.com/wday/cxs/drreddys/External/jobs",
-      "enabled": true,
+      "url": "https://drreddys.wd12.myworkdayjobs.com/wday/cxs/drreddys/External/jobs",
+      "enabled": false,
       "priority": 2,
       "note": "Major Indian pharma"
     },
     {
       "name": "Cipla",
       "scraper": "WorkdayScraper",
-      "url": "https://cipla.wd1.myworkdayjobs.com/wday/cxs/cipla/careers/jobs",
-      "enabled": true,
+      "url": "https://cipla.wd3.myworkdayjobs.com/wday/cxs/cipla/careers/jobs",
+      "enabled": false,
       "priority": 2,
       "note": "Major Indian pharma"
     },
     {
       "name": "Asian Paints",
       "scraper": "WorkdayScraper",
-      "url": "https://asianpaints.wd1.myworkdayjobs.com/wday/cxs/asianpaints/Careers/jobs",
-      "enabled": true,
+      "url": "https://asianpaints.wd5.myworkdayjobs.com/wday/cxs/asianpaints/Careers/jobs",
+      "enabled": false,
       "priority": 2,
       "note": "India's largest paint company"
     },
     {
       "name": "Hindustan Unilever",
       "scraper": "WorkdayScraper",
-      "url": "https://hul.wd1.myworkdayjobs.com/wday/cxs/hul/Careers/jobs",
-      "enabled": true,
+      "url": "https://hul.wd3.myworkdayjobs.com/wday/cxs/hul/Careers/jobs",
+      "enabled": false,
       "priority": 1,
       "note": "Major FMCG - India operations"
     },
     {
       "name": "ITC Limited",
       "scraper": "WorkdayScraper",
-      "url": "https://itc.wd1.myworkdayjobs.com/wday/cxs/itc/Careers/jobs",
-      "enabled": true,
+      "url": "https://itc.wd12.myworkdayjobs.com/wday/cxs/itc/Careers/jobs",
+      "enabled": false,
       "priority": 1,
       "note": "Indian conglomerate - FMCG, Hotels"
     },
     {
       "name": "Titan Company",
       "scraper": "WorkdayScraper",
-      "url": "https://titan.wd1.myworkdayjobs.com/wday/cxs/titan/Careers/jobs",
-      "enabled": true,
+      "url": "https://titan.wd5.myworkdayjobs.com/wday/cxs/titan/Careers/jobs",
+      "enabled": false,
       "priority": 2,
       "note": "Tata Group - Watches, Jewelry"
     },
     {
       "name": "Godrej",
       "scraper": "WorkdayScraper",
-      "url": "https://godrej.wd1.myworkdayjobs.com/wday/cxs/godrej/Careers/jobs",
-      "enabled": true,
+      "url": "https://godrej.wd3.myworkdayjobs.com/wday/cxs/godrej/Careers/jobs",
+      "enabled": false,
       "priority": 2,
       "note": "Indian conglomerate"
     },
     {
       "name": "Aditya Birla Group",
       "scraper": "WorkdayScraper",
-      "url": "https://adityabirla.wd1.myworkdayjobs.com/wday/cxs/adityabirla/careers/jobs",
-      "enabled": true,
+      "url": "https://adityabirla.wd5.myworkdayjobs.com/wday/cxs/adityabirla/careers/jobs",
+      "enabled": false,
       "priority": 1,
       "note": "Major Indian conglomerate"
     },
     {
       "name": "JSW Steel",
       "scraper": "WorkdayScraper",
-      "url": "https://jsw.wd1.myworkdayjobs.com/wday/cxs/jsw/Careers/jobs",
-      "enabled": true,
+      "url": "https://jsw.wd3.myworkdayjobs.com/wday/cxs/jsw/Careers/jobs",
+      "enabled": false,
       "priority": 2,
       "note": "Major Indian steel company"
     },
     {
       "name": "Adani Group",
       "scraper": "WorkdayScraper",
-      "url": "https://adani.wd1.myworkdayjobs.com/wday/cxs/adani/Careers/jobs",
-      "enabled": true,
+      "url": "https://adani.wd12.myworkdayjobs.com/wday/cxs/adani/Careers/jobs",
+      "enabled": false,
       "priority": 1,
       "note": "Major Indian conglomerate - Ports, Energy"
     },
     {
       "name": "Hero MotoCorp",
       "scraper": "WorkdayScraper",
-      "url": "https://hero.wd1.myworkdayjobs.com/wday/cxs/hero/Careers/jobs",
-      "enabled": true,
+      "url": "https://hero.wd3.myworkdayjobs.com/wday/cxs/hero/Careers/jobs",
+      "enabled": false,
       "priority": 2,
       "note": "World's largest two-wheeler manufacturer"
     },
     {
       "name": "Maruti Suzuki",
       "scraper": "WorkdayScraper",
-      "url": "https://maruti.wd1.myworkdayjobs.com/wday/cxs/maruti/Careers/jobs",
-      "enabled": true,
+      "url": "https://maruti.wd3.myworkdayjobs.com/wday/cxs/maruti/Careers/jobs",
+      "enabled": false,
       "priority": 1,
       "note": "India's largest car manufacturer"
     },
@@ -1271,7 +1455,7 @@
       "name": "Nestle India",
       "scraper": "WorkdayScraper",
       "url": "https://nestle.wd3.myworkdayjobs.com/wday/cxs/nestle/NestleIndiaCareers/jobs",
-      "enabled": true,
+      "enabled": false,
       "priority": 2,
       "note": "FMCG - India operations"
     },
@@ -1286,92 +1470,92 @@
       "name": "Johnson & Johnson",
       "scraper": "WorkdayScraper",
       "url": "https://jnj.wd5.myworkdayjobs.com/wday/cxs/jnj/JNJExternal/jobs",
-      "enabled": true,
+      "enabled": false,
       "priority": 2
     },
     {
       "name": "Procter & Gamble",
       "scraper": "WorkdayScraper",
       "url": "https://pg.wd5.myworkdayjobs.com/wday/cxs/pg/PGCareersDirect/jobs",
-      "enabled": true,
+      "enabled": false,
       "priority": 2
     },
     {
       "name": "General Electric",
       "scraper": "WorkdayScraper",
       "url": "https://ge.wd5.myworkdayjobs.com/wday/cxs/ge/GE_ExternalSite/jobs",
-      "enabled": true,
+      "enabled": false,
       "priority": 2,
       "note": "GE India - major presence"
     },
     {
       "name": "MediaTek",
       "scraper": "WorkdayScraper",
-      "url": "https://mediatek.wd1.myworkdayjobs.com/wday/cxs/mediatek/Careers/jobs",
-      "enabled": true,
+      "url": "https://mediatek.wd3.myworkdayjobs.com/wday/cxs/mediatek/Careers/jobs",
+      "enabled": false,
       "priority": 2,
       "note": "Semiconductor - India R&D"
     },
     {
       "name": "AMD",
       "scraper": "WorkdayScraper",
-      "url": "https://amd.wd1.myworkdayjobs.com/wday/cxs/amd/AMD/jobs",
-      "enabled": true,
+      "url": "https://amd.wd5.myworkdayjobs.com/wday/cxs/amd/AMD/jobs",
+      "enabled": false,
       "priority": 2,
       "note": "AMD India - chip design"
     },
     {
       "name": "Micron",
       "scraper": "WorkdayScraper",
-      "url": "https://micron.wd1.myworkdayjobs.com/wday/cxs/micron/External/jobs",
-      "enabled": true,
+      "url": "https://micron.wd5.myworkdayjobs.com/wday/cxs/micron/External/jobs",
+      "enabled": false,
       "priority": 2,
       "note": "Micron India - memory chips"
     },
     {
       "name": "Texas Instruments",
       "scraper": "WorkdayScraper",
-      "url": "https://ti.wd1.myworkdayjobs.com/wday/cxs/ti/Careers/jobs",
-      "enabled": true,
+      "url": "https://ti.wd3.myworkdayjobs.com/wday/cxs/ti/Careers/jobs",
+      "enabled": false,
       "priority": 2,
       "note": "TI India - major R&D center"
     },
     {
       "name": "Cisco",
       "scraper": "WorkdayScraper",
-      "url": "https://cisco.wd1.myworkdayjobs.com/wday/cxs/cisco/ExternalCisco/jobs",
-      "enabled": true,
+      "url": "https://cisco.wd3.myworkdayjobs.com/wday/cxs/cisco/ExternalCisco/jobs",
+      "enabled": false,
       "priority": 1,
       "note": "Cisco India - major presence"
     },
     {
       "name": "VMware",
       "scraper": "WorkdayScraper",
-      "url": "https://vmware.wd1.myworkdayjobs.com/wday/cxs/vmware/VMwareCareers/jobs",
-      "enabled": true,
+      "url": "https://vmware.wd3.myworkdayjobs.com/wday/cxs/vmware/VMwareCareers/jobs",
+      "enabled": false,
       "priority": 2,
       "note": "VMware India - major R&D"
     },
     {
       "name": "ServiceNow",
-      "scraper": "WorkdayScraper",
-      "url": "https://servicenow.wd1.myworkdayjobs.com/wday/cxs/servicenow/Careers/jobs",
+      "scraper": "SmartRecruitersScraper",
+      "url": "https://jobs.smartrecruiters.com/ServiceNow",
       "enabled": true,
-      "priority": 2,
-      "note": "ServiceNow India"
+      "priority": 1,
+      "note": "ServiceNow India - Verified SmartRecruiters"
     },
     {
       "name": "Splunk",
       "scraper": "WorkdayScraper",
-      "url": "https://splunk.wd1.myworkdayjobs.com/wday/cxs/splunk/Careers/jobs",
-      "enabled": true,
+      "url": "https://splunk.wd3.myworkdayjobs.com/wday/cxs/splunk/Careers/jobs",
+      "enabled": false,
       "priority": 2
     },
     {
       "name": "Palo Alto Networks",
       "scraper": "WorkdayScraper",
-      "url": "https://paloaltonetworks.wd1.myworkdayjobs.com/wday/cxs/paloaltonetworks/Careers/jobs",
-      "enabled": true,
+      "url": "https://paloaltonetworks.wd3.myworkdayjobs.com/wday/cxs/paloaltonetworks/Careers/jobs",
+      "enabled": false,
       "priority": 2,
       "note": "Cybersecurity - India presence"
     },
@@ -1385,33 +1569,40 @@
     },
     {
       "name": "Zscaler",
-      "scraper": "WorkdayScraper",
-      "url": "https://zscaler.wd1.myworkdayjobs.com/wday/cxs/zscaler/Careers/jobs",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/zscaler",
       "enabled": true,
       "priority": 2,
       "note": "Cloud security - India presence"
     },
     {
+      "name": "HubSpot",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/hubspot",
+      "enabled": true,
+      "priority": 2
+    },
+    {
       "name": "Nutanix India",
       "scraper": "WorkdayScraper",
-      "url": "https://nutanix.wd1.myworkdayjobs.com/wday/cxs/nutanix/Careers/jobs",
-      "enabled": true,
+      "url": "https://nutanix.wd3.myworkdayjobs.com/wday/cxs/nutanix/Careers/jobs",
+      "enabled": false,
       "priority": 2,
       "note": "Cloud infrastructure - Bangalore R&D"
     },
     {
       "name": "NetApp",
       "scraper": "WorkdayScraper",
-      "url": "https://netapp.wd1.myworkdayjobs.com/wday/cxs/netapp/Careers/jobs",
-      "enabled": true,
+      "url": "https://netapp.wd3.myworkdayjobs.com/wday/cxs/netapp/Careers/jobs",
+      "enabled": false,
       "priority": 2,
       "note": "Data management - India presence"
     },
     {
       "name": "Juniper Networks",
       "scraper": "WorkdayScraper",
-      "url": "https://juniper.wd1.myworkdayjobs.com/wday/cxs/juniper/Careers/jobs",
-      "enabled": true,
+      "url": "https://juniper.wd12.myworkdayjobs.com/wday/cxs/juniper/Careers/jobs",
+      "enabled": false,
       "priority": 2,
       "note": "Networking - India R&D"
     },
@@ -1419,25 +1610,852 @@
       "name": "Arista Networks",
       "scraper": "WorkdayScraper",
       "url": "https://arista.wd3.myworkdayjobs.com/wday/cxs/arista/Careers/jobs",
-      "enabled": true,
+      "enabled": false,
       "priority": 2,
       "note": "Cloud networking - Bangalore presence"
     },
     {
       "name": "Zoho",
       "scraper": "WorkdayScraper",
-      "url": "https://zoho.wd1.myworkdayjobs.com/wday/cxs/zoho/Careers/jobs",
-      "enabled": true,
+      "url": "https://zoho.wd3.myworkdayjobs.com/wday/cxs/zoho/Careers/jobs",
+      "enabled": false,
       "priority": 1,
       "note": "Indian SaaS giant - Chennai based"
     },
     {
       "name": "Microchip Technology",
       "scraper": "WorkdayScraper",
-      "url": "https://microchip.wd1.myworkdayjobs.com/wday/cxs/microchip/Careers/jobs",
-      "enabled": true,
+      "url": "https://microchip.wd3.myworkdayjobs.com/wday/cxs/microchip/Careers/jobs",
+      "enabled": false,
       "priority": 2,
       "note": "Semiconductor - India presence"
+    },
+    {
+      "name": "Oracle",
+      "scraper": "OracleScraper",
+      "url": "https://eeho.fa.us2.oraclecloud.com/hcmRestApi/resources/latest/recruitingCEJobRequisitions",
+      "enabled": true,
+      "priority": 1,
+      "note": "Custom Scraper for Oracle Recruiting Cloud"
+    },
+    {
+      "name": "IBM",
+      "scraper": "IBMScraper",
+      "url": "https://sjobs.brassring.com/TGnewUI/Search/Home/Home?partnerid=26059&siteid=5016",
+      "enabled": true,
+      "priority": 1,
+      "note": "Custom Scraper for IBM BrassRing"
+    },
+    {
+      "name": "Bank of America",
+      "scraper": "WorkdayScraper",
+      "url": "https://bankofamerica.wd1.myworkdayjobs.com/wday/cxs/bankofamerica/Jobs/jobs",
+      "enabled": false,
+      "priority": 2
+    },
+    {
+      "name": "Rolls-Royce",
+      "scraper": "WorkdayScraper",
+      "url": "https://rollsroyce.wd1.myworkdayjobs.com/wday/cxs/rollsroyce/Jobs/jobs",
+      "enabled": false,
+      "priority": 2
+    },
+    {
+      "name": "Nissan",
+      "scraper": "WorkdayScraper",
+      "url": "https://nissan.wd1.myworkdayjobs.com/wday/cxs/nissan/Jobs/jobs",
+      "enabled": false,
+      "priority": 2
+    },
+    {
+      "name": "Choice Hotels",
+      "scraper": "WorkdayScraper",
+      "url": "https://choicehotels.wd1.myworkdayjobs.com/wday/cxs/choicehotels/Jobs/jobs",
+      "enabled": false,
+      "priority": 2
+    },
+    {
+      "name": "City and County of Denver",
+      "scraper": "WorkdayScraper",
+      "url": "https://denver.wd1.myworkdayjobs.com/wday/cxs/denver/denver_External_Careers/jobs",
+      "enabled": false,
+      "priority": 2
+    },
+    {
+      "name": "Abbott",
+      "scraper": "WorkdayScraper",
+      "url": "https://abbott.wd1.myworkdayjobs.com/wday/cxs/abbott/Jobs/jobs",
+      "enabled": false,
+      "priority": 2
+    },
+    {
+      "name": "Arbella Insurance",
+      "scraper": "WorkdayScraper",
+      "url": "https://arbella.wd1.myworkdayjobs.com/wday/cxs/arbella/Jobs/jobs",
+      "enabled": false,
+      "priority": 2
+    },
+    {
+      "name": "Patagonia",
+      "scraper": "WorkdayScraper",
+      "url": "https://patagonia.wd1.myworkdayjobs.com/wday/cxs/patagonia/Jobs/jobs",
+      "enabled": false,
+      "priority": 2
+    },
+    {
+      "name": "Puma",
+      "scraper": "WorkdayScraper",
+      "url": "https://puma.wd1.myworkdayjobs.com/wday/cxs/puma/puma_External/jobs",
+      "enabled": false,
+      "priority": 2
+    },
+    {
+      "name": "Sanofi",
+      "scraper": "WorkdayScraper",
+      "url": "https://sanofi.wd1.myworkdayjobs.com/wday/cxs/sanofi/Jobs/jobs",
+      "enabled": false,
+      "priority": 2
+    },
+    {
+      "name": "Costco",
+      "scraper": "WorkdayScraper",
+      "url": "https://costco.wd1.myworkdayjobs.com/wday/cxs/costco/External_Career_Site/jobs",
+      "enabled": false,
+      "priority": 2
+    },
+    {
+      "name": "Cloudflare",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/cloudflare",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Snyk",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/snyk",
+      "enabled": false,
+      "priority": 1
+    },
+    {
+      "name": "Sourcegraph",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/sourcegraph",
+      "enabled": false,
+      "priority": 2
+    },
+    {
+      "name": "LangChain",
+      "scraper": "AshbyScraper",
+      "url": "https://jobs.ashbyhq.com/langchain",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Cal.com",
+      "scraper": "AshbyScraper",
+      "url": "https://jobs.ashbyhq.com/cal.com",
+      "enabled": false,
+      "priority": 2
+    },
+    {
+      "name": "Railway",
+      "scraper": "AshbyScraper",
+      "url": "https://jobs.ashbyhq.com/railway",
+      "enabled": true,
+      "priority": 2
+    },
+    {
+      "name": "Supabase",
+      "scraper": "AshbyScraper",
+      "url": "https://jobs.ashbyhq.com/supabase",
+      "enabled": true,
+      "priority": 1
+    },
+    {
+      "name": "Midjourney",
+      "scraper": "AshbyScraper",
+      "url": "https://jobs.ashbyhq.com/midjourney",
+      "enabled": false,
+      "priority": 2
+    },
+    {
+      "name": "Unity",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/unity",
+      "enabled": false,
+      "priority": 1
+    },
+    {
+      "name": "Roblox",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/roblox",
+      "enabled": false,
+      "priority": 1
+    },
+    {
+      "name": "GitLab",
+      "scraper": "LeverScraper",
+      "url": "https://jobs.lever.co/gitlab",
+      "enabled": false,
+      "priority": 1
+    },
+    {
+      "name": "IKEA",
+      "scraper": "SmartRecruitersScraper",
+      "url": "https://jobs.smartrecruiters.com/IKEA",
+      "enabled": false,
+      "priority": 2
+    },
+    {
+      "name": "L'Oreal",
+      "scraper": "SmartRecruitersScraper",
+      "url": "https://jobs.smartrecruiters.com/Loreal",
+      "enabled": false,
+      "priority": 2
+    },
+    {
+      "_comment": "=== HEAVY ENGINEERING & INDUSTRIAL ==="
+    },
+    {
+      "name": "Siemens Energy",
+      "scraper": "WorkdayScraper",
+      "url": "https://siemensenergy.wd3.myworkdayjobs.com/wday/cxs/siemensenergy/Siemens_Energy/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Heavy Engineering - Energy sector"
+    },
+    {
+      "name": "GE Aerospace",
+      "scraper": "WorkdayScraper",
+      "url": "https://geaerospace.wd5.myworkdayjobs.com/wday/cxs/geaerospace/GE_ExternalSite/jobs",
+      "enabled": true,
+      "priority": 2,
+      "note": "Aerospace engineering"
+    },
+    {
+      "name": "GE Vernova",
+      "scraper": "WorkdayScraper",
+      "url": "https://gevernova.wd5.myworkdayjobs.com/wday/cxs/gevernova/GE_Vernova/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Energy technology"
+    },
+    {
+      "name": "Mitsubishi Heavy Industries",
+      "scraper": "WorkdayScraper",
+      "url": "https://mhi.wd3.myworkdayjobs.com/wday/cxs/mhi/MHI_Careers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Heavy engineering - Japan"
+    },
+    {
+      "name": "Hitachi",
+      "scraper": "WorkdayScraper",
+      "url": "https://hitachi.wd3.myworkdayjobs.com/wday/cxs/hitachi/Hitachi_Careers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Industrial & engineering conglomerate"
+    },
+    {
+      "name": "Komatsu",
+      "scraper": "WorkdayScraper",
+      "url": "https://komatsu.wd3.myworkdayjobs.com/wday/cxs/komatsu/Komatsu_Careers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Construction & mining equipment"
+    },
+    {
+      "name": "Cummins",
+      "scraper": "WorkdayScraper",
+      "url": "https://cummins.wd5.myworkdayjobs.com/wday/cxs/cummins/Cummins_Careers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Engines & power systems"
+    },
+    {
+      "name": "John Deere",
+      "scraper": "WorkdayScraper",
+      "url": "https://deere.wd5.myworkdayjobs.com/wday/cxs/deere/External/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Agricultural & construction equipment"
+    },
+    {
+      "name": "Doosan Enerbility",
+      "scraper": "WorkdayScraper",
+      "url": "https://doosan.wd3.myworkdayjobs.com/wday/cxs/doosan/Doosan_Careers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Power & energy equipment - Korea"
+    },
+    {
+      "name": "Alstom",
+      "scraper": "SmartRecruitersScraper",
+      "url": "https://jobs.smartrecruiters.com/Alstom",
+      "enabled": true,
+      "priority": 2,
+      "note": "Rail & transport engineering"
+    },
+    {
+      "name": "Hyundai Heavy Industries",
+      "scraper": "WorkdayScraper",
+      "url": "https://hyundai.wd3.myworkdayjobs.com/wday/cxs/hyundai/HHI_Careers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Shipbuilding & offshore"
+    },
+    {
+      "name": "Larsen & Toubro",
+      "scraper": "WorkdayScraper",
+      "url": "https://lntigroup.wd3.myworkdayjobs.com/wday/cxs/lntigroup/LT_Careers/jobs",
+      "enabled": false,
+      "priority": 1,
+      "note": "Indian engineering conglomerate"
+    },
+    {
+      "name": "ISGEC Heavy Engineering",
+      "scraper": "WorkdayScraper",
+      "url": "https://isgec.wd3.myworkdayjobs.com/wday/cxs/isgec/ISGEC_Careers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Indian heavy engineering"
+    },
+    {
+      "_comment": "=== ELECTRICAL & POWER SYSTEMS ==="
+    },
+    {
+      "name": "ABB",
+      "scraper": "WorkdayScraper",
+      "url": "https://abb.wd3.myworkdayjobs.com/wday/cxs/abb/Careers/jobs",
+      "enabled": false,
+      "priority": 1,
+      "note": "Power & automation - major India presence"
+    },
+    {
+      "name": "Rockwell Automation",
+      "scraper": "WorkdayScraper",
+      "url": "https://rockwellautomation.wd1.myworkdayjobs.com/wday/cxs/rockwellautomation/External_Rockwell_Automation/jobs",
+      "enabled": true,
+      "priority": 2,
+      "note": "Industrial automation"
+    },
+    {
+      "name": "Emerson",
+      "scraper": "WorkdayScraper",
+      "url": "https://emerson.wd5.myworkdayjobs.com/wday/cxs/emerson/Emerson_External/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Process automation & engineering"
+    },
+    {
+      "name": "Mitsubishi Electric",
+      "scraper": "WorkdayScraper",
+      "url": "https://mitsubishielectric.wd3.myworkdayjobs.com/wday/cxs/mitsubishielectric/Careers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Electrical equipment - Japan"
+    },
+    {
+      "name": "Hitachi Energy",
+      "scraper": "WorkdayScraper",
+      "url": "https://hitachienergy.wd3.myworkdayjobs.com/wday/cxs/hitachienergy/Careers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Power grid & energy solutions"
+    },
+    {
+      "name": "Legrand",
+      "scraper": "SmartRecruitersScraper",
+      "url": "https://jobs.smartrecruiters.com/Legrand",
+      "enabled": true,
+      "priority": 2,
+      "note": "Electrical infrastructure"
+    },
+    {
+      "name": "Crompton Greaves",
+      "scraper": "WorkdayScraper",
+      "url": "https://crompton.wd3.myworkdayjobs.com/wday/cxs/crompton/Crompton_Careers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Indian electrical company"
+    },
+    {
+      "name": "Havells",
+      "scraper": "WorkdayScraper",
+      "url": "https://havells.wd3.myworkdayjobs.com/wday/cxs/havells/Havells_Careers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Indian electrical goods"
+    },
+    {
+      "_comment": "=== AUTOMOTIVE & INDUSTRIAL MANUFACTURING ==="
+    },
+    {
+      "name": "Toyota",
+      "scraper": "WorkdayScraper",
+      "url": "https://toyota.wd5.myworkdayjobs.com/wday/cxs/toyota/Toyota_Careers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Automotive - Japan"
+    },
+    {
+      "name": "Volkswagen Group",
+      "scraper": "SmartRecruitersScraper",
+      "url": "https://jobs.smartrecruiters.com/VolkswagenGroup",
+      "enabled": true,
+      "priority": 2,
+      "note": "Automotive - Germany"
+    },
+    {
+      "name": "BMW Group",
+      "scraper": "WorkdayScraper",
+      "url": "https://bmw.wd3.myworkdayjobs.com/wday/cxs/bmw/BMW_Careers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Premium automotive - Germany"
+    },
+    {
+      "name": "Mercedes-Benz",
+      "scraper": "WorkdayScraper",
+      "url": "https://mercedesbenz.wd3.myworkdayjobs.com/wday/cxs/mercedesbenz/Careers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Premium automotive"
+    },
+    {
+      "name": "Ford Motor Company",
+      "scraper": "WorkdayScraper",
+      "url": "https://ford.wd5.myworkdayjobs.com/wday/cxs/ford/FordGlobal/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Automotive - USA"
+    },
+    {
+      "name": "General Motors",
+      "scraper": "WorkdayScraper",
+      "url": "https://generalmotors.wd5.myworkdayjobs.com/wday/cxs/generalmotors/GMCareers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Automotive - USA"
+    },
+    {
+      "name": "Stellantis",
+      "scraper": "WorkdayScraper",
+      "url": "https://stellantis.wd3.myworkdayjobs.com/wday/cxs/stellantis/Stellantis_Careers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Automotive - Fiat/Chrysler/Peugeot"
+    },
+    {
+      "name": "Tesla",
+      "scraper": "GreenhouseScraper",
+      "url": "https://boards.greenhouse.io/tesla",
+      "enabled": false,
+      "priority": 2,
+      "note": "EV & clean energy"
+    },
+    {
+      "name": "Continental",
+      "scraper": "SmartRecruitersScraper",
+      "url": "https://jobs.smartrecruiters.com/Continental",
+      "enabled": true,
+      "priority": 2,
+      "note": "Automotive supplier - Germany"
+    },
+    {
+      "name": "Denso",
+      "scraper": "WorkdayScraper",
+      "url": "https://denso.wd3.myworkdayjobs.com/wday/cxs/denso/DENSO_Careers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Automotive supplier - Japan"
+    },
+    {
+      "name": "Magna International",
+      "scraper": "WorkdayScraper",
+      "url": "https://magna.wd3.myworkdayjobs.com/wday/cxs/magna/Magna_Careers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Automotive supplier - Canada"
+    },
+    {
+      "name": "Hyundai Motor Group",
+      "scraper": "WorkdayScraper",
+      "url": "https://hyundaimotorgroup.wd3.myworkdayjobs.com/wday/cxs/hyundaimotorgroup/Careers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Automotive - Korea"
+    },
+    {
+      "name": "Tata Motors",
+      "scraper": "WorkdayScraper",
+      "url": "https://tatamotors.wd3.myworkdayjobs.com/wday/cxs/tatamotors/TataMotors_Careers/jobs",
+      "enabled": false,
+      "priority": 1,
+      "note": "Indian automotive"
+    },
+    {
+      "name": "Mahindra & Mahindra",
+      "scraper": "WorkdayScraper",
+      "url": "https://mahindra.wd3.myworkdayjobs.com/wday/cxs/mahindra/Mahindra_Careers/jobs",
+      "enabled": false,
+      "priority": 1,
+      "note": "Indian automotive & farm equipment"
+    },
+    {
+      "_comment": "=== CORE MANUFACTURING & MATERIALS ==="
+    },
+    {
+      "name": "ArcelorMittal",
+      "scraper": "WorkdayScraper",
+      "url": "https://arcelormittal.wd3.myworkdayjobs.com/wday/cxs/arcelormittal/Careers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Steel manufacturing - global"
+    },
+    {
+      "name": "Tata Steel",
+      "scraper": "WorkdayScraper",
+      "url": "https://tatasteel.wd3.myworkdayjobs.com/wday/cxs/tatasteel/TataSteel_Careers/jobs",
+      "enabled": false,
+      "priority": 1,
+      "note": "Indian steel manufacturing"
+    },
+    {
+      "name": "JSW Steel",
+      "scraper": "WorkdayScraper",
+      "url": "https://jsw.wd3.myworkdayjobs.com/wday/cxs/jsw/JSW_Careers/jobs",
+      "enabled": false,
+      "priority": 1,
+      "note": "Indian steel & infrastructure"
+    },
+    {
+      "name": "Rio Tinto",
+      "scraper": "WorkdayScraper",
+      "url": "https://riotinto.wd3.myworkdayjobs.com/wday/cxs/riotinto/RioTinto_Careers/jobs",
+      "enabled": true,
+      "priority": 2,
+      "note": "Mining & metals - global"
+    },
+    {
+      "name": "BHP",
+      "scraper": "WorkdayScraper",
+      "url": "https://bhp.wd3.myworkdayjobs.com/wday/cxs/bhp/BHP_Careers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Mining & resources - Australia"
+    },
+    {
+      "name": "Holcim",
+      "scraper": "SmartRecruitersScraper",
+      "url": "https://jobs.smartrecruiters.com/Holcim",
+      "enabled": true,
+      "priority": 2,
+      "note": "Building materials - cement"
+    },
+    {
+      "_comment": "=== OIL, GAS & ENERGY ==="
+    },
+    {
+      "name": "ExxonMobil",
+      "scraper": "WorkdayScraper",
+      "url": "https://exxonmobil.wd5.myworkdayjobs.com/wday/cxs/exxonmobil/ExxonMobil_Careers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Oil & gas major - USA"
+    },
+    {
+      "name": "Chevron",
+      "scraper": "WorkdayScraper",
+      "url": "https://chevron.wd5.myworkdayjobs.com/wday/cxs/chevron/Chevron_Careers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Oil & gas - USA"
+    },
+    {
+      "name": "Shell",
+      "scraper": "WorkdayScraper",
+      "url": "https://shell.wd3.myworkdayjobs.com/wday/cxs/shell/ShellCareers/jobs",
+      "enabled": true,
+      "priority": 2,
+      "note": "Oil & gas major - India presence"
+    },
+    {
+      "name": "BP",
+      "scraper": "WorkdayScraper",
+      "url": "https://bp.wd3.myworkdayjobs.com/wday/cxs/bp/External/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Oil & gas major - UK"
+    },
+    {
+      "name": "TotalEnergies",
+      "scraper": "SmartRecruitersScraper",
+      "url": "https://jobs.smartrecruiters.com/TotalEnergies",
+      "enabled": true,
+      "priority": 2,
+      "note": "Energy - France"
+    },
+    {
+      "name": "Schlumberger (SLB)",
+      "scraper": "WorkdayScraper",
+      "url": "https://slb.wd3.myworkdayjobs.com/wday/cxs/slb/SLB_Careers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Oilfield services"
+    },
+    {
+      "name": "Halliburton",
+      "scraper": "WorkdayScraper",
+      "url": "https://halliburton.wd1.myworkdayjobs.com/wday/cxs/halliburton/Halliburton_Careers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Oilfield services"
+    },
+    {
+      "name": "Baker Hughes",
+      "scraper": "WorkdayScraper",
+      "url": "https://bakerhughes.wd5.myworkdayjobs.com/wday/cxs/bakerhughes/BakerHughes_Careers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Energy technology"
+    },
+    {
+      "name": "Reliance Industries",
+      "scraper": "WorkdayScraper",
+      "url": "https://reliance.wd3.myworkdayjobs.com/wday/cxs/reliance/RIL_Careers/jobs",
+      "enabled": false,
+      "priority": 1,
+      "note": "Indian conglomerate - energy & chemicals"
+    },
+    {
+      "name": "ONGC",
+      "scraper": "WorkdayScraper",
+      "url": "https://ongc.wd3.myworkdayjobs.com/wday/cxs/ongc/ONGC_Careers/jobs",
+      "enabled": false,
+      "priority": 1,
+      "note": "Indian oil & gas PSU"
+    },
+    {
+      "name": "Indian Oil Corporation",
+      "scraper": "WorkdayScraper",
+      "url": "https://iocl.wd3.myworkdayjobs.com/wday/cxs/iocl/IOCL_Careers/jobs",
+      "enabled": false,
+      "priority": 1,
+      "note": "Indian oil refining PSU"
+    },
+    {
+      "_comment": "=== AEROSPACE & DEFENSE ==="
+    },
+    {
+      "name": "Airbus",
+      "scraper": "WorkdayScraper",
+      "url": "https://ag.wd3.myworkdayjobs.com/wday/cxs/ag/Airbus/jobs",
+      "enabled": true,
+      "priority": 2,
+      "note": "Aerospace - Europe"
+    },
+    {
+      "name": "Lockheed Martin",
+      "scraper": "WorkdayScraper",
+      "url": "https://lockheedmartin.wd5.myworkdayjobs.com/wday/cxs/lockheedmartin/LM_External/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Defense & aerospace - USA"
+    },
+    {
+      "name": "Raytheon (RTX)",
+      "scraper": "WorkdayScraper",
+      "url": "https://rtx.wd1.myworkdayjobs.com/wday/cxs/rtx/RTX_Careers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Defense & aerospace - USA"
+    },
+    {
+      "name": "Northrop Grumman",
+      "scraper": "WorkdayScraper",
+      "url": "https://northropgrumman.wd5.myworkdayjobs.com/wday/cxs/northropgrumman/Northrop_Grumman/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Defense - USA"
+    },
+    {
+      "name": "General Dynamics",
+      "scraper": "WorkdayScraper",
+      "url": "https://generaldynamics.wd1.myworkdayjobs.com/wday/cxs/generaldynamics/GD_Careers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Defense - USA"
+    },
+    {
+      "name": "Safran",
+      "scraper": "SmartRecruitersScraper",
+      "url": "https://jobs.smartrecruiters.com/Safran",
+      "enabled": true,
+      "priority": 2,
+      "note": "Aerospace - France"
+    },
+    {
+      "name": "Rolls-Royce",
+      "scraper": "WorkdayScraper",
+      "url": "https://rollsroyce.wd3.myworkdayjobs.com/wday/cxs/rollsroyce/RollsRoyce_External/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Aerospace engines - UK, India presence"
+    },
+    {
+      "name": "BAE Systems",
+      "scraper": "WorkdayScraper",
+      "url": "https://baesystems.wd1.myworkdayjobs.com/wday/cxs/baesystems/BAE_Systems_Careers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Defense - UK"
+    },
+    {
+      "name": "Hindustan Aeronautics Limited",
+      "scraper": "WorkdayScraper",
+      "url": "https://hal.wd3.myworkdayjobs.com/wday/cxs/hal/HAL_Careers/jobs",
+      "enabled": false,
+      "priority": 1,
+      "note": "Indian aerospace & defense PSU"
+    },
+    {
+      "_comment": "=== CHEMICAL & PROCESS ENGINEERING ==="
+    },
+    {
+      "name": "BASF",
+      "scraper": "WorkdayScraper",
+      "url": "https://basf.wd12.myworkdayjobs.com/wday/cxs/basf/BASF_Careers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Chemical - Germany, India R&D center"
+    },
+    {
+      "name": "Dow",
+      "scraper": "WorkdayScraper",
+      "url": "https://dow.wd1.myworkdayjobs.com/wday/cxs/dow/ExternalCareers/jobs",
+      "enabled": true,
+      "priority": 2,
+      "note": "Chemical - USA"
+    },
+    {
+      "name": "DuPont",
+      "scraper": "WorkdayScraper",
+      "url": "https://dupont.wd5.myworkdayjobs.com/wday/cxs/dupont/DuPont_Careers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Specialty chemicals"
+    },
+    {
+      "name": "LyondellBasell",
+      "scraper": "WorkdayScraper",
+      "url": "https://lyondellbasell.wd5.myworkdayjobs.com/wday/cxs/lyondellbasell/Careers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Plastics & chemicals"
+    },
+    {
+      "name": "LG Chem",
+      "scraper": "WorkdayScraper",
+      "url": "https://lgchem.wd3.myworkdayjobs.com/wday/cxs/lgchem/LGChem_Careers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Chemicals & batteries - Korea"
+    },
+    {
+      "name": "UPL",
+      "scraper": "WorkdayScraper",
+      "url": "https://upl.wd3.myworkdayjobs.com/wday/cxs/upl/UPL_Careers/jobs",
+      "enabled": false,
+      "priority": 1,
+      "note": "Indian agrochemicals"
+    },
+    {
+      "name": "Aarti Industries",
+      "scraper": "WorkdayScraper",
+      "url": "https://aarti.wd3.myworkdayjobs.com/wday/cxs/aarti/Aarti_Careers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Indian specialty chemicals"
+    },
+    {
+      "_comment": "=== ROBOTICS, AUTOMATION & INDUSTRIAL TECH ==="
+    },
+    {
+      "name": "Fanuc",
+      "scraper": "WorkdayScraper",
+      "url": "https://fanuc.wd3.myworkdayjobs.com/wday/cxs/fanuc/FANUC_Careers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Industrial robotics - Japan"
+    },
+    {
+      "name": "ABB Robotics",
+      "scraper": "WorkdayScraper",
+      "url": "https://abb.wd3.myworkdayjobs.com/wday/cxs/abb/Careers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Robotics division - uses same ABB portal"
+    },
+    {
+      "name": "KUKA",
+      "scraper": "SmartRecruitersScraper",
+      "url": "https://jobs.smartrecruiters.com/KUKA",
+      "enabled": true,
+      "priority": 2,
+      "note": "Industrial robotics - Germany"
+    },
+    {
+      "name": "Yaskawa Electric",
+      "scraper": "WorkdayScraper",
+      "url": "https://yaskawa.wd3.myworkdayjobs.com/wday/cxs/yaskawa/Yaskawa_Careers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Robotics & motion control - Japan"
+    },
+    {
+      "name": "Siemens Digital Industries",
+      "scraper": "WorkdayScraper",
+      "url": "https://siemens.wd3.myworkdayjobs.com/wday/cxs/siemens/Jobs/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Uses same Siemens portal"
+    },
+    {
+      "_comment": "=== RENEWABLE ENERGY & GREEN TECH ==="
+    },
+    {
+      "name": "NextEra Energy",
+      "scraper": "WorkdayScraper",
+      "url": "https://nexteraenergy.wd5.myworkdayjobs.com/wday/cxs/nexteraenergy/NextEra_Careers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Renewable energy - USA"
+    },
+    {
+      "name": "Vestas",
+      "scraper": "WorkdayScraper",
+      "url": "https://vestas.wd3.myworkdayjobs.com/wday/cxs/vestas/Vestas_Careers/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Wind energy - Denmark, India presence"
+    },
+    {
+      "name": "First Solar",
+      "scraper": "WorkdayScraper",
+      "url": "https://firstsolar.wd5.myworkdayjobs.com/wday/cxs/firstsolar/External/jobs",
+      "enabled": false,
+      "priority": 2,
+      "note": "Solar panel manufacturing"
+    },
+    {
+      "name": "Enel Green Power",
+      "scraper": "SmartRecruitersScraper",
+      "url": "https://jobs.smartrecruiters.com/Enel",
+      "enabled": true,
+      "priority": 2,
+      "note": "Renewable energy - Italy"
     }
   ]
 }

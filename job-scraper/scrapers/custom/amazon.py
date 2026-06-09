@@ -79,11 +79,11 @@ class AmazonScraper(BaseJobScraper):
         jobs = []
         offset = 0
         limit = 100
-        target_jobs_count = 500  # <--- Set your hard limit here
+        max_jobs = 50  # Max jobs per company
         
         api_url = "https://www.amazon.jobs/en/search.json"
         
-        while len(jobs) < target_jobs_count:  # <--- Check total jobs in loop condition
+        while True:
             try:
                 params = {
                     'offset': offset,
@@ -106,22 +106,16 @@ class AmazonScraper(BaseJobScraper):
                     try:
                         job = self._parse_job(job_data)
                         jobs.append(job)
-                        
-                        # Stop immediately if we hit the limit while processing this batch
-                        if len(jobs) >= target_jobs_count:
-                            break
-                            
+                        if len(jobs) >= max_jobs:
+                            logger.info(f"Hit max job limit of {max_jobs}")
+                            return jobs
                     except Exception as e:
                         logger.error(f"Error parsing job: {e}")
                 
                 # Log progress
                 logger.info(f"Scanned {len(jobs)} jobs so far...")
 
-                # Break outer loop if limit reached
-                if len(jobs) >= target_jobs_count:
-                    break
-                
-                # Check pagination (if we haven't hit our limit but Amazon runs out of jobs)
+                # Check pagination
                 hits = data.get('hits', 0)
                 if offset + limit >= hits:
                     break
@@ -133,7 +127,7 @@ class AmazonScraper(BaseJobScraper):
                 logger.error(f"Error fetching Amazon jobs: {e}")
                 break
         
-        return jobs[:target_jobs_count] # Return exactly the limit
+        return jobs
     
     # def _parse_job(self, job_data: Dict) -> Dict:
     #     """Parse an Amazon job posting."""

@@ -51,7 +51,7 @@ class SmartRecruitersScraper(BaseJobScraper):
         jobs = []
         offset = 0
         limit = 100
-        max_jobs = 500
+        max_jobs = 50  # Max jobs per company
         
         # SmartRecruiters public API
         api_url = f"https://api.smartrecruiters.com/v1/companies/{self.company_identifier}/postings"
@@ -62,8 +62,8 @@ class SmartRecruitersScraper(BaseJobScraper):
             try:
                 params = {
                     'offset': offset,
-                    'limit': limit,
-                    'country': 'in'  # Filter for India
+                    'limit': limit
+                    # 'country': 'in'  <-- REMOVED to allow global scraping
                 }
                 
                 response = self.session.get(api_url, params=params, timeout=30)
@@ -156,21 +156,9 @@ class SmartRecruitersScraper(BaseJobScraper):
         }
     
     def _is_eligible_location(self, location: str) -> bool:
-        """Check if location is in India."""
-        if not location:
-            return False
-        
-        india_keywords = [
-            'india', 'bangalore', 'bengaluru', 'hyderabad', 'mumbai', 
-            'delhi', 'noida', 'gurgaon', 'gurugram', 'pune', 'chennai',
-            'kolkata', 'goa', 'ahmedabad', 'chandigarh', 'remote'
-        ]
-        
-        loc_lower = location.lower()
-        if loc_lower == 'remote':
-            return True
-            
-        return any(keyword in loc_lower for keyword in india_keywords)
+        """Check if location is eligible."""
+        # Returns True for ALL locations (Global scraping)
+        return True
 
     def _scrape_html(self) -> List[Dict]:
         """Fallback HTML scraping method."""

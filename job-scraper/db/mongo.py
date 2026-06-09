@@ -8,9 +8,45 @@ from typing import List, Dict, Optional
 from datetime import datetime
 import logging
 from dotenv import load_dotenv
+
 logger = logging.getLogger(__name__)
 
 load_dotenv()
+
+
+def _flush_redis_cache():
+    redis_url = os.getenv("REDIS_URL")
+    if not redis_url:
+        logger.info("REDIS_URL not set – skipping cache flush")
+        return
+
+    try:
+        import redis
+        r = redis.from_url(redis_url, decode_responses=True)
+
+        patterns = ["jobs:*", "new_jobs:*", "job_search:*"]
+        deleted = 0
+
+        for pattern in patterns:
+            cursor = 0
+            while True:
+                cursor, keys = r.scan(cursor=cursor, match=pattern, count=100)
+                if keys:
+                    deleted += r.delete(*keys)
+                if cursor == 0:
+                    break
+
+        for key in ["job_stats", "companies:list"]:
+            deleted += r.delete(key)
+
+        logger.info(f"Redis cache flushed – {deleted} key(s) deleted")
+        r.close()
+
+    except ImportError:
+        logger.warning("redis package not installed – run: pip install redis")
+    except Exception as e:
+        logger.error(f"Failed to flush Redis cache: {e}")
+    
 class JobDatabase:
     """MongoDB handler for job data."""
     
@@ -20,6 +56,7 @@ class JobDatabase:
 
         if not connection_string:
             raise ValueError("❌ MONGO_URI is missing from .env file!")
+        
         self.client = MongoClient(connection_string)
         self.db = self.client[db_name]
         self.jobs_collection = self.db['jobs']
@@ -107,6 +144,11 @@ class JobDatabase:
                 'failed': 0
             }
             logger.info(f"Database operation: {stats}")
+
+            # Flush Redis cache so the API serves fresh data immediately
+            if stats['inserted'] > 0 or stats['updated'] > 0:
+                _flush_redis_cache()
+
             return stats
             
         except BulkWriteError as e:
@@ -127,5 +169,70 @@ class JobDatabase:
             }
             return stats
             
+    def mark_missing_jobs_dead(self, company: str, current_job_ids: List[str]) -> Dict:
+        """
+        Marks jobs as dead (joblive: false) if they are in DB but not in current_job_ids.
+        Includes SAFETY CIRCUIT BREAKER:
+        - If > 20% of jobs would be deleted, ABORT and return error.
+        - Prevents wiping out data if scraper fails/returns 0 jobs.
+        """
+        if not current_job_ids:
+            logger.warning(f"[Circuit Breaker] Scraper returned 0 jobs for {company}. Aborting dead job check.")
+            return {'status': 'skipped', 'reason': 'zero_jobs_scraped'}
+
+        # 1. Get all currently LIVE jobs from DB for this company
+        active_jobs_cursor = self.jobs_collection.find(
+            {'company': company, 'joblive': True},
+            {'job_id': 1}
+        )
+        active_db_ids = {doc['job_id'] for doc in active_jobs_cursor}
+        
+        if not active_db_ids:
+            return {'status': 'skipped', 'reason': 'no_active_jobs_in_db'}
+
+        # 2. Identify missing IDs (In DB but not in Current Scrape)
+        # Convert list to set for O(1) lookup
+        current_ids_set = set(current_job_ids)
+        missing_ids = list(active_db_ids - current_ids_set)
+        
+        if not missing_ids:
+            return {'status': 'clean', 'removed': 0, 'reason': 'perfect_match'}
+
+        # 3. SAFETY CHECK (Circuit Breaker)
+        total_active = len(active_db_ids)
+        drop_count = len(missing_ids)
+        drop_rate = drop_count / total_active
+        
+        if drop_rate > 0.20: # 20% Threshold
+            logger.error(f"[Circuit Breaker] {company}: Attempting to remove {drop_count}/{total_active} jobs ({drop_rate:.1%}). ABORTING.")
+            return {
+                'status': 'aborted', 
+                'reason': 'circuit_breaker_tripped',
+                'drop_rate': drop_rate,
+                'planned_removal': drop_count,
+                'total_active': total_active
+            }
+
+        # 4. Execute Soft Delete
+        logger.info(f"Marking {drop_count} jobs as dead for {company}")
+        result = self.jobs_collection.update_many(
+            {
+                'company': company,
+                'job_id': {'$in': missing_ids}
+            },
+            {
+                '$set': {
+                    'joblive': False,
+                    'last_seen': datetime.utcnow() # Update timestamp to show when we closed it
+                }
+            }
+        )
+        
+        return {
+            'status': 'success',
+            'removed': result.modified_count,
+            'drop_rate': drop_rate
+        }
+
     def close(self):
         self.client.close()

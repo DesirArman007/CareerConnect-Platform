@@ -29,23 +29,49 @@ class WorkdayScraper(BaseJobScraper):
         jobs = []
         offset = 0
         limit = 20
-        max_jobs = 1500 # Safety limit - increased to capture more India jobs
         
-        logger.info(f"Starting scrape for {self.company_name}...")
+        # Get max jobs from config (default 50)
+        max_jobs = self.config.get('limit', 50)
+        
+        logger.info(f"Starting scrape for {self.company_name}... (max: {max_jobs} jobs)")
+        
+        consecutive_filtered_batches = 0
         
         while True:
             try:
                 batch = self._fetch_page(offset, limit)
                 if not batch:
                     break
-                    
-                jobs.extend(batch)
-                offset += limit
                 
-                # Stop if we hit safety limit
-                if len(jobs) >= max_jobs:
-                    logger.info(f"Hit max job limit of {max_jobs}")
+                # Check if we are finding valid jobs
+                valid_jobs_start_count = len(jobs)
+                
+                # CRITICAL FIX: Parse each raw posting into our schema
+                for posting in batch:
+                    try:
+                        parsed_job = self._parse_job(posting)
+                        if parsed_job:
+                            jobs.append(parsed_job)
+                            # Check max_jobs limit
+                            if max_jobs and len(jobs) >= max_jobs:
+                                logger.info(f"Hit max job limit of {max_jobs}")
+                                return jobs
+                    except Exception as e:
+                        # Skip individual parsing failures
+                        pass
+                
+                # Loop Protection: If we fetched a full batch but found 0 valid jobs (all filtered)
+                # repeat this for 5 batches (100 jobs), then give up to avoid infinite scraping of US jobs
+                if len(jobs) == valid_jobs_start_count:
+                    consecutive_filtered_batches += 1
+                else:
+                    consecutive_filtered_batches = 0
+                    
+                if consecutive_filtered_batches >= 5:
+                    logger.info(f"Stopping after {consecutive_filtered_batches} batches with 0 valid jobs (Location filtering active)")
                     break
+                    
+                offset += limit
                 
                 # Rate limiting
                 time.sleep(1)
@@ -56,91 +82,109 @@ class WorkdayScraper(BaseJobScraper):
                 logger.error(f"Error fetching page at offset {offset}: {e}")
                 break
                 
+        
         return jobs
     
     def _fetch_page(self, offset: int, limit: int) -> List[Dict]:
         """Fetch a single page of jobs."""
-        # FIXED: Don't append '/jobs' if it's already in the config URL
         if self.base_url.endswith('/jobs'):
             api_url = self.base_url
         else:
             api_url = f"{self.base_url}/jobs"
         
+        # Optimization: Use server-side filtering if country is specified
+        search_text = ''
+        if self.config and self.config.get('filter_country'):
+            search_text = self.config.get('filter_country')
+
         payload = {
             'appliedFacets': {},
             'limit': limit,
             'offset': offset,
-            'searchText': ''
+            'searchText': search_text
         }
         
         try:
+            # logger.debug(f"Fetching {api_url} with payload {payload}")
             response = self.session.post(api_url, json=payload, timeout=30)
+            
+            # If 422 (Unprocessable Entity), try a simpler payload
+            if response.status_code == 422:
+                logger.warning(f"Got 422 for {self.company_name}, retrying with minimal payload...")
+                minimal_payload = {
+                    'limit': limit,
+                    'offset': offset
+                }
+                response = self.session.post(api_url, json=minimal_payload, timeout=30)
+
             response.raise_for_status()
             data = response.json()
-            
-            job_postings = data.get('jobPostings', [])
-            
-            # Check if we've reached the end
-            if not job_postings:
-                return []
-            
-            jobs = []
-            for posting in job_postings:
-                try:
-                    job = self._parse_job(posting)
-                    if job:
-                        jobs.append(job)
-                except Exception as e:
-                    pass
-                    
-            return jobs
+            return data.get('jobPostings', [])
             
         except requests.RequestException as e:
             logger.error(f"Request error: {e}")
+            if hasattr(e, 'response') and e.response:
+                logger.debug(f"Response Content: {e.response.text[:200]}")
             return []
     
     def _parse_job(self, posting: Dict) -> Dict:
         """Parse a Workday job posting."""
-        # 1. Title
         title = posting.get('title', 'Untitled')
         
-        # 2. Location & India Filter
+        # 1. Location Logic
         location = posting.get('locationsText', '')
-        # Fallback if locationsText is empty/generic
         if not location:
             location = "Unspecified"
             
-        # FILTER: Only keep India jobs and global remote jobs
         if not self._is_eligible_location(location):
             return None
             
-        # 3. Apply URL
-        # We need the "client" part of the URL (e.g. adobe.wd5...)
-        # Usually base_url is '.../wday/cxs/adobe/external/jobs'
-        # We need '.../en-US/adobe/job/...'
-        # This is tricky to reconstruct generically, so we approximate:
-        external_path = posting.get('externalPath', '')
+        # 2. Robust URL Construction
+        # APIBase: https://{host}/wday/cxs/{tenant}/{site}/jobs
+        # FrontURL: https://{host}/en-US/{tenant}/{site}/job/{slug}
+        # But externalPath usually looks like: "/job/slug" or "/job/location/slug"
         
-        # Try to guess the frontend URL from the API URL
-        # Convert: https://adobe.../wday/cxs/adobe/external/jobs 
-        # To:      https://adobe.../en-US/adobe/job{external_path}
+        try:
+            # Extract base parts: .../wday/cxs/{tenant}/{site}/...
+            if '/wday/cxs/' in self.base_url:
+                base_parts = self.base_url.split('/wday/cxs/')
+                host = base_parts[0]
+                # path_part is like "nvidia/NVIDIAExternalCareerSite"
+                # But frontend URL only needs the SITE name, not tenant!
+                # So we split and take the last part
+                path_part = base_parts[1].replace('/jobs', '').strip('/')
+                site_name = path_part.split('/')[-1] if '/' in path_part else path_part
+                
+                ext = posting.get('externalPath') or ''
+                # Frontend URL: /{site}{externalPath}
+                # Example: /NVIDIAExternalCareerSite/job/India-Pune/Senior-Engineer_JR123
+                
+                apply_url = f"{host}/{site_name}{ext}"
+            else:
+                # Fallback
+                apply_url = posting.get('externalPath') or ''
+                
+        except Exception as e:
+            logger.error(f"URL Gen Error: {e}")
+            apply_url = posting.get('externalPath') or ''
+            
+        # 3. Description Fetching
+        description = self._get_full_description(posting)
         
-        # Simple fallback: use the API base, the user will be redirected or can copy ID
-        apply_url = self.base_url.replace('/wday/cxs/', '/en-US/').replace('/jobs', '') + f"/job{external_path}"
+        if not description or len(description) < 50:
+            bullets = posting.get('bulletFields', [])
+            if bullets:
+                # Format bullet points nicely for Markdown/Display
+                description = "\n".join([f"• {str(x)}" for x in bullets])
+        
+        if not description or len(description) < 20:
+             return None
 
         # 4. Job ID
-        job_id = posting.get('bulletinOrderId') or external_path.split('/')[-1]
+        job_id = posting.get('bulletinOrderId') or posting.get('externalPath', '').split('/')[-1]
         
-        # 5. Description
-        # Workday list API DOES NOT return full description. 
-        # We use a placeholder to avoid making N+1 requests (which is very slow).
-        description = posting.get('bulletFields', [])
-        
-        # VALIDATION: Reject jobs with no description
-        if not description:
-            return None
-            
-        desc_text = "\n".join([str(x) for x in description])
+        # DEBUG TRACE - Removed for production
+        # print(f"DEBUG: Parsed job '{title}' | URL: {apply_url[:30]}... | DescLen: {len(description)}")
 
         return {
             'title': title,
@@ -149,34 +193,48 @@ class WorkdayScraper(BaseJobScraper):
             'job_id': str(job_id),
             'department': posting.get('subtitleText', ''),
             'employment_type': self._extract_employment_type(posting),
-            'description': desc_text,
+            'description': description,
             'source': 'Workday'
         }
-    
+
+    def _get_full_description(self, posting: Dict) -> str:
+        """
+        Attempt to fetch full description from the job detail API.
+        The detail API is usually at {base_url}/{job_slug}
+        """
+        try:
+            # externalPath is like "/job-slug"
+            slug = posting.get('externalPath', '')
+            if not slug:
+                return ""
+                
+            # Construct detail API URL
+            # Base: .../jobs 
+            # Detail: .../{slug} (without /jobs)
+            if self.base_url.endswith('/jobs'):
+                base_without_jobs = self.base_url[:-5]
+            else:
+                base_without_jobs = self.base_url
+                
+            detail_url = f"{base_without_jobs}{slug}"
+            
+            resp = self.session.get(detail_url, timeout=10)
+            if resp.status_code == 200:
+                data = resp.json()
+                # Workday detail JSON usually has 'jobPostingInfo' -> 'jobDescription'
+                return data.get('jobPostingInfo', {}).get('jobDescription', '')
+        except Exception as e:
+            # Be silent on individual detail fetch failures to avoid spamming logs
+            pass
+            
+        return ""
+
     def _is_eligible_location(self, location: str) -> bool:
         """
-        Check if location is eligible for Indian applicants.
-        Includes: India locations + global remote jobs.
-        Excludes: Country-specific remote (US-only, UK-only, etc.)
+        Check if location is eligible.
+        Updated: Returns True for ALL locations (Global scraping).
         """
-        if not location: 
-            return False
-        
-        loc_lower = location.lower()
-        
-        # Check for remote jobs
-        if self._is_remote_job(loc_lower):
-            return self._is_remote_accessible_to_india(loc_lower)
-        
-        # Check for India-based locations
-        india_keywords = [
-            'india', 'bangalore', 'bengaluru', 'hyderabad', 'mumbai', 
-            'delhi', 'noida', 'gurgaon', 'gurugram', 'pune', 'chennai',
-            'kolkata', 'ahmedabad', 'jaipur', 'lucknow', 'kochi', 
-            'thiruvananthapuram', 'chandigarh', 'indore', 'bhopal'
-        ]
-        
-        return any(keyword in loc_lower for keyword in india_keywords)
+        return True
     
     def _is_remote_job(self, location: str) -> bool:
         """Check if location indicates a remote position."""
@@ -222,12 +280,4 @@ class WorkdayScraper(BaseJobScraper):
         if time_type:
             return time_type
             
-        # Check bullet fields if standard field is missing
-        for field in posting.get('bulletFields', []):
-            field_str = str(field).lower()
-            if 'full-time' in field_str or 'full time' in field_str:
-                return 'Full-time'
-            if 'part-time' in field_str:
-                return 'Part-time'
-                
         return 'Full-time'

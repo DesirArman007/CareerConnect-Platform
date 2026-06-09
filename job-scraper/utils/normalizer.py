@@ -2,14 +2,22 @@ import re
 from typing import Dict, List, Optional
 import logging
 from datetime import datetime
-from bs4 import BeautifulSoup 
+from bs4 import BeautifulSoup
+
+# Import new utilities
+from utils.experience_extractor import ExperienceExtractor
+from utils.description_formatter import DescriptionFormatter
 
 logger = logging.getLogger(__name__)
 
 class JobNormalizer:
     """
     Normalize and clean job data to match the MERN Job Schema.
-    Ensures strict Enums for job_type and employment_type.
+    
+    Now includes:
+    - Experience extraction (regex-based, no LLM)
+    - Description formatting (BeautifulSoup-based, no LLM)
+    - Strict Enums for job_type and employment_type
     """
     
     # ---------------------------------------------------------
@@ -85,33 +93,6 @@ class JobNormalizer:
             
         return clean_loc
 
-    @staticmethod
-    def clean_html(html_text: str) -> str:
-        """
-        Robust cleaning using BeautifulSoup.
-        Removes tags, scripts, styles, and fixes entities automatically.
-        """
-        if not html_text:
-            return ""
-
-        try:
-            # 1. Parse HTML
-            soup = BeautifulSoup(html_text, "html.parser")
-
-            # 2. Remove script and style elements completely
-            for script_or_style in soup(["script", "style"]):
-                script_or_style.decompose()
-
-            # 3. Get text and collapse whitespace
-            text = soup.get_text(separator=" ", strip=True)
-
-            # 4. Final cleanup of extra spaces
-            return " ".join(text.split())
-            
-        except Exception as e:
-            logger.error(f"Error cleaning HTML: {e}")
-            return html_text # Fallback to raw text if BS4 fails
-
     # ---------------------------------------------------------
     # MAIN PIPELINE
     # ---------------------------------------------------------
@@ -120,39 +101,60 @@ class JobNormalizer:
     def normalize_job(raw_job: Dict) -> Dict:
         """
         Transform raw scraper data into a Schema-compliant dictionary.
+        
+        Now includes:
+        - Formatted description (BeautifulSoup, no LLM)
+        - Experience extraction (regex, no LLM)
         """
         normalized = {}
         
         # 1. Identity & Meta
-        normalized["job_id"] = str(raw_job.get("job_id"))
+        normalized["job_id"] = str(raw_job.get("job_id", ""))
         normalized["company"] = raw_job.get("company", "Unknown").strip()
-        normalized["apply_url"] = raw_job.get("apply_url")
+        normalized["apply_url"] = raw_job.get("apply_url", "")
         normalized["source"] = raw_job.get("source", "Scraper")
-        normalized["department"] = raw_job.get("department")
+        normalized["department"] = raw_job.get("department", "")
 
-        # 2. Text Content
+        # 2. Title
         raw_title = raw_job.get("title", "")
-        normalized["title"] = " ".join(raw_title.split()) # Simple clean
+        normalized["title"] = " ".join(raw_title.split())  # Simple clean
         
+        # 3. Description - Format using new utility (NO LLM)
         raw_desc = raw_job.get("description", "")
-        normalized["description"] = JobNormalizer.clean_html(raw_desc)
+        normalized["description"] = DescriptionFormatter.format(raw_desc)
 
-        # 3. Location (Returns String now)
+        # 4. Location
         normalized["location"] = JobNormalizer.normalize_location(raw_job.get("location"))
 
-        # 4. Employment Type (Enum Enforcement)
+        # 5. Employment Type (Enum Enforcement)
         raw_emp_type = raw_job.get("employment_type", "")
         normalized["employment_type"] = JobNormalizer.normalize_employment_type(raw_emp_type)
 
-        # 5. Job Type (New Field Calculation)
+        # 6. Job Type (job vs internship)
         normalized["job_type"] = JobNormalizer.derive_job_type(
             normalized["title"], 
             normalized["employment_type"]
         )
 
-        # 6. Timestamps (For Upsert compatibility)
-        # Note: In Python, use datetime.utcnow()
+        # 7. Experience Extraction (NEW - regex-based, NO LLM)
+        exp_result = ExperienceExtractor.extract(
+            text=normalized["description"],
+            title=normalized["title"]
+        )
+        
+        # Store experience value if confidence is sufficient
+        if exp_result.confidence >= 0.5:
+            normalized["experience"] = exp_result.value
+            normalized["experience_min_years"] = exp_result.min_years
+            normalized["experience_max_years"] = exp_result.max_years
+        else:
+            normalized["experience"] = None
+            normalized["experience_min_years"] = None
+            normalized["experience_max_years"] = None
+
+        # 8. Timestamps
         normalized["last_seen"] = datetime.utcnow()
-        # 'createdAt' is handled by $setOnInsert in your main loop
+        normalized["joblive"] = True
+        # 'createdAt' is handled by $setOnInsert in MongoDB
 
         return normalized

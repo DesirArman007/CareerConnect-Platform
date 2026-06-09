@@ -52,6 +52,7 @@ class AshbyScraper(BaseJobScraper):
     def scrape(self) -> List[Dict]:
         """Scrape jobs from Ashby GraphQL API."""
         jobs = []
+        max_jobs = 50  # Max jobs per company
         
         # Ashby uses GraphQL API
         api_url = "https://jobs.ashbyhq.com/api/non-user-graphql"
@@ -102,7 +103,7 @@ class AshbyScraper(BaseJobScraper):
             
             if response.status_code != 200:
                 logger.warning(f"Ashby API returned status {response.status_code}, trying HTML fallback")
-                return self._scrape_html()
+                return self._scrape_html()[:max_jobs]
                 
             data = response.json()
             
@@ -115,6 +116,9 @@ class AshbyScraper(BaseJobScraper):
                     job = self._parse_job(job_data, teams)
                     if job:
                         jobs.append(job)
+                        if len(jobs) >= max_jobs:
+                            logger.info(f"Hit max job limit of {max_jobs}")
+                            break
                 except Exception as e:
                     logger.error(f"Error parsing job: {e}")
             
@@ -122,7 +126,7 @@ class AshbyScraper(BaseJobScraper):
             
         except requests.RequestException as e:
             logger.error(f"Error fetching Ashby jobs: {e}")
-            jobs = self._scrape_html()
+            jobs = self._scrape_html()[:max_jobs]
             
         return jobs
     
@@ -223,21 +227,9 @@ class AshbyScraper(BaseJobScraper):
         return 'Description available on apply page'
     
     def _is_eligible_location(self, location: str) -> bool:
-        """Check if location is in India."""
-        if not location:
-            return False
-        
-        india_keywords = [
-            'india', 'bangalore', 'bengaluru', 'hyderabad', 'mumbai', 
-            'delhi', 'noida', 'gurgaon', 'gurugram', 'pune', 'chennai',
-            'kolkata', 'goa', 'ahmedabad', 'chandigarh', 'remote'
-        ]
-        
-        loc_lower = location.lower()
-        if loc_lower == 'remote':
-            return True
-            
-        return any(keyword in loc_lower for keyword in india_keywords)
+        """Check if location is eligible."""
+        # Returns True for ALL locations (Global scraping)
+        return True
 
     def _scrape_html(self) -> List[Dict]:
         """Fallback HTML scraping method."""
