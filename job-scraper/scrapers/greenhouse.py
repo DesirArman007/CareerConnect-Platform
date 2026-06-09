@@ -11,6 +11,7 @@ from bs4 import BeautifulSoup
 import logging
 import urllib.parse
 import html
+from utils.text_cleaner import clean_description
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +53,7 @@ class GreenhouseScraper(BaseJobScraper):
     def scrape(self) -> List[Dict]:
         """Scrape jobs from Greenhouse API."""
         jobs = []
+        max_jobs = 50  # Max jobs per company
         
         # API URL with content=true to get descriptions
         api_url = f"https://boards-api.greenhouse.io/v1/boards/{self.company_identifier}/jobs?content=true"
@@ -62,7 +64,7 @@ class GreenhouseScraper(BaseJobScraper):
             
             if response.status_code == 404:
                 logger.warning("API not found, falling back to HTML scraping")
-                return self._scrape_html()
+                return self._scrape_html()[:max_jobs]
                 
             response.raise_for_status()
             data = response.json()
@@ -75,6 +77,9 @@ class GreenhouseScraper(BaseJobScraper):
                     job = self._parse_job(job_data)
                     if job:
                         jobs.append(job)
+                        if len(jobs) >= max_jobs:
+                            logger.info(f"Hit max job limit of {max_jobs}")
+                            break
                 except Exception as e:
                     logger.error(f"Error parsing job: {e}")
             
@@ -82,7 +87,7 @@ class GreenhouseScraper(BaseJobScraper):
             
         except requests.RequestException as e:
             logger.error(f"Error fetching Greenhouse jobs: {e}")
-            jobs = self._scrape_html()
+            jobs = self._scrape_html()[:max_jobs]
             
         return jobs
     
@@ -102,17 +107,10 @@ class GreenhouseScraper(BaseJobScraper):
         
         # --- IMPROVED CLEANING LOGIC ---
         raw_content = job_data.get('content', '')
-        html_content = html.unescape(raw_content)
         
-        # 1. Get text with newlines
-        text = BeautifulSoup(html_content, 'html.parser').get_text(separator='\n')
-        
-        # 2. Split by lines, strip whitespace from each line, and remove empty lines
-        clean_lines = [line.strip() for line in text.splitlines() if line.strip()]
-        
-        # 3. Join back with double newlines (paragraphs) or single (list style)
-        # Using double newline '\n\n' makes it look like nice paragraphs
-        clean_description = '\n\n'.join(clean_lines)
+        # Use shared text cleaner for consistent formatting
+        formatted_content = clean_description(raw_content)
+        # --- CLEANING LOGIC END ---
         # --- CLEANING LOGIC END ---
         
         return {
@@ -122,26 +120,14 @@ class GreenhouseScraper(BaseJobScraper):
             'job_id': str(job_data.get('id', '')),
             'department': department_name,
             'employment_type': self._extract_employment_type(job_data),
-            'description': clean_description,
+            'description': formatted_content,
             'source': 'Greenhouse'
         }
     
     def _is_eligible_location(self, location: str) -> bool:
-        """Check if location is in India."""
-        if not location:
-            return False
-        
-        india_keywords = [
-            'india', 'bangalore', 'bengaluru', 'hyderabad', 'mumbai', 
-            'delhi', 'noida', 'gurgaon', 'gurugram', 'pune', 'chennai',
-            'kolkata', 'goa', 'ahmedabad', 'chandigarh', 'remote'
-        ]
-        
-        loc_lower = location.lower()
-        if loc_lower == 'remote':
-            return True
-            
-        return any(keyword in loc_lower for keyword in india_keywords)
+        """Check if location is eligible."""
+        # Returns True for ALL locations (Global scraping)
+        return True
 
     def _extract_employment_type(self, job_data: Dict) -> str:
         """Extract employment type from job data."""

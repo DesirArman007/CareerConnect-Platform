@@ -31,6 +31,12 @@ def run_all_scrapers():
     for index, company in enumerate(enabled_companies, 1):
         name = company.get('name')
         
+        # Skip scrapers that require supervision (run via run_manual_scrapers.py)
+        if company.get('requires_supervision', False) is True:
+            print(f"[{index}/{len(enabled_companies)}] ⏩ Skipping {name} (Requires supervision. Use run_manual_scrapers.py)")
+            continue
+            
+        
         print(f"\n[{index}/{len(enabled_companies)}] {'='*30}")
         print(f"  ▶️  Running Scraper for: {name}")
         print(f"{'='*35}")

@@ -31,7 +31,8 @@ class WellfoundScraper(BaseJobScraper):
         """Scrape jobs from Wellfound (AngelList)."""
         jobs = []
         page = 1
-        max_pages = 20
+        max_pages = 5
+        max_jobs = 50  # Max jobs per company
         
         logger.info("Starting Wellfound (AngelList) India startup scrape...")
         
@@ -45,6 +46,11 @@ class WellfoundScraper(BaseJobScraper):
                 
                 jobs.extend(page_jobs)
                 logger.info(f"Page {page}: Found {len(page_jobs)} jobs (Total: {len(jobs)})")
+                
+                if len(jobs) >= max_jobs:
+                    logger.info(f"Hit max job limit of {max_jobs}")
+                    jobs = jobs[:max_jobs]
+                    break
                 
                 page += 1
                 time.sleep(1)  # Rate limiting

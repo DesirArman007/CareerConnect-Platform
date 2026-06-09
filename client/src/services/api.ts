@@ -1,8 +1,14 @@
 import axios from "axios";
 import { Job, User, Feedback } from "../types";
 
-/* ---------- AXIOS INSTANCE ---------- */
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+const configuredApiUrl = import.meta.env.VITE_API_URL?.trim();
+const API_URL = configuredApiUrl;
+
+if (!configuredApiUrl && typeof window !== "undefined" && window.location.hostname !== "localhost") {
+  console.warn(
+    "VITE_API_URL is not set. The client is falling back to http://localhost:8000/api, which will leave production pages empty if the backend is hosted elsewhere."
+  );
+}
 
 const api = axios.create({
   baseURL: API_URL,

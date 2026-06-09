@@ -34,7 +34,8 @@ class UberScraper(BaseJobScraper):
         jobs = []
         page = 1
         page_size = 50
-        max_pages = 20
+        max_pages = 5
+        max_jobs = 50  # Max jobs per company
         
         # Uber's job search API
         api_url = "https://www.uber.com/api/loadSearchJobsResults"
@@ -75,6 +76,9 @@ class UberScraper(BaseJobScraper):
                         job = self._parse_job(job_data)
                         if job:
                             jobs.append(job)
+                            if len(jobs) >= max_jobs:
+                                logger.info(f"Hit max job limit of {max_jobs}")
+                                return jobs
                     except Exception as e:
                         logger.error(f"Error parsing job: {e}")
                 

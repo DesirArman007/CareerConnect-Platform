@@ -76,6 +76,18 @@ def main():
         action='store_true',
         help='Remove jobs older than 90 days'
     )
+
+    parser.add_argument(
+        '--dry-run',
+        action='store_true',
+        help='Run without saving to database'
+    )
+
+    parser.add_argument(
+        '--output',
+        type=str,
+        help='Output JSON file for dry-run mode'
+    )
     
     args = parser.parse_args()
     
@@ -94,7 +106,12 @@ def main():
         
         # Initialize scraper engine
         logger.info("Initializing scraper engine...")
-        engine = ScraperEngine(config_path=args.config, db=db)
+        engine = ScraperEngine(
+            config_path=args.config, 
+            db=db,
+            dry_run=args.dry_run,
+            output_file=args.output
+        )
         
         # Execute scraping based on mode
         if args.mode == 'single':

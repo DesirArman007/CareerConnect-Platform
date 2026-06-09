@@ -11,6 +11,7 @@ from bs4 import BeautifulSoup
 import logging
 import urllib.parse
 import html
+from utils.text_cleaner import clean_description
 
 logger = logging.getLogger(__name__)
 
@@ -49,6 +50,7 @@ class LeverScraper(BaseJobScraper):
     def scrape(self) -> List[Dict]:
         """Scrape jobs from Lever API."""
         jobs = []
+        max_jobs = 50  # Max jobs per company
         
         # Lever has a simple JSON API
         api_url = f"https://api.lever.co/v0/postings/{self.company_identifier}?mode=json"
@@ -59,20 +61,23 @@ class LeverScraper(BaseJobScraper):
             
             if response.status_code == 404:
                 logger.warning("Lever API not found, trying HTML fallback")
-                return self._scrape_html()
+                return self._scrape_html()[:max_jobs]
                 
             response.raise_for_status()
             job_listings = response.json()
             
             if not isinstance(job_listings, list):
                 logger.warning("Unexpected API response format")
-                return self._scrape_html()
+                return self._scrape_html()[:max_jobs]
             
             for job_data in job_listings:
                 try:
                     job = self._parse_job(job_data)
                     if job:
                         jobs.append(job)
+                        if len(jobs) >= max_jobs:
+                            logger.info(f"Hit max job limit of {max_jobs}")
+                            break
                 except Exception as e:
                     logger.error(f"Error parsing job: {e}")
             
@@ -80,7 +85,7 @@ class LeverScraper(BaseJobScraper):
             
         except requests.RequestException as e:
             logger.error(f"Error fetching Lever jobs: {e}")
-            jobs = self._scrape_html()
+            jobs = self._scrape_html()[:max_jobs]
             
         return jobs
     
@@ -103,7 +108,7 @@ class LeverScraper(BaseJobScraper):
         if not description:
             html_desc = job_data.get('description', '')
             if html_desc:
-                description = BeautifulSoup(html.unescape(html_desc), 'html.parser').get_text(separator='\n')
+                description = clean_description(html_desc)
         
         # Also get lists (responsibilities, requirements)
         lists = job_data.get('lists', [])
@@ -111,8 +116,8 @@ class LeverScraper(BaseJobScraper):
             list_name = lst.get('text', '')
             list_content = lst.get('content', '')
             if list_content:
-                clean_content = BeautifulSoup(html.unescape(list_content), 'html.parser').get_text(separator='\n')
-                description += f"\n\n{list_name}\n{clean_content}"
+                cleaned_list = clean_description(list_content)
+                description += f"\n\n**{list_name}**\n{cleaned_list}"
         
         # Extract commitment (employment type)
         commitment = job_data.get('categories', {}).get('commitment', 'Full-time')
@@ -129,21 +134,9 @@ class LeverScraper(BaseJobScraper):
         }
     
     def _is_eligible_location(self, location: str) -> bool:
-        """Check if location is in India."""
-        if not location:
-            return False
-        
-        india_keywords = [
-            'india', 'bangalore', 'bengaluru', 'hyderabad', 'mumbai', 
-            'delhi', 'noida', 'gurgaon', 'gurugram', 'pune', 'chennai',
-            'kolkata', 'goa', 'ahmedabad', 'chandigarh', 'remote'
-        ]
-        
-        loc_lower = location.lower()
-        if loc_lower == 'remote':
-            return True
-            
-        return any(keyword in loc_lower for keyword in india_keywords)
+        """Check if location is eligible."""
+        # Returns True for ALL locations (Global scraping)
+        return True
 
     def _scrape_html(self) -> List[Dict]:
         """Fallback HTML scraping method."""

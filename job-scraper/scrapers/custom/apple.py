@@ -31,7 +31,8 @@ class AppleScraper(BaseJobScraper):
         jobs = []
         page = 0
         page_size = 100
-        max_pages = 50
+        max_pages = 5
+        max_jobs = 50  # Max jobs per company
         
         # Apple's job search API endpoint
         api_url = "https://jobs.apple.com/api/v1/search"
@@ -72,6 +73,9 @@ class AppleScraper(BaseJobScraper):
                         job = self._parse_job(job_data)
                         if job:
                             jobs.append(job)
+                            if len(jobs) >= max_jobs:
+                                logger.info(f"Hit max job limit of {max_jobs}")
+                                return jobs
                     except Exception as e:
                         logger.debug(f"Error parsing job: {e}")
                 

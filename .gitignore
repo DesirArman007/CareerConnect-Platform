@@ -7,6 +7,7 @@ dist/
 build/
 
 # --- Python ---
+*.py
 __pycache__/
 *.pyc
 *.pyo
@@ -42,6 +43,29 @@ node_modules/
 .DS_Store
 venv/
 
+# --- Test Scripts ---
+test/
+tests/
+test_*
+*_test.*
+*.test.*
+*.spec.*
+
 # All Logs
 *.log
 logs/
+job-scraper/live_test_results.txt
+job-scraper/fix_results.txt
+job-scraper/workday_discovery_output.txt
+job-scraper/workday_discovery_v2_output.txt
+job-scraper/workday_test_results.txt
+job-scraper/requirements.txt
+job-scraper/requirements.txt
+job-scraper/naukri_debug.html
+job-scraper/netflix_debug.html
+job-scraper/requirements.txt
+job-scraper/MANUAL_SCRAPERS.md
+job-scraper/hirist_debug.html
+.gitignore
+job-scraper/instahyre_debug.html
+job-scraper/cutshort_debug.html

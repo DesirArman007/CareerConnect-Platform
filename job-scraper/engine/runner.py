@@ -15,18 +15,24 @@ logger = logging.getLogger(__name__)
 class ScraperEngine:
     """Main engine for orchestrating job scraping."""
     
-    def __init__(self, config_path: str = "config/companies.json", db: JobDatabase = None):
+    def __init__(self, config_path: str = "config/companies.json", db: JobDatabase = None, 
+                 dry_run: bool = False, output_file: str = None):
         """
         Initialize scraper engine.
         
         Args:
             config_path: Path to companies configuration file
             db: JobDatabase instance
+            dry_run: If True, do not save to DB
+            output_file: Optional file to save scraped jobs to in dry-run mode
         """
         self.config_path = config_path
         self.companies = self._load_config()
         self.db = db or JobDatabase()
         self.scrapers = {}
+        self.dry_run = dry_run
+        self.output_file = output_file
+        self.all_dry_run_jobs = []
         
     def _load_config(self) -> List[Dict]:
         """Load company configuration."""
@@ -50,7 +56,11 @@ class ScraperEngine:
             custom_scrapers = [
                 'GoogleScraper', 'AmazonScraper', 'HCLScraper', 'LinkedInScraper',
                 'UberScraper', 'SpotifyScraper', 'AppleScraper',
-                'WellfoundScraper', 'IndianStartupsScraper'
+                'WellfoundScraper',                'IndianStartupsScraper', 'RevolutScraper',
+                'InstahyreScraper', 'CutshortScraper',
+                'HiristScraper', 'FounditScraper',
+                'OracleScraper', 'UnstopScraper', 'IBMScraper', 'MicrosoftScraper',
+                'MetaScraper', 'NetflixScraper'
             ]
             if scraper_name in custom_scrapers:
                 module_path = f"scrapers.custom.{scraper_name.replace('Scraper', '').lower()}"
@@ -95,15 +105,48 @@ class ScraperEngine:
             
             jobs = scraper.get_jobs()
             
-            # Store in database
-            stats = self.db.insert_jobs(jobs)
+            jobs = scraper.get_jobs()
             
-            # Log scrape
-            self.db.log_scrape(
-                company=company_name,
-                status='success',
-                jobs_count=len(jobs)
-            )
+            if self.dry_run:
+                logger.info(f"[DRY RUN] Would save {len(jobs)} jobs for {company_name}")
+                self.all_dry_run_jobs.extend(jobs)
+                
+                # If output file specified and we are in single company mode or just want incremental updates
+                if self.output_file:
+                     try:
+                        import datetime
+                        import json
+                        
+                        def json_serial(obj):
+                            if isinstance(obj, (datetime.datetime, datetime.date)):
+                                return obj.isoformat()
+                            raise TypeError ("Type %s not serializable" % type(obj))
+
+                        with open(self.output_file, 'w') as f:
+                            json.dump(self.all_dry_run_jobs, f, default=json_serial, indent=2)
+                     except Exception as e:
+                        logger.error(f"Failed to save output file in scrape_company: {e}") 
+
+                stats = {'inserted': 0, 'updated': 0, 'skipped': 0}
+            else:
+                # Store in database
+                stats = self.db.insert_jobs(jobs)
+                
+                # --- LIFECYCLE MANAGEMENT (Mark Dead Jobs) ---
+                current_job_ids = [j['job_id'] for j in jobs]
+                lifecycle_stats = self.db.mark_missing_jobs_dead(company_name, current_job_ids)
+                stats['lifecycle'] = lifecycle_stats
+                
+                if lifecycle_stats.get('status') == 'aborted':
+                    logger.warning(f"Circuit Breaker: Kept potentially dead jobs live for {company_name}")
+                # ---------------------------------------------
+                
+                # Log scrape
+                self.db.log_scrape(
+                    company=company_name,
+                    status='success',
+                    jobs_count=len(jobs)
+                )
             
             result = {
                 'company': company_name,
@@ -118,12 +161,13 @@ class ScraperEngine:
         except Exception as e:
             logger.error(f"Error scraping {company_name}: {e}")
             
-            self.db.log_scrape(
-                company=company_name,
-                status='failed',
-                jobs_count=0,
-                error=str(e)
-            )
+            if not self.dry_run:
+                self.db.log_scrape(
+                    company=company_name,
+                    status='failed',
+                    jobs_count=0,
+                    error=str(e)
+                )
             
             return {
                 'company': company_name,
@@ -171,7 +215,24 @@ class ScraperEngine:
                         'status': 'failed',
                         'error': str(e)
                     })
-                    
+        
+        # Save to file if needed (at the end of scrape_all)
+        if self.dry_run and self.output_file:
+            try:
+                import datetime
+                
+                # Convert datetime objects to string for JSON serialization
+                def json_serial(obj):
+                    if isinstance(obj, (datetime.datetime, datetime.date)):
+                        return obj.isoformat()
+                    raise TypeError ("Type %s not serializable" % type(obj))
+
+                logger.info(f"Saving {len(self.all_dry_run_jobs)} jobs to {self.output_file}")
+                with open(self.output_file, 'w') as f:
+                    json.dump(self.all_dry_run_jobs, f, default=json_serial, indent=2)
+            except Exception as e:
+                logger.error(f"Failed to save output file: {e}")
+
         return results
         
     def scrape_by_priority(self) -> Dict[int, List[Dict]]:

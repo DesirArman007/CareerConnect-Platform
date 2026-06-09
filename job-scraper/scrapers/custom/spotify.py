@@ -32,6 +32,7 @@ class SpotifyScraper(BaseJobScraper):
     def scrape(self) -> List[Dict]:
         """Scrape jobs from Spotify Careers."""
         jobs = []
+        max_jobs = 50  # Max jobs per company
         
         logger.info(f"Starting Spotify scrape...")
         
@@ -43,6 +44,11 @@ class SpotifyScraper(BaseJobScraper):
             # Fallback to HTML
             jobs = self._scrape_html()
         
+        # Cap at max_jobs
+        if len(jobs) > max_jobs:
+            logger.info(f"Limiting Spotify jobs to {max_jobs} (found {len(jobs)})")
+            jobs = jobs[:max_jobs]
+        
         logger.info(f"Total Spotify India jobs scraped: {len(jobs)}")
         return jobs
     
@@ -51,7 +57,7 @@ class SpotifyScraper(BaseJobScraper):
         jobs = []
         page = 0
         page_size = 50
-        max_pages = 10
+        max_pages = 5
         
         # Spotify API endpoint
         api_url = "https://www.lifeatspotify.com/api/jobs"

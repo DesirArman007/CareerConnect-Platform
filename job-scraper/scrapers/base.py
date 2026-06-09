@@ -1,14 +1,13 @@
 """
 Base scraper interface for all job scrapers.
 Now integrates with JobNormalizer for schema compliance.
+Experience extraction and description formatting are handled by regex utilities (no LLM).
 """
 
 from abc import ABC, abstractmethod
 from typing import List, Dict
 import logging
-# Import the utility class we just built
-# Ensure this matches your file name (normalizer.py vs job_normalizer.py)
-from utils.normalizer import JobNormalizer 
+from utils.normalizer import JobNormalizer
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +18,7 @@ class BaseJobScraper(ABC):
         self.company_name = company_name
         self.base_url = base_url
         self.config = config or {}
+        # NOTE: LLM enricher removed - using regex-based extraction in JobNormalizer
 
     @abstractmethod
     def scrape(self) -> List[Dict]:
@@ -57,16 +57,10 @@ class BaseJobScraper(ABC):
         if not all(job.get(field) for field in required_fields):
             return False
 
-        # 2. Location eligibility check
-        location = str(job.get("location", "")).lower()
-        
-        # Check if it's a remote job
-        if self._is_remote_job(location):
-            # Accept global remote, reject country-restricted remote
-            return self._is_remote_accessible_to_india(location)
-        
-        # 3. India-based location check
-        return self._is_india_location(location)
+        # 2. Location eligibility check - REMOVED (Global Access)
+        # Previously filtered for India-based or India-accessible remote jobs.
+        # Now accepting all locations.
+        return True
     
     def _is_remote_job(self, location: str) -> bool:
         """Check if location indicates a remote position."""
@@ -135,6 +129,98 @@ class BaseJobScraper(ABC):
         ]
         return any(keyword in location for keyword in india_keywords)
 
+    def _matches_target_level(self, job: Dict) -> bool:
+        """
+        Check if job matches the configured SCRAPE_TARGET_LEVEL.
+        Levels: ENTRY_LEVEL, MID_LEVEL, SENIOR_LEVEL, ALL
+        """
+        import os
+        target_level = os.getenv("SCRAPE_TARGET_LEVEL", "ALL").upper()
+        logger.info(f"DEBUG: SCRAPE_TARGET_LEVEL = {target_level}")
+        
+        if target_level == "ALL":
+            return True
+            
+        title = job.get("title", "").lower()
+        if not title: 
+            return False # Can't judge without title
+            
+        # Extract experience years if available (populated by JobNormalizer)
+        exp_min = job.get("experience_min_years")
+        
+        # --- ENTRY LEVEL LOGIC ---
+        if target_level == "ENTRY_LEVEL":
+            # 1. Experience Check (if available) -> Max 3 years
+            if exp_min is not None and exp_min > 3:
+                return False
+                
+            # 2. Negative Keywords (Dealbreakers)
+            if any(k in title for k in ["senior", "lead", "principal", "manager", "head", "director", "vp", "architect", "staff", "iii", "iv", "sr."]):
+                return False
+                
+            # 3. Positive Keywords (Always include if no dealbreakers)
+            if any(k in title for k in ["intern", "trainee", "fresher", "grad", "junior", "associate", "entry", "0-", "early"]):
+                return True
+                
+            # Default for unknown titles: If it looks neutral (e.g. "Software Engineer"), allow it for now 
+            # unless scraper is strictly only for identified early roles. 
+            # Let's be slightly permissive but strict on experience if known.
+            return True
+
+        # --- MID LEVEL LOGIC ---
+        elif target_level == "MID_LEVEL":
+            # 1. Experience Check -> 3-5 years (approx)
+            if exp_min is not None:
+                if exp_min < 2 or exp_min > 6: # Buffer
+                    return False
+            
+            # 2. Negative Keywords
+            if any(k in title for k in ["intern", "trainee", "fresher", "director", "head", "vp", "chief", "principal"]):
+                return False
+                
+            return True
+
+        # --- SENIOR LEVEL LOGIC ---
+        elif target_level == "SENIOR_LEVEL":
+            # 1. Experience Check -> Min 5 years
+            if exp_min is not None and exp_min < 4: # Buffer
+                return False
+                
+            # 2. Positive Keywords (Strong signal)
+            if any(k in title for k in ["senior", "lead", "principal", "architect", "staff", "manager", "head", "director", "sr."]):
+                return True
+                
+            # 3. Negative Keywords
+            if any(k in title for k in ["intern", "junior", "associate", "trainee", "entry"]):
+                return False
+                
+            # If neutral title (e.g. "Software Engineer") but no experience data, 
+            # we might default to excluded if we want STRICT senior only.
+            # But usually "Senior" is explicit in title.
+            return False
+
+        return True
+
+    def validate_job(self, job: Dict) -> bool:
+        """
+        Validate required fields only - no filtering by experience level.
+        """
+        required_fields = [
+            "job_id",
+            "company",
+            "title",
+            "description",
+            "location",
+            "apply_url",
+            "job_type",       
+            "employment_type" 
+        ]
+
+        # Check for missing or empty fields
+        if not all(job.get(field) for field in required_fields):
+            return False
+
+        return True
     def get_jobs(self) -> List[Dict]:
         """
         Full scraping pipeline:
@@ -150,6 +236,7 @@ class BaseJobScraper(ABC):
                 try:
                     # ✅ USE THE NEW UTILITY CLASS
                     # This cleans HTML, fixes Enums, and adds timestamps
+                    # It also handles regex-based experience extraction and description formatting
                     job = JobNormalizer.normalize_job(raw_job)
                     
                     # Ensure company name matches the scraper
@@ -158,12 +245,19 @@ class BaseJobScraper(ABC):
                     if self.validate_job(job):
                         normalized_jobs.append(job)
                     else:
-                        # Log why it failed (optional, keeps logs clean)
-                        pass
+                        logger.warning(f"Job validation failed for '{job.get('title')}': Missing fields or target level mismatch.")
+                        # Debug: Print missing fields
+                        required_fields = ["job_id", "company", "title", "description", "location", "apply_url", "job_type", "employment_type"]
+                        missing = [f for f in required_fields if not job.get(f)]
+                        if missing:
+                            logger.warning(f"  -> Missing fields: {missing}")
+                        if not self._matches_target_level(job):
+                            logger.warning(f"  -> Failed target level check")
 
                 except Exception as e:
                     logger.error(f"Error processing job: {e}")
 
+            # Limit removed - return all valid jobs
             logger.info(
                 f"Scraped {len(normalized_jobs)} valid jobs from {self.company_name}"
             )
