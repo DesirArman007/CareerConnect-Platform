@@ -1,11 +1,10 @@
 import React from 'react';
 import { Job } from '../types';
-import { Card } from './ui/Card';
-import { MapPin, Clock, ArrowUpRight, Trash2 } from 'lucide-react';
+import { MapPin, Clock, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { getCompanyIcon } from './CompanyLogos';
 import { formatTimeAgo } from '../utils/formatDate';
 import { openExternalLink } from '../utils/security';
+import { CompanyLogo } from './CompanyLogo';
 
 interface JobCardProps {
     job: Job;
@@ -14,44 +13,6 @@ interface JobCardProps {
     onRemove?: (e: React.MouseEvent) => void;
     className?: string;
 }
-
-// Helper to render company logo - reused from JobList
-const CompanyLogo: React.FC<{ company: string; logo?: string }> = ({ company, logo }) => {
-    const [imgError, setImgError] = React.useState(false);
-    // Use smaller size on mobile via responsive classes
-    const customIcon = getCompanyIcon(company, 40);
-    const logoDevKey = import.meta.env.VITE_LOGO_DEV_PUBLIC_KEY;
-
-    if (customIcon) {
-        return <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center flex-shrink-0">{customIcon}</div>;
-    }
-
-    // Try Logo.dev first
-    if (!imgError && logoDevKey) {
-        return (
-            <img
-                src={`https://img.logo.dev/name/${encodeURIComponent(company)}?token=${logoDevKey}`}
-                alt={company}
-                width={40}
-                height={40}
-                onError={() => setImgError(true)}
-                className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-white/5 object-cover flex-shrink-0"
-            />
-        );
-    }
-
-    // Fallback to provided logo
-    if (logo) {
-        return <img src={logo} alt={company} width={40} height={40} className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-white/5 object-cover flex-shrink-0" />;
-    }
-
-    // Final Fallback: gradient with first letter
-    return (
-        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-br from-accent to-purple-600 flex items-center justify-center text-white font-bold text-base sm:text-lg flex-shrink-0">
-            {company?.charAt(0) || 'J'}
-        </div>
-    );
-};
 
 export const JobCard: React.FC<JobCardProps> = ({
     job,
@@ -76,82 +37,84 @@ export const JobCard: React.FC<JobCardProps> = ({
         onRemove?.(e);
     };
 
+    const employmentType = job.employment_type || job.type || 'Full-time';
+    const postedTime = job.createdAt ? formatTimeAgo(job.createdAt) : (job.postedAt || '');
+
     return (
-        <Card
-            className={`p-4 sm:p-6 group flex flex-col h-full bg-surface/50 hover:bg-surface transition-colors cursor-pointer relative ${className || ''}`}
+        <div
+            className={`group relative flex flex-col h-full justify-between bg-[#0B0F12] border border-white/[0.08] hover:border-white/[0.18] hover:bg-[#0E1317] rounded-[22px] sm:rounded-[24px] p-5 sm:p-6 transition-all duration-200 cursor-pointer ${className || ''}`}
             onClick={handleClick}
         >
-            <div className="flex items-start justify-between mb-4 sm:mb-6 gap-3">
-                <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+            {/* Top Row: Squircle Logo + Title/Company */}
+            <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start gap-3.5 sm:gap-4 min-w-0 flex-1">
                     <CompanyLogo company={job.company} logo={job.logo} />
-                    <div className="min-w-0 flex-1">
-                        <h3 className="font-bold text-white group-hover:text-accent transition-colors text-sm sm:text-base leading-tight line-clamp-2">{job.title}</h3>
-                        <p className="text-xs sm:text-sm text-gray-500 truncate">{job.company}</p>
+                    <div className="min-w-0 flex-1 pt-0.5">
+                        <h3 className="font-bold text-white text-[15px] sm:text-[16px] leading-snug line-clamp-2 tracking-tight group-hover:text-white transition-colors">
+                            {job.title}
+                        </h3>
+                        <p className="text-xs sm:text-[13.5px] text-[#7E8B9B] font-normal mt-0.5 truncate">
+                            {job.company}
+                        </p>
                     </div>
                 </div>
 
-                {/* ACTION BUTTONS / BADGES */}
-                <div className="flex items-center gap-2">
-                    {variant === 'saved' && (
-                        <button
-                            onClick={handleRemove}
-                            className="p-2 rounded-full hover:bg-white/10 text-gray-400 hover:text-red-500 transition-colors z-10"
-                            title="Remove from saved jobs"
-                        >
-                            <Trash2 className="w-4 h-4" />
-                        </button>
-                    )}
-
-                    {variant === 'applied' && appliedDate && (
-                        <span className="text-xs bg-green-500/10 text-green-400 px-2 py-1 rounded whitespace-nowrap hidden sm:inline-block">
-                            Applied {new Date(appliedDate).toLocaleDateString()}
-                        </span>
-                    )}
-
-                    {variant === 'default' && (
-                        <div className="p-1.5 sm:p-2 rounded-full bg-white/5 group-hover:bg-white/10 transition-colors opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 duration-300 flex-shrink-0 hidden sm:block">
-                            <ArrowUpRight className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
-                        </div>
-                    )}
-                </div>
+                {/* Actions (if saved or applied) */}
+                {variant === 'saved' && (
+                    <button
+                        onClick={handleRemove}
+                        className="p-1.5 rounded-full hover:bg-white/10 text-gray-400 hover:text-red-400 transition-colors z-10 flex-shrink-0"
+                        title="Remove from saved jobs"
+                    >
+                        <Trash2 className="w-4 h-4" />
+                    </button>
+                )}
             </div>
 
-            {/* Mobile Applied Badge */}
+            {/* Applied Date indicator for dashboard if applied */}
             {variant === 'applied' && appliedDate && (
-                <div className="sm:hidden mb-3">
-                    <span className="text-xs bg-green-500/10 text-green-400 px-2 py-1 rounded">
+                <div className="mt-2 text-right">
+                    <span className="text-xs text-emerald-400 font-medium">
                         Applied {new Date(appliedDate).toLocaleDateString()}
                     </span>
                 </div>
             )}
 
-            <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4 sm:mb-6">
-                {job.tags && Array.isArray(job.tags) && job.tags.slice(0, 3).map(tag => (
-                    <span key={tag} className="px-2 py-0.5 rounded-full text-xs font-medium bg-white/5 text-gray-400 border border-white/5">
-                        {tag}
-                    </span>
-                ))}
-                {job.tags && job.tags.length > 3 && (
-                    <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-white/5 text-gray-500 border border-white/5">
-                        +{job.tags.length - 3}
+            {/* Subtle Divider Line */}
+            <div className="border-t border-white/[0.08] my-4 sm:my-5 mt-auto" />
+
+            {/* Bottom Row: Location | Employment Type (Left) & Posted Time (Right) */}
+            <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center gap-3 sm:gap-3.5 text-[#94A3B8]">
+                    {/* Location */}
+                    <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-[#7E8B9B] flex-shrink-0" />
+                        <span className="text-[13.5px] sm:text-sm text-[#94A3B8] font-normal">
+                            {job.location || 'Location not specified'}
+                        </span>
+                    </div>
+
+                    {/* Vertical Divider */}
+                    <span className="h-3.5 w-px bg-white/[0.12] flex-shrink-0" />
+
+                    {/* Employment Type */}
+                    <div className="flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-[#7E8B9B] flex-shrink-0" />
+                        <span className="text-[13.5px] sm:text-sm text-[#94A3B8] font-normal">
+                            {employmentType}
+                        </span>
+                    </div>
+                </div>
+
+                {/* Posted Time */}
+                {postedTime && (
+                    <span className="text-[13px] sm:text-sm text-[#64748B] font-normal ml-auto whitespace-nowrap">
+                        {postedTime}
                     </span>
                 )}
             </div>
-
-            <div className="mt-auto space-y-2 sm:space-y-3 pt-4 sm:pt-6 border-t border-white/5">
-                <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-400">
-                    <MapPin className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                    <span className="truncate">{job.location}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-400">
-                        <Clock className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" /> {job.employment_type || job.type || 'Full-time'}
-                    </div>
-                    <span className="text-xs text-gray-600 font-mono">
-                        {job.createdAt ? formatTimeAgo(job.createdAt) : job.postedAt}
-                    </span>
-                </div>
-            </div>
-        </Card>
+        </div>
     );
 };
+
+export default JobCard;

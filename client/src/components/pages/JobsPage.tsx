@@ -225,12 +225,19 @@ export const JobsPage: React.FC = () => {
     /* ====================================================================== */
 
     return (
-        <main className="md:pt-16">
-            <div className="bg-surface/30 border-b border-white/5 py-10">
-                <div className="max-w-4xl mx-auto px-4">
-                    <h1 className="text-3xl font-bold text-center mb-8">
-                        Explore Opportunities
+        <main className="min-h-screen bg-[#070709] md:pt-16">
+            {/* Top Hero Banner */}
+            <div className="relative overflow-hidden bg-[#070709] border-b border-white/5 pt-12 pb-14 sm:pt-16 sm:pb-16">
+                {/* Warm ambient orange radial glow on the right side */}
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/4 w-[500px] h-[400px] rounded-full bg-[#FF5500]/[0.08] blur-[120px] pointer-events-none" />
+
+                <div className="max-w-4xl mx-auto px-4 relative z-10 text-center">
+                    <h1 className="text-3xl sm:text-4xl md:text-[44px] font-bold tracking-tight text-white mb-2.5">
+                        Explore <span className="text-[#FF5500]">Opportunities</span>
                     </h1>
+                    <p className="text-gray-400 text-sm sm:text-base font-normal mb-8 max-w-xl mx-auto">
+                        Find your next role. Apply directly. No third-party recruiters.
+                    </p>
 
                     <SearchControls
                         searchQuery={filters.searchQuery}

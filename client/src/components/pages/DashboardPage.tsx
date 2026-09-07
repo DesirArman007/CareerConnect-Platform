@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Navigate, useNavigate, useLocation } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Card } from '../ui/Card';
@@ -61,7 +62,12 @@ export const DashboardPage: React.FC = () => {
 
     const handleRemoveJob = async (jobId: string, e: React.MouseEvent) => {
         e.stopPropagation();
-        await toggleSaveJob(jobId);
+        try {
+            await toggleSaveJob(jobId);
+            toast.success('Job removed from saved');
+        } catch {
+            toast.error('Failed to remove job');
+        }
     };
 
     /* ---------- AUTH GUARDS ---------- */
@@ -117,14 +123,17 @@ export const DashboardPage: React.FC = () => {
     /* ---------- MAP ENRICHED DATA → JobCard-compatible shape ---------- */
 
     const savedJobsForCards: Job[] = savedJobsData
-        .filter(entry => entry.job !== null)
+        .filter(entry => entry && entry.job !== null)
         .map(entry => ({
-            id: (entry.job!.id || entry.job!._id) as string,
-            title: entry.job!.title || '',
-            company: entry.job!.company || '',
-            location: entry.job!.location || '',
-            salary: entry.job!.salary,
-            apply_url: entry.job!.apply_url,
+            id: ((entry.job as any)?.id || (entry.job as any)?._id || entry.jobId || entry.savedId) as string,
+            title: entry.job?.title || 'Position',
+            company: entry.job?.company || 'Company',
+            location: entry.job?.location || 'Remote',
+            salary: entry.job?.salary,
+            apply_url: entry.job?.apply_url,
+            logo: entry.job?.logo,
+            employment_type: entry.job?.employment_type,
+            createdAt: entry.savedAt || entry.createdAt
         }));
 
     const appliedJobsForCards: (Job & { appliedDate: string })[] = appliedJobsData

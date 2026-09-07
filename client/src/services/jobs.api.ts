@@ -21,6 +21,11 @@ export const jobApi = {
             .get<ApiResponse<{ job: Job }>>(`/job/${id}`)
             .then((r) => r.data),
 
+    createJob: (data: CreateJobData) =>
+        api
+            .post<ApiResponse<{ job: Job }>>('/job/employer/createJob', data)
+            .then((r) => r.data),
+
     search: (params: any) =>
         api
             .get<ApiResponse<{ jobs: Job[]; pagination: any }>>(

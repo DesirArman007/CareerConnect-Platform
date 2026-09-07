@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, ArrowLeft, Check, Layers, Search } from 'lucide-react';
+import { ChevronDown, ArrowLeft, Check, Layers, Search, SlidersHorizontal } from 'lucide-react';
 
 /* ===================== TYPES ===================== */
 
@@ -117,15 +117,15 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
                     setIsOpen(v => !v);
                     setActiveCategoryId(null);
                 }}
-                className={`flex items-center gap-2 px-4 py-3 rounded-xl border transition-colors ${isOpen
-                        ? 'bg-white/10 border-white/20 text-white'
-                        : 'bg-black/40 border-white/10 text-gray-300 hover:text-white'
+                className={`flex items-center gap-2.5 px-4 sm:px-5 h-[50px] rounded-xl border transition-colors cursor-pointer ${isOpen
+                        ? 'bg-white/10 border-white/25 text-white'
+                        : 'bg-[#0e0f13] border-white/10 text-gray-300 hover:text-white hover:border-white/20'
                     }`}
             >
-                <Layers className="w-5 h-5" />
-                <span className="hidden sm:inline">Filters</span>
+                <SlidersHorizontal className="w-4 h-4 text-gray-400" />
+                <span className="text-sm sm:text-base font-medium">Filters</span>
                 <ChevronDown
-                    className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''
+                    className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''
                         }`}
                 />
             </button>
