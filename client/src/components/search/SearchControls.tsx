@@ -89,7 +89,7 @@ export const SearchControls: React.FC<SearchControlsProps> = (props) => {
     }
 
     const handleLocationChange = (val: string) => {
-        if (val === '__RESET_COUNTRY__') {
+        if (!val || val === '__RESET_COUNTRY__') {
             setSelectedCountry('');
             setSelectedState('');
             props.onLocationChange('');
@@ -99,6 +99,7 @@ export const SearchControls: React.FC<SearchControlsProps> = (props) => {
             setSelectedState('');
             const c = Country.getCountryByCode(selectedCountry);
             if (c) props.onLocationChange(c.name);
+            else props.onLocationChange('');
             return;
         }
 
@@ -158,10 +159,9 @@ export const SearchControls: React.FC<SearchControlsProps> = (props) => {
         <div className="flex flex-col gap-4">
             <div className="flex gap-3 ">
                 {/* Large Search Input */}
-                <div className="relative flex-1 group">
-                    <div className="absolute inset-0 bg-gradient-to-r from-accent/20 to-purple-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                    <div className="relative h-full flex items-center bg-[#0a0a0a] border border-white/10 rounded-xl focus-within:border-white/20 transition-colors overflow-hidden">
-                        <div className="pl-4 pr-3 text-gray-500">
+                <div className="relative flex-1">
+                    <div className="relative h-[50px] flex items-center bg-[#0e0f13] border border-white/10 rounded-xl focus-within:border-white/20 transition-colors overflow-hidden">
+                        <div className="pl-4 pr-3 text-gray-400">
                             <Search className="w-5 h-5" />
                         </div>
                         <input
@@ -169,13 +169,13 @@ export const SearchControls: React.FC<SearchControlsProps> = (props) => {
                             type="text"
                             value={props.searchQuery}
                             onChange={(e) => props.onSearchChange(e.target.value)}
-                            placeholder="Type to search..."
-                            className="flex-1 bg-transparent border-none outline-none text-white placeholder-gray-500 h-full text-base"
+                            placeholder="Search by role, skills, company..."
+                            className="flex-1 bg-transparent border-none outline-none text-white placeholder-gray-500 h-full text-sm sm:text-base pr-2"
                         />
                         {props.searchQuery && (
                             <button
                                 onClick={props.onClearSearch}
-                                className="px-4 h-full hover:bg-white/5 text-gray-500 hover:text-white transition-colors"
+                                className="px-4 h-full hover:bg-white/5 text-gray-400 hover:text-white transition-colors cursor-pointer"
                             >
                                 <X className="w-4 h-4" />
                             </button>
@@ -191,21 +191,46 @@ export const SearchControls: React.FC<SearchControlsProps> = (props) => {
                 />
             </div>
 
-            {/* Mobile Active Filters Summary (Optional visual cue) */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
-                {filterCategories.filter(c => c.value).map(cat => (
-                    <span key={cat.id} className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/5 text-xs text-gray-300 whitespace-nowrap">
-                        <cat.icon className="w-3 h-3 text-gray-500" />
-                        {cat.options.find(o => o.value === cat.value)?.label}
-                        <button
-                            onClick={() => cat.onChange('')}
-                            className="ml-1 hover:text-white"
-                        >
-                            <X className="w-3 h-3" />
-                        </button>
-                    </span>
-                ))}
-            </div>
+            {/* Active Filters Chips */}
+            {filterCategories.some(c => c.value) && (
+                <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide pt-1">
+                    {filterCategories.filter(c => c.value).map(cat => {
+                        const displayLabel = cat.options.find(o => o.value === cat.value)?.label || cat.value;
+                        return (
+                            <span
+                                key={cat.id}
+                                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.08] border border-white/10 text-xs text-gray-200 whitespace-nowrap shadow-sm hover:border-white/20 transition-colors"
+                            >
+                                <cat.icon className="w-3.5 h-3.5 text-orange-400 shrink-0" />
+                                <span>{displayLabel}</span>
+                                <button
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        cat.onChange('');
+                                    }}
+                                    className="ml-0.5 p-1 -mr-1 rounded-full text-gray-400 hover:text-white hover:bg-white/20 transition-colors cursor-pointer flex items-center justify-center"
+                                    aria-label={`Remove ${cat.label} filter`}
+                                >
+                                    <X className="w-3.5 h-3.5" />
+                                </button>
+                            </span>
+                        );
+                    })}
+                    <button
+                        type="button"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            props.onClearAllFilters();
+                        }}
+                        className="text-xs text-gray-400 hover:text-orange-400 underline ml-2 transition-colors cursor-pointer whitespace-nowrap"
+                    >
+                        Clear all
+                    </button>
+                </div>
+            )}
         </div>
     );
 };

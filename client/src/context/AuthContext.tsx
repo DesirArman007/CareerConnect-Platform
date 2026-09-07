@@ -62,6 +62,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [jobsDataLoading, setJobsDataLoading] = useState(false);
 
   const jobsDataLoadedRef = useRef(false);
+  const savedJobsRef = useRef<string[]>([]);
+  const savedJobsDataRef = useRef<SavedJobEntry[]>([]);
+  const saveMutationQueuesRef = useRef(new Map<string, Promise<void>>());
+
+  useEffect(() => {
+    savedJobsRef.current = savedJobs;
+  }, [savedJobs]);
+
+  useEffect(() => {
+    savedJobsDataRef.current = savedJobsData;
+  }, [savedJobsData]);
 
   /* ================= FETCH USER ================= */
 
@@ -71,13 +82,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       if (response.success && response.data) {
         setUser(response.data);
-        setSavedJobs(response.data.savedJobs ?? []);
+        const userSaved = response.data.savedJobs ?? [];
+        savedJobsRef.current = userSaved;
+        setSavedJobs(userSaved);
+        // Trigger jobs data fetch in background for enriched entries
+        setTimeout(() => {
+          fetchJobsData();
+        }, 0);
         return true;
       }
 
       return false;
     } catch {
       setUser(null);
+      savedJobsRef.current = [];
+      savedJobsDataRef.current = [];
       setSavedJobs([]);
       return false;
     }
@@ -87,7 +106,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const extractJobIds = (entries: SavedJobEntry[]): string[] =>
     entries
-      .map(entry => entry.job?.id ?? entry.job?._id ?? entry.jobId)
+      .map(entry => (entry.job as any)?.id ?? (entry.job as any)?._id ?? entry.jobId)
       .filter((id): id is string => Boolean(id));
 
   const fetchJobsData = useCallback(async () => {
@@ -102,13 +121,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       ]);
 
       if (savedRes.success) {
-        const savedEntries = savedRes.data;
+        const savedEntries = savedRes.data || [];
+        savedJobsDataRef.current = savedEntries;
         setSavedJobsData(savedEntries);
-        setSavedJobs(extractJobIds(savedEntries));
+        const extracted = extractJobIds(savedEntries);
+        savedJobsRef.current = extracted;
+        setSavedJobs(extracted);
       }
 
       if (appliedRes.success) {
-        setAppliedJobsData(appliedRes.data);
+        setAppliedJobsData(appliedRes.data || []);
       }
 
       jobsDataLoadedRef.current = true;
@@ -177,6 +199,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       localStorage.removeItem("hasSession");
       localStorage.removeItem("accessToken");
       setUser(null);
+      savedJobsRef.current = [];
+      savedJobsDataRef.current = [];
       setSavedJobs([]);
       setSavedJobsData([]);
       setAppliedJobsData([]);
@@ -218,35 +242,91 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   /* ================= SAVED JOBS ================= */
 
   const toggleSaveJob = async (jobId: string) => {
-    if (!user) return;
+    if (!user || !jobId) return;
 
-    const isSaved = savedJobs.includes(jobId);
+    const previousMutation =
+      saveMutationQueuesRef.current.get(jobId) ?? Promise.resolve();
+    const mutation = previousMutation.then(async () => {
+      const isCurrentlySaved = savedJobsRef.current.includes(jobId);
+
+      if (isCurrentlySaved) {
+        // Optimistic removal from state
+        const nextSavedJobs = savedJobsRef.current.filter(id => id !== jobId);
+        savedJobsRef.current = nextSavedJobs;
+        setSavedJobs(nextSavedJobs);
+        const removedEntries = savedJobsDataRef.current.filter(entry => {
+          const entryJobId =
+            (entry.job as any)?.id ||
+            (entry.job as any)?._id ||
+            entry.jobId;
+          return entryJobId === jobId || entry.savedId === jobId;
+        });
+        const nextSavedJobsData = savedJobsDataRef.current.filter(entry => {
+          const entryJobId =
+            (entry.job as any)?.id ||
+            (entry.job as any)?._id ||
+            entry.jobId;
+          return entryJobId !== jobId && entry.savedId !== jobId;
+        });
+        savedJobsDataRef.current = nextSavedJobsData;
+        setSavedJobsData(nextSavedJobsData);
+
+        try {
+          await jobApi.removeSavedJob(jobId);
+        } catch (error: any) {
+          // If 404, it means it's already removed in DB, which is acceptable
+          if (error?.response?.status !== 404) {
+            console.error("Failed to remove saved job", error);
+            savedJobsRef.current = Array.from(
+              new Set([...savedJobsRef.current, jobId])
+            );
+            setSavedJobs(savedJobsRef.current);
+            const existingEntries = new Set(
+              savedJobsDataRef.current.map(entry => entry.savedId || entry.jobId)
+            );
+            const restoredSavedJobsData = [
+              ...savedJobsDataRef.current,
+              ...removedEntries.filter(
+                entry => !existingEntries.has(entry.savedId || entry.jobId)
+              ),
+            ];
+            savedJobsDataRef.current = restoredSavedJobsData;
+            setSavedJobsData(restoredSavedJobsData);
+            jobsDataLoadedRef.current = false;
+            throw error;
+          }
+        }
+      } else {
+        // Optimistic addition to state
+        const nextSavedJobs = savedJobsRef.current.includes(jobId)
+          ? savedJobsRef.current
+          : [...savedJobsRef.current, jobId];
+        savedJobsRef.current = nextSavedJobs;
+        setSavedJobs(nextSavedJobs);
+
+        try {
+          await jobApi.saveJob(jobId);
+          jobsDataLoadedRef.current = false;
+        } catch (error: any) {
+          // If 409, it was already saved in DB, so keep the saved state
+          if (error?.response?.status !== 409) {
+            console.error("Failed to save job", error);
+            savedJobsRef.current = savedJobsRef.current.filter(id => id !== jobId);
+            setSavedJobs(savedJobsRef.current);
+            throw error;
+          }
+        }
+      }
+    });
+
+    const queuedMutation = mutation.catch(() => undefined);
+    saveMutationQueuesRef.current.set(jobId, queuedMutation);
 
     try {
-      if (isSaved) {
-        setSavedJobs(prev => prev.filter(id => id !== jobId));
-        setSavedJobsData(prev =>
-          prev.filter(
-            entry =>
-              entry.job?._id !== jobId &&
-              entry.jobId !== jobId
-          )
-        );
-
-        await jobApi.removeSavedJob(jobId);
-      } else {
-        await jobApi.saveJob(jobId);
-        setSavedJobs(prev => [...prev, jobId]);
-        jobsDataLoadedRef.current = false;
-      }
-    } catch (error) {
-      console.error("Failed to toggle save job", error);
-
-      if (isSaved) {
-        setSavedJobs(prev => [...prev, jobId]);
-        jobsDataLoadedRef.current = false;
-      } else {
-        setSavedJobs(prev => prev.filter(id => id !== jobId));
+      await mutation;
+    } finally {
+      if (saveMutationQueuesRef.current.get(jobId) === queuedMutation) {
+        saveMutationQueuesRef.current.delete(jobId);
       }
     }
   };

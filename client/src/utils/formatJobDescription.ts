@@ -4,13 +4,33 @@
  */
 import DOMPurify from 'isomorphic-dompurify';
 
-export const formatDescription = (description: string): string => {
+export const formatDescription = (description: string, companyName?: string): string => {
     if (!description) return '';
 
-    // 1. Check if it's already HTML (simple check)
-    const isHtml = /<[a-z][\s\S]*>/i.test(description);
-
     let formatted = description;
+    const sourceIsHtml = /<[a-z][\s\S]*>/i.test(description);
+
+    // Filter out "About the Company", "About Us", or "About [Company]" sections
+    if (companyName && sourceIsHtml) {
+        const escaped = companyName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        formatted = formatted.replace(
+            new RegExp(`(<h[1-6][^>]*>|<strong>|<b>)?\\s*About\\s+(?:${escaped}|the\\s+company|us)\\s*(<\\/h[1-6]>|<\\/strong>|<\\/b>)?:?([\\s\\S]*?)(?=(<h[1-6]|<strong>|<b>|$))`, 'gi'),
+            ''
+        );
+    }
+    if (sourceIsHtml) {
+        formatted = formatted.replace(
+            /(<h[1-6][^>]*>|<strong>|<b>)?\s*About\s+(?:the\s+company|us)[^<:\n]*:?(<\/h[1-6]>|<\/strong>|<\/b>)?([\s\S]*?)(?=(<h[1-6]|<strong>|<b>))/gi,
+            ''
+        );
+    }
+    formatted = formatted.replace(
+        /(?:\*\*)?About\s+(?:the\s+company|us)[^:\n]*:?(?:\*\*)?[\s\S]*?(?=(?:\*\*|\n\n[A-Z]|$))/gi,
+        ''
+    );
+
+    // 1. Check if it's already HTML (simple check)
+    const isHtml = /<[a-z][\s\S]*>/i.test(formatted);
 
     if (!isHtml) {
         // If it's plain text, we need to handle newlines and bullets

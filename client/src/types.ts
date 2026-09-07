@@ -23,6 +23,7 @@ export interface Job {
   department?: string;
 
   apply_url?: string;
+  applyUrl?: string;
   source?: string;
 
   experience?: string;
