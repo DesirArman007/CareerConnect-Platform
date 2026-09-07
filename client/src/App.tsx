@@ -23,6 +23,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 
 import { MobileTopBar } from './components/mobile/MobileTopBar';
 import { MobileBottomNav } from './components/mobile/MobileBottomNav';
+import { Footer } from './components/Footer';
 
 function App() {
   return (
@@ -60,21 +61,12 @@ function App() {
               <Route path="/employer/post-job" element={<CreateJobPage />} />
             </Routes>
 
-            <footer className="py-8 border-t border-white/5 text-center text-sm text-gray-600">
-              <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
-                <p>© 2026 WorkRaze Jobs. All rights reserved.</p>
-                <div className="flex gap-6">
-                  <a href="#" className="hover:text-white transition-colors">Privacy</a>
-                  <a href="#" className="hover:text-white transition-colors">Terms</a>
-                  <a href="#" className="hover:text-white transition-colors">Twitter</a>
-                </div>
-              </div>
-            </footer>
+            <Footer />
 
             <MobileBottomNav className="md:hidden" />
 
-            {/* Floating AI Agent */}
-            <AIChat />
+            {/* Floating AI Agent (Disabled for now) */}
+            {/* <AIChat /> */}
 
             {/* Vercel Speed Insights & Analytics - debug disabled to hide console logs */}
             <SpeedInsights debug={false} />

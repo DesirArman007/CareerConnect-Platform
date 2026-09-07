@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
+import { Logo } from '../ui/Logo';
 import { ArrowLeft, ArrowRight, Building2, User, Briefcase } from 'lucide-react';
 import { authApi } from '../../services/auth.api';
 import toast from 'react-hot-toast';
@@ -132,8 +133,8 @@ export const EmployerSignupPage: React.FC = () => {
                 <div className="relative z-10">
                     {/* Header */}
                     <div className="text-center mb-8">
-                        <div className="w-14 h-14 mx-auto mb-6 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center">
-                            <Briefcase className="w-7 h-7 text-white" />
+                        <div className="flex justify-center mb-6">
+                            <Logo size="lg" onClick={() => navigate('/')} />
                         </div>
                         <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
                             {step === 'personal' ? 'Create Employer Account' : 'Company Details'}

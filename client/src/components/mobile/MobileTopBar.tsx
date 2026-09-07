@@ -2,6 +2,7 @@ import React from 'react';
 import { Bell, LogIn } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { Logo } from '../ui/Logo';
 
 export const MobileTopBar: React.FC<{ className?: string }> = ({ className = '' }) => {
     const { user } = useAuth();
@@ -10,16 +11,11 @@ export const MobileTopBar: React.FC<{ className?: string }> = ({ className = '' 
     return (
         <div className={`sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-white/5 px-4 h-14 flex items-center justify-between ${className}`}>
             {/* Brand */}
-            <div className="flex items-center gap-2" onClick={() => navigate('/')}>
-                <img
-                    src="/assets/logo.png"
-                    alt="WorkRaze"
-                    className="w-8 h-8 object-contain"
-                />
-                <span className="text-base font-bold tracking-tight text-white">
-                    WorkRaze
-                </span>
-            </div>
+            <Logo
+                size="sm"
+                showText
+                onClick={() => navigate('/')}
+            />
 
             {/* Right Actions */}
             <div className="flex items-center gap-3">

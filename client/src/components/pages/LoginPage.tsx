@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { GoogleLogin } from '@react-oauth/google';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
+import { Logo } from '../ui/Logo';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { ArrowLeft } from 'lucide-react';
@@ -152,7 +153,9 @@ export const LoginPage: React.FC = () => {
                     )}
 
                     <div className="text-center mb-8">
-                        <img src="/assets/logo.png" className="w-12 h-12 mx-auto mb-6 object-contain" alt="Logo" />
+                        <div className="flex justify-center mb-6">
+                            <Logo size="lg" onClick={() => navigate('/')} />
+                        </div>
                         <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
                             {step === 'email' && 'Continue to WorkRaze'}
                             {step === 'login' && 'Welcome back'}
