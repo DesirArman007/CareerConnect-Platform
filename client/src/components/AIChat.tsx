@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Bot, X, Send } from 'lucide-react';
 import { Button } from './ui/Button';
+import { Logo } from './ui/Logo';
 import { generateCareerAdvice } from '../services/geminiService';
 import { ChatMessage } from '../types';
 
@@ -56,8 +57,8 @@ export const AIChat: React.FC = () => {
         <div className="fixed bottom-40 md:bottom-24 right-4 md:right-6 w-[calc(100vw-2rem)] md:w-[400px] h-[500px] max-h-[calc(100vh-12rem)] bg-surface/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl z-[90] flex flex-col overflow-hidden animate-fade-in-up origin-bottom-right">
           {/* Header */}
           <div className="p-4 border-b border-white/10 flex items-center gap-3 bg-white/5 shrink-0">
-            <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center overflow-hidden">
-              <img src="/assets/logo.png" alt="AI" className="w-5 h-5 object-contain" />
+            <div className="w-8 h-8 rounded-full bg-black/40 flex items-center justify-center overflow-hidden border border-white/10">
+              <Logo size="xs" imageClassName="w-5 h-5" />
             </div>
             <div>
               <h3 className="font-bold text-white text-sm">WorkRaze AI Agent</h3>

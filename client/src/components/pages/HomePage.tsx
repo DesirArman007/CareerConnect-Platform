@@ -51,7 +51,6 @@ export const HomePage: React.FC = () => {
     return (
         <main>
             <Hero jobs={recentJobs} />
-            <Stats />
 
             <JobList
                 jobs={recentJobs}

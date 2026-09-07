@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Menu, X, LogIn, Home, Search, Building2, Info, User as UserIcon, Settings, Briefcase, LogOut, ChevronDown, ChevronRight, PlusCircle } from 'lucide-react';
 import { Button } from './ui/Button';
+import { Logo } from './ui/Logo';
 
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -67,37 +68,37 @@ export const Header: React.FC = () => {
       <header className="hidden md:block fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-background/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center gap-2 cursor-pointer group" onClick={() => handleNavigation('/')}>
-            <img
-              src="/assets/logo.png"
-              alt="WorkRaze"
-              className="w-10 h-10 object-contain group-hover:scale-105 transition-transform"
-            />
-            <span className="text-lg font-bold tracking-tight text-white group-hover:text-gray-200 transition-colors">
-              WorkRaze
-            </span>
-          </div>
+          <Logo
+            size="md"
+            showText
+            onClick={() => handleNavigation('/')}
+          />
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-2">
+          <nav className="hidden md:flex items-center gap-6">
             {[
-              { name: 'Home', path: '/', icon: Home },
-              { name: 'Explore', path: '/explore', icon: Search },
-              { name: 'Companies', path: '/companies', icon: Building2 },
-              { name: 'About', path: '/about', icon: Info },
+              { name: 'Home', path: '/' },
+              { name: 'Find Jobs', path: '/explore' },
+              { name: 'Companies', path: '/companies' },
+              { name: 'About Us', path: '/about' },
             ].map((item) => {
-              const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));
+              const isActive = (item.path === '/' && location.pathname === '/') ||
+                (item.path === '/explore' && (location.pathname === '/explore' || location.pathname.startsWith('/jobs'))) ||
+                (item.path === '/companies' && location.pathname.startsWith('/company/')) ||
+                (item.path !== '/' && item.path !== '/explore' && location.pathname.startsWith(item.path));
+
               return (
                 <button
                   key={item.name}
                   onClick={() => handleNavigation(item.path)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${isActive
-                    ? 'text-white bg-white/10'
-                    : 'text-gray-400 hover:text-white hover:bg-white/5'
-                    }`}
+                  className={`relative py-1 text-sm font-medium transition-colors ${
+                    isActive ? 'text-white' : 'text-gray-400 hover:text-white'
+                  }`}
                 >
-                  <item.icon className="w-4 h-4" />
                   {item.name}
+                  {isActive && (
+                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#FF5500] rounded-full" />
+                  )}
                 </button>
               );
             })}
@@ -106,16 +107,16 @@ export const Header: React.FC = () => {
             {user?.role === 'employer' && (
               <button
                 onClick={() => handleNavigation('/employer/post-job')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all bg-orange-500/20 text-orange-400 hover:bg-orange-500/30 border border-orange-500/30 ${location.pathname === '/employer/post-job' ? 'ring-2 ring-orange-500/50' : ''}`}
+                className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold transition-all bg-orange-500/20 text-orange-400 hover:bg-orange-500/30 border border-orange-500/30 ${location.pathname === '/employer/post-job' ? 'ring-2 ring-orange-500/50' : ''}`}
               >
-                <PlusCircle className="w-4 h-4" />
+                <PlusCircle className="w-3.5 h-3.5" />
                 Post Job
               </button>
             )}
           </nav>
 
-          {/* Desktop Auth / Hamburger */}
-          <div className="flex items-center gap-3 min-w-[100px] sm:min-w-[140px] justify-end">
+          {/* Desktop Auth / Actions */}
+          <div className="flex items-center gap-4 min-w-[100px] sm:min-w-[140px] justify-end">
             {user ? (
               <div className="relative" ref={profileMenuRef}>
                 <button
@@ -132,7 +133,7 @@ export const Header: React.FC = () => {
                     height={36}
                     className="w-9 h-9 rounded-full border border-white/10"
                   />
-                  {/* <ChevronsLeftRight className="w-4 h-4 text-gray-500 rotate-90" /> */}
+                  <ChevronDown className={`w-3.5 h-3.5 text-gray-400 transition-transform ${isProfileMenuOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {/* Dropdown Menu */}
@@ -196,13 +197,15 @@ export const Header: React.FC = () => {
                 )}
               </div>
             ) : (
-              <button
-                onClick={() => navigate('/login')}
-                className="flex items-center gap-2 hover:bg-white/10 px-3 py-2 rounded-lg transition-colors text-white"
-              >
-                <LogIn className="w-5 h-5" />
-                <span className="text-sm font-medium">Sign in</span>
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => navigate('/login')}
+                  className="flex items-center gap-2 border border-white/15 hover:border-white/30 bg-white/5 hover:bg-white/10 px-4 py-1.5 rounded-xl transition-all text-white text-sm font-medium"
+                >
+                  <UserIcon className="w-4 h-4 text-gray-300" />
+                  <span>Sign in</span>
+                </button>
+              </div>
             )}
 
             {/* Hamburger Button - 44x44 touch target */}
@@ -229,7 +232,19 @@ export const Header: React.FC = () => {
         className={`fixed top-0 right-0 bottom-0 w-[280px] max-w-[80vw] bg-surface border-l border-white/10 z-50 md:hidden transition-transform duration-300 ease-out overflow-y-auto overflow-x-hidden ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
           }`}
       >
-        <div className="flex flex-col h-full pt-20 pb-8 px-4">
+        <div className="flex flex-col h-full pt-6 pb-8 px-4">
+          {/* Drawer Top Header with Logo */}
+          <div className="flex items-center justify-between pb-6 mb-2 border-b border-white/5">
+            <Logo size="sm" showText onClick={() => handleNavigation('/')} />
+            <button
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
+              aria-label="Close menu"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
           {/* Navigation Links */}
           <nav className="flex flex-col gap-2">
             {[
@@ -238,7 +253,9 @@ export const Header: React.FC = () => {
               { name: 'Companies', path: '/companies', icon: Building2 },
               { name: 'About', path: '/about', icon: Info },
             ].map((item) => {
-              const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));
+              const isActive = location.pathname === item.path ||
+                (item.path === '/companies' && location.pathname.startsWith('/company/')) ||
+                (item.path !== '/' && item.path !== '/companies' && location.pathname.startsWith(item.path));
               return (
                 <button
                   key={item.name}

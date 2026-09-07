@@ -64,4 +64,8 @@
     .rotate-y-180 {
         transform: rotateY(180deg);
     }
+
+    .font-caveat {
+        font-family: 'Caveat', cursive, sans-serif;
+    }
 }

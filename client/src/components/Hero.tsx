@@ -1,151 +1,51 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
-import { Button } from "./ui/Button";
-import { jobApi } from "../services/jobs.api";
+import React from "react";
 import { Job } from "../types";
-import { HeroJobStack } from "./HeroJobStack";
-import { Particles } from "./ui/Particles";
+import { HeroLeftColumn } from "./HeroLeftColumn";
+import { HeroVisualStage } from "./HeroVisualStage";
+import { TrustedCompanies } from "./TrustedCompanies";
 
 interface HeroProps {
   jobs?: Job[];
 }
 
 export const Hero: React.FC<HeroProps> = ({ jobs = [] }) => {
-  const navigate = useNavigate();
-
-  const [stats, setStats] = useState({
-    totalJobs: 0,
-    newJobsThisWeek: 0,
-    jobTypes: { jobs: 0, internships: 0 }
-  });
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const response = await jobApi.getStats();
-        const statsData = response?.data;
-
-        if (!statsData || typeof statsData.newJobsThisWeek !== "number") {
-          console.error("Invalid stats response", response);
-          return;
-        }
-
-        setStats(statsData);
-      } catch (error) {
-        console.error("Failed to fetch stats:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchStats();
-  }, []);
-
-  // ✅ Correct text logic
-  const getNewJobsText = () => {
-    if (isLoading) return "Loading job updates...";
-    if (stats.newJobsThisWeek <= 0) return "Fresh Jobs Updated Daily";
-    if (stats.newJobsThisWeek >= 100)
-      return `${stats.newJobsThisWeek}+ New Roles Added This Week`;
-
-    return `${stats.newJobsThisWeek} New Roles Added This Week`;
-  };
-
   return (
-    <section className="relative pt-24 pb-8 sm:pt-10 sm:pb-16 md:pt-28 md:pb-24 lg:pt-32 lg:pb-32 overflow-hidden">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[1000px] h-[200px] sm:h-[300px] md:h-[500px] bg-accent/20 blur-[120px] rounded-full opacity-20 pointer-events-none" />
-      <div className="absolute top-1/2 right-0 w-[50vw] max-w-[800px] h-[300px] sm:h-[400px] md:h-[600px] bg-blue-500/10 blur-[100px] rounded-full opacity-20 pointer-events-none" />
+    <section className="relative pt-24 pb-12 sm:pt-28 sm:pb-16 md:pt-32 md:pb-20 lg:pt-36 lg:pb-24 overflow-hidden bg-black text-white">
+      {/* Background ambient lighting */}
+      <div className="absolute top-0 left-1/4 -translate-x-1/2 w-[600px] h-[400px] bg-orange-600/10 blur-[150px] rounded-full pointer-events-none" />
+      <div className="absolute top-1/3 right-10 w-[700px] h-[500px] bg-orange-500/15 blur-[160px] rounded-full pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 grid lg:grid-cols-[1.4fr_1fr] gap-8 lg:gap-20 items-center">
-        <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm text-[10px] sm:text-xs font-medium text-gray-300 mb-4 sm:mb-6 md:mb-8 animate-fade-in-up min-w-[200px] sm:min-w-[220px]">
-            <span
-              className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${stats.newJobsThisWeek > 0 ? "bg-green-500" : "bg-accent"
-                } animate-pulse`}
-            />
-            {getNewJobsText()}
-          </div>
+      {/* Subtle geometric background light rays */}
+      <svg
+        className="absolute inset-0 w-full h-full pointer-events-none opacity-20 overflow-hidden"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <line x1="5%" y1="0%" x2="75%" y2="100%" stroke="#FF5500" strokeWidth="0.8" strokeDasharray="6 8" strokeOpacity="0.4" />
+        <line x1="85%" y1="5%" x2="25%" y2="95%" stroke="#FF5500" strokeWidth="0.6" strokeOpacity="0.35" />
+        <polygon
+          points="80,100 480,40 680,360 400,680 60,520"
+          fill="none"
+          stroke="#FF5500"
+          strokeWidth="0.5"
+          strokeOpacity="0.2"
+        />
+      </svg>
 
-          <h1 className="text-4xl sm:text-5xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight leading-[1.1] sm:leading-[1.05] mb-4 sm:mb-5 md:mb-6 break-words w-full max-w-full px-1">
-            Top Companies{" "}
-            <span className="text-gradient-accent">That Are Actively</span> Hiring.
-          </h1>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
+        {/* Two-column Hero Layout */}
+        <div className="grid lg:grid-cols-[1.1fr_0.9fr] xl:grid-cols-[1.15fr_0.85fr] gap-10 lg:gap-12 items-center">
 
-          <p className="text-xs sm:text-sm md:text-base text-gray-400 mb-6 sm:mb-7 md:mb-8 max-w-lg leading-relaxed mx-auto lg:mx-0">
-            Stop visiting fifty different career pages. Access direct company
-            listings, use one-click applications, and see fresh opportunities
-            dropped daily.
-          </p>
+          {/* Left Column: Headline, Search, Stats */}
+          <HeroLeftColumn />
 
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-8 sm:mb-10 md:mb-12 w-full sm:w-auto justify-center lg:justify-start">
-            <Button
-              variant="secondary"
-              size="lg"
-              className="w-full sm:w-auto text-sm sm:text-base"
-              onClick={() => navigate("/explore")}
-            >
-              Start Applying Now <ArrowRight className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className="w-full sm:w-auto text-sm sm:text-base"
-              onClick={() => navigate("/explore")}
-            >
-              View Open Roles
-            </Button>
-          </div>
+          {/* Right Column: Student Cutout, Floating Cards, Annotations */}
+          <HeroVisualStage />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 w-full pt-6 sm:pt-8 border-t border-white/5 justify-center max-w-2xl lg:max-w-none">
-            <div className="flex items-center sm:items-start gap-3 text-left">
-              <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500 mt-0.5 flex-shrink-0" />
-              <div>
-                <h3 className="font-semibold text-white mb-1 text-sm sm:text-base">
-                  Direct Applications
-                </h3>
-                <p className="text-xs sm:text-sm text-gray-500">
-                  Apply directly to the source. No third-party recruiters.
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center sm:items-start gap-3 text-left">
-              <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500 mt-0.5 flex-shrink-0" />
-              <div>
-                <h3 className="font-semibold text-white mb-1 text-sm sm:text-base">
-                  Fresh Listings Daily
-                </h3>
-                <p className="text-xs sm:text-sm text-gray-500">
-                  New opportunities added every day from top companies worldwide.
-                </p>
-              </div>
-            </div>
-          </div>
         </div>
 
-        <div className="hidden lg:block relative w-full perspective-1000 group mt-12 lg:mt-0">
+        {/* Bottom Banner: Trusted By Top Companies */}
+        <TrustedCompanies />
 
-          {/* Separator Line (Visible only on mobile now) */}
-          <div className="w-full max-w-[200px] h-px bg-gradient-to-r from-transparent via-accent/50 to-transparent mb-12 lg:hidden" />
-
-          {jobs.length > 0 ? (
-            <div className="relative flex justify-center lg:justify-end">
-              {/* Particles Originating from Bottom-Left of Card */}
-              <div className="absolute -left-32 -bottom-20 w-[600px] h-[700px] -z-10 pointer-events-none opacity-80">
-                <Particles />
-              </div>
-
-              <div className="relative z-10 animate-fade-in-up delay-200">
-                <HeroJobStack jobs={jobs} />
-              </div>
-            </div>
-          ) : (
-            <div className="relative h-[400px] w-full flex items-center justify-center">
-              <div className="absolute inset-0 bg-grid opacity-30 mask-radial" />
-            </div>
-          )}
-        </div>
       </div>
     </section>
   );
