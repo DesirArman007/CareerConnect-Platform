@@ -30,9 +30,12 @@ const saveJob = asyncHandler(async (req, res) => {
         });
     }
     catch (error) {
-
         if (error.code === 11000) {
-            throw new ApiError(409, "Job already saved");
+            // Already saved - return existing entry successfully
+            const existing = await SavedJobs.findOne({ userId, jobId });
+            return res.status(200).json(
+                new ApiResponse(200, "Job already saved", existing)
+            );
         }
 
         throw new ApiError(500, "Failed to save job");
@@ -48,7 +51,6 @@ const saveJob = asyncHandler(async (req, res) => {
 });
 
 const removeSavedJob = asyncHandler(async (req, res) => {
-
     const { jobId } = req.params;
     const userId = req.user._id;
 
@@ -56,14 +58,16 @@ const removeSavedJob = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Invalid job ID");
     }
 
-    const deletedJob = await SavedJobs.findOneAndDelete({
-        userId,
-        jobId
-    });
+    const targetId = new mongoose.Types.ObjectId(jobId);
 
-    if (!deletedJob) {
-        throw new ApiError(404, "Saved job not found");
-    }
+    // Delete matching either jobId or savedId to ensure reliable deletion
+    await SavedJobs.deleteMany({
+        userId,
+        $or: [
+            { jobId: targetId },
+            { _id: targetId }
+        ]
+    });
 
     return res.status(200)
         .json(
@@ -71,7 +75,7 @@ const removeSavedJob = asyncHandler(async (req, res) => {
                 "Saved job removed successfully",
                 null
             )
-        )
+        );
 });
 
 const getSavedJobs = asyncHandler(async (req, res) => {
@@ -93,20 +97,30 @@ const getSavedJobs = asyncHandler(async (req, res) => {
     logger.info({ jobIds }, "getSavedJobs jobIds");
 
     const jobs = await Job.find({ _id: { $in: jobIds } })
-        .select("title company location employment_type salary apply_type apply_url")
+        .select("title company location employment_type salary apply_type apply_url logo joblive")
         .lean();
 
     logger.info({ matchedCount: jobs.length }, "getSavedJobs matched jobs");
 
     const jobsMap = new Map(
-        jobs.map(job => [job._id.toString(), { ...job, id: job._id.toString(), _id: undefined }])
+        jobs.map(job => [job._id.toString(), { ...job, id: job._id.toString() }])
     );
 
-    const response = savedJobs.map(s => ({
-        savedId: s._id.toString(),
-        savedAt: s.createdAt,
-        job: jobsMap.get(s.jobId.toString()) || null
-    }));
+    const response = savedJobs.map(s => {
+        const strJobId = s.jobId.toString();
+        const matchedJob = jobsMap.get(strJobId);
+        return {
+            savedId: s._id.toString(),
+            jobId: strJobId,
+            savedAt: s.createdAt,
+            job: matchedJob || {
+                id: strJobId,
+                title: 'Position',
+                company: 'Company',
+                location: 'Remote'
+            }
+        };
+    });
 
     return res.status(200).json(
         new ApiResponse(200, "Saved jobs fetched successfully", response)
