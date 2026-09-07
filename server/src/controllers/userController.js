@@ -2,6 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import { User } from "../models/userModel.js";
+import { SavedJobs } from "../models/savedJobsModel.js";
 import { clearAuthCookies } from "../utils/authCookies.js";
 import { logger } from "../config/logger.js";
 
@@ -15,8 +16,14 @@ const getUser = asyncHandler(async (req, res) => {
         throw new ApiError(404, "User not found");
     }
 
+    const savedRecords = await SavedJobs.find({ userId }).select("jobId").lean();
+    const savedJobIds = savedRecords.map(s => s.jobId.toString());
+
+    const userJson = user.toJSON();
+    userJson.savedJobs = savedJobIds;
+
     return res.status(200).json(
-        new ApiResponse(200, "User fetched successfully", user.toJSON())
+        new ApiResponse(200, "User fetched successfully", userJson)
     );
 });
 
