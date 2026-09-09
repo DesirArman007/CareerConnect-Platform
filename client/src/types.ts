@@ -77,6 +77,9 @@ export interface User {
     jobId: string;
     appliedAt: string;
   }[];
+
+  createdAt?: string;
+  status?: string;
 }
 
 

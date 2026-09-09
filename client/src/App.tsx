@@ -52,6 +52,7 @@ function App() {
               <Route path="/company/:companySlug" element={<JobsPage />} />
               <Route path="/about" element={<AboutPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/profile" element={<DashboardPage />} />
 
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
